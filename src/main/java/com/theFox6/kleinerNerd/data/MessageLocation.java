@@ -1,7 +1,9 @@
 package com.theFox6.kleinerNerd.data;
 
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
+import net.dv8tion.jda.api.events.message.guild.GenericGuildMessageEvent;
 
 public class MessageLocation extends MessageChannelLocation {
 
@@ -14,6 +16,11 @@ public class MessageLocation extends MessageChannelLocation {
 
 	public MessageLocation(GenericMessageEvent event) {
 		super(event.getChannelType(), event.getChannel().getId(), event.isFromGuild() ? event.getGuild().getId() : null);
+		messageId = event.getMessageId();
+	}
+	
+	public MessageLocation(GenericGuildMessageEvent event) {
+		super(ChannelType.TEXT, event.getChannel().getId(), event.getGuild().getId());
 		messageId = event.getMessageId();
 	}
 

@@ -1,8 +1,15 @@
 package com.theFox6.kleinerNerd.data;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.theFox6.kleinerNerd.storage.ChannelTypeDeserializer;
+import com.theFox6.kleinerNerd.storage.ChannelTypeSerializer;
+
 import net.dv8tion.jda.api.entities.ChannelType;
 
 public class MessageChannelLocation {
+	@JsonSerialize(using = ChannelTypeSerializer.class, as=String.class)
+	@JsonDeserialize(using = ChannelTypeDeserializer.class)
 	public final ChannelType type;
 	public final String channelId;
 	public final String guildId;
