@@ -13,6 +13,8 @@ import com.theFox6.kleinerNerd.listeners.LoggingListener;
 import com.theFox6.kleinerNerd.listeners.SimpleCommandListener;
 import com.theFox6.kleinerNerd.listeners.StalkerCommandListener;
 import com.theFox6.kleinerNerd.listeners.TestListener;
+import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleListener;
+import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleStorage;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 import com.theFox6.kleinerNerd.storage.GuildStorage;
 
@@ -75,6 +77,7 @@ public class KleinerNerd {
 			QueuedLog.error("Error while trying to set logfile",e);
 		}
 		GuildStorage.load();
+		ReactionRoleStorage.load();
 		eventManager = new AnnotatedConvertingEventManager();
 		convertEvent(GuildMessageReceivedEvent.class, ConsumableGuildMessageReceivedEvent.class);
 		eventManager.register(new LoggingListener());
@@ -83,6 +86,7 @@ public class KleinerNerd {
 		eventManager.register(new StalkerCommandListener());
 		eventManager.register(new ConfigurationListener());
 		eventManager.register(new ManualMessagingListener());
+		eventManager.register(new ReactionRoleListener());
 		eventManager.register(new TestListener());
 		JDA jda = buildBot();
 		if (jda == null) {
@@ -94,7 +98,9 @@ public class KleinerNerd {
 			@Override
 			public void run() {
 				QueuedLog.action("runtime shutting down");
+				checkDataFolder();
 				GuildStorage.save();
+				ReactionRoleStorage.save();
 				QueuedLog.printWarningCount();
 				QueuedLog.printErrorCount();
 				QueuedLog.flush();
