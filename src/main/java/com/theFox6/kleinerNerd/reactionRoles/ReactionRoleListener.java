@@ -33,7 +33,7 @@ public class ReactionRoleListener {
 	
 	private Role getReactionRoleFromEvent(GenericGuildMessageReactionEvent event) {
 		MessageLocation loc = new MessageLocation(event);
-		ReactionRoleConfiguration config = ReactionRoleStorage.getConfig(loc);
+		ReactionRoleMap config = ReactionRoleStorage.getConfig(loc);
 		if (config == null)
 			return null;
 		String roleId = config.getRoleIdForReaction(event.getReactionEmote().getAsReactionCode());
@@ -53,7 +53,6 @@ public class ReactionRoleListener {
 	public void onReactionAdded(GuildMessageReactionAddEvent event) {
 		Role r = getReactionRoleFromEvent(event);
 		if (r == null) {
-			QueuedLog.warning("could not find the role associated with the reaction");
 			return;
 		}
 		Member member = event.getMember();
@@ -77,7 +76,6 @@ public class ReactionRoleListener {
 	public void onReactionRemoved(GuildMessageReactionRemoveEvent event) {
 		Role r = getReactionRoleFromEvent(event);
 		if (r == null) {
-			QueuedLog.warning("could not find the role associated with the reaction");
 			return;
 		}
 		Member member = event.getMember();

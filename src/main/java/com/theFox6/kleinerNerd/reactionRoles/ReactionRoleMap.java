@@ -3,11 +3,11 @@ package com.theFox6.kleinerNerd.reactionRoles;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ReactionRoleConfiguration {
+public class ReactionRoleMap {
 	//Reaction, Role
 	private Map<String,String> reactions;
 	
-	public ReactionRoleConfiguration() {
+	public ReactionRoleMap() {
 		reactions = new ConcurrentHashMap<>();
 	}
 	

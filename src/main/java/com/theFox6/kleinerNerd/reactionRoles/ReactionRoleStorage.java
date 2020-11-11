@@ -2,6 +2,7 @@ package com.theFox6.kleinerNerd.reactionRoles;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -18,15 +19,16 @@ public class ReactionRoleStorage {
 	private static final File gsf = new File(KleinerNerd.dataFolder + "reactionrole.json");
 	private static final File bsf = new File(KleinerNerd.dataFolder + "reactionrole_broken.json");
 	private static boolean broken = false;
-	private static ConcurrentHashMap<MessageLocation,ReactionRoleConfiguration> rrConfig;
+	private static ConcurrentHashMap<MessageLocation,ReactionRoleMap> rrConfig;
 
 	public static void load() {
+		LinkedList<ReactionRoleConfig> ser = null;
 		if (gsf.exists()) {
+			JavaType storedType = TypeFactory.defaultInstance().constructParametricType(LinkedList.class, ReactionRoleConfig.class);
 			//FIXME: Cannot serialize message location object as map key
 			//TODO: serialize as list and load into map or something
-			JavaType settingsType = TypeFactory.defaultInstance().constructParametricType(ConcurrentHashMap.class, MessageLocation.class, ReactionRoleConfiguration.class);
 			try {
-				rrConfig = new ObjectMapper().readValue(gsf, settingsType);
+				ser = new ObjectMapper().readValue(gsf, storedType);
 			} catch (JsonParseException e) {
 				broken = true;
 				QueuedLog.error("parse error while trying to load guild settings", e);
@@ -41,8 +43,8 @@ public class ReactionRoleStorage {
 				loadingError("io error while loading guild settings");
 			}
 		}
-		if (rrConfig == null)
-			rrConfig = new ConcurrentHashMap<>();
+		rrConfig = new ConcurrentHashMap<>();
+		ReactionRoleConfig.intoMap(ser, rrConfig);
 	}
 	
 	public static void save() {
@@ -59,8 +61,9 @@ public class ReactionRoleStorage {
 				}
 			}
 		}
+		LinkedList<ReactionRoleConfig> ser = ReactionRoleConfig.list(rrConfig);
 		try {
-			new ObjectMapper().writeValue(gsf, rrConfig);
+			new ObjectMapper().writeValue(gsf, ser);
 		} catch (JsonGenerationException e) {
 			QueuedLog.error("generation error while trying to save guild settings", e);
 			saveError("JSON generation error while writing guild settings");
@@ -73,7 +76,7 @@ public class ReactionRoleStorage {
 		}
 	}
 	
-	public static ReactionRoleConfiguration getConfig(MessageLocation msgLoc) {
+	public static ReactionRoleMap getConfig(MessageLocation msgLoc) {
 		return rrConfig.get(msgLoc);
 	}
 
