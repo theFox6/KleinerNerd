@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.DisconnectEvent;
 import net.dv8tion.jda.api.events.ExceptionEvent;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -98,8 +99,11 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	@SubscribeEvent
     public void onPrivateMessageReceived(@Nonnull PrivateMessageReceivedEvent event) {
     	Message msg = event.getMessage();
+    	User author = msg.getAuthor();
+    	if (event.getJDA().getSelfUser().equals(author))
+    		return;
     	QueuedLog.info("private message in conversation with " + msg.getChannel().getName() + "\n"
-    			+ "written by " + msg.getAuthor().getName() + "\n"
+    			+ "written by " + author.getName() + "\n"
 				+ "message contents " + msg.getContentRaw());
     }
     

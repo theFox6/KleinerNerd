@@ -3,6 +3,7 @@ package com.theFox6.kleinerNerd.listeners;
 import com.theFox6.kleinerNerd.KleinerNerd;
 
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -20,7 +21,10 @@ public class SimpleCommandListener {
             long time = System.currentTimeMillis();
             chan.sendMessage("Pong!")
             .queue(response -> {
-            	response.editMessageFormat("Pong: %d ms", System.currentTimeMillis() - time).queue();
+            	JDA jda = response.getJDA();
+            	response.editMessageFormat("Pong!\n"
+            			+ "sending time: %d ms\n"
+            			+ "last heartbeat: %d ms", System.currentTimeMillis() - time, jda.getGatewayPing()).queue();
             });
     	} else if (raw.equals(KleinerNerd.prefix + "shutdown")) {
     		chan.sendMessage("Shutting down").queue();

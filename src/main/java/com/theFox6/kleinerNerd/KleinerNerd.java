@@ -8,14 +8,17 @@ import com.theFox6.kleinerNerd.consumable.AnnotatedConvertingEventManager;
 import com.theFox6.kleinerNerd.consumable.ConsumableGuildMessageReceivedEvent;
 import com.theFox6.kleinerNerd.echo.ManualMessagingListener;
 import com.theFox6.kleinerNerd.listeners.ConfigurationListener;
+import com.theFox6.kleinerNerd.listeners.VoiceLoggingListener;
 import com.theFox6.kleinerNerd.listeners.HelpListener;
 import com.theFox6.kleinerNerd.listeners.LoggingListener;
 import com.theFox6.kleinerNerd.listeners.SimpleCommandListener;
 import com.theFox6.kleinerNerd.listeners.StalkerCommandListener;
+import com.theFox6.kleinerNerd.listeners.SuicideListener;
 import com.theFox6.kleinerNerd.listeners.TestListener;
 import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleListener;
 import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleStorage;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
+import com.theFox6.kleinerNerd.storage.CounterStorage;
 import com.theFox6.kleinerNerd.storage.GuildStorage;
 
 import foxLog.LogLevel;
@@ -78,15 +81,23 @@ public class KleinerNerd {
 		}
 		GuildStorage.load();
 		ReactionRoleStorage.load();
+		CounterStorage.load();
+		
 		eventManager = new AnnotatedConvertingEventManager();
 		convertEvent(GuildMessageReceivedEvent.class, ConsumableGuildMessageReceivedEvent.class);
+		
 		eventManager.register(new LoggingListener());
+		
 		eventManager.register(new HelpListener());
 		eventManager.register(new SimpleCommandListener());
 		eventManager.register(new StalkerCommandListener());
 		eventManager.register(new ConfigurationListener());
 		eventManager.register(new ManualMessagingListener());
 		eventManager.register(new ReactionRoleListener());
+		
+		eventManager.register(new SuicideListener());
+		
+		eventManager.register(new VoiceLoggingListener());
 		eventManager.register(new TestListener());
 		JDA jda = buildBot();
 		if (jda == null) {
@@ -101,6 +112,7 @@ public class KleinerNerd {
 				checkDataFolder();
 				GuildStorage.save();
 				ReactionRoleStorage.save();
+				CounterStorage.save();
 				QueuedLog.printWarningCount();
 				QueuedLog.printErrorCount();
 				QueuedLog.flush();

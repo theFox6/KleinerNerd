@@ -73,6 +73,10 @@ public class MessageChannelLocation {
 	 * It is made by applying an exclusive-or on the hash codes of all fields.
 	 */
 	public int hashCode() {
-		return type.hashCode()^channelId.hashCode()^guildId.hashCode();
+		if (guildId == null) {
+			return type.hashCode()^channelId.hashCode();
+		} else {
+			return type.hashCode()^channelId.hashCode()^guildId.hashCode();
+		}
 	}
 }

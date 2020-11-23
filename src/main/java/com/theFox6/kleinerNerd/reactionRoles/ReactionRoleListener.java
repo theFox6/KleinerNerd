@@ -1,22 +1,20 @@
 package com.theFox6.kleinerNerd.reactionRoles;
 
-import com.theFox6.kleinerNerd.KNHelpers;
-import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.data.MessageLocation;
 
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class ReactionRoleListener {
-	private static final String addrrCommand = KleinerNerd.prefix + "rr add ";
+	//private static final String addrrCommand = KleinerNerd.prefix + "rr add ";
 	
+	/*
 	@SubscribeEvent
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Guild guild = event.getGuild();
@@ -24,12 +22,14 @@ public class ReactionRoleListener {
 		if (!KNHelpers.isModerator(author, guild))
 			return;
 		String raw = event.getMessage().getContentRaw();
-		/*if (raw.startsWith(addrrCommand)) {
-			//String messageId = raw.substring(addrrCommand.length());
-		}*/
 		//associate reaction roles with a message
+		if (raw.startsWith(addrrCommand)) {
+			String args = raw.substring(addrrCommand.length());
+			// args are: message id, emoji, role id
+		}
 		//edit reaction role configurations
 	}
+	*/
 	
 	private Role getReactionRoleFromEvent(GenericGuildMessageReactionEvent event) {
 		MessageLocation loc = new MessageLocation(event);

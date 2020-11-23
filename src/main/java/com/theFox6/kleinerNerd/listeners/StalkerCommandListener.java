@@ -21,7 +21,7 @@ public class StalkerCommandListener {
 		Message msg = event.getMessage();
     	String raw = msg.getContentRaw();
     	if (raw.startsWith(avatarCommand)) {
-    		if (msg.getMentionedMembers().isEmpty()) {
+    		if (msg.getMentionedUsers().isEmpty()) {
     			MessageChannel chan = event.getChannel();
 	    		try {
 		    		event.getJDA().retrieveUserById(
