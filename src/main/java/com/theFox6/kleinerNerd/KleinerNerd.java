@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import javax.security.auth.login.LoginException;
 
+import com.theFox6.kleinerNerd.categories.CategoryCreation;
 import com.theFox6.kleinerNerd.consumable.AnnotatedConvertingEventManager;
 import com.theFox6.kleinerNerd.consumable.ConsumableGuildMessageReceivedEvent;
+import com.theFox6.kleinerNerd.conversation.rulebased.RPGConvoListener;
 import com.theFox6.kleinerNerd.echo.ManualMessagingListener;
 import com.theFox6.kleinerNerd.listeners.ConfigurationListener;
 import com.theFox6.kleinerNerd.listeners.VoiceLoggingListener;
@@ -94,11 +96,14 @@ public class KleinerNerd {
 		eventManager.register(new ConfigurationListener());
 		eventManager.register(new ManualMessagingListener());
 		eventManager.register(new ReactionRoleListener());
+		eventManager.register(new CategoryCreation());
 		
 		eventManager.register(new SuicideListener());
 		
 		eventManager.register(new VoiceLoggingListener());
 		eventManager.register(new TestListener());
+		eventManager.register(new RPGConvoListener());
+		
 		JDA jda = buildBot();
 		if (jda == null) {
 			QueuedLog.warning("bot unbuilt, trying to exit");
