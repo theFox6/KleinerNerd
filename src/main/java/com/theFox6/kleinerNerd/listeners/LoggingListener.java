@@ -111,6 +111,9 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	@SubscribeEvent
     public void onPrivateMessageUpdate(@Nonnull PrivateMessageUpdateEvent event) {
     	Message msg = event.getMessage();
+    	User author = msg.getAuthor();
+    	if (event.getJDA().getSelfUser().equals(author))
+    		return;
     	QueuedLog.info("private message edited in convo with " + msg.getChannel().getName() + "\n"
     			+ "new message contents " + msg.getContentRaw());
     }

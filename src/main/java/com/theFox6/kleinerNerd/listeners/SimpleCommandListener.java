@@ -26,6 +26,8 @@ public class SimpleCommandListener {
             			+ "sending time: %d ms\n"
             			+ "last heartbeat: %d ms", System.currentTimeMillis() - time, jda.getGatewayPing()).queue();
             });
+    	} else if (raw.equals(KleinerNerd.prefix + "pong")) {
+    		chan.sendMessage("PENG!");
     	} else if (raw.equals(KleinerNerd.prefix + "shutdown")) {
     		chan.sendMessage("Shutting down").queue();
     		QueuedLog.action("Shutdown requested by " + msg.getAuthor().getName());
