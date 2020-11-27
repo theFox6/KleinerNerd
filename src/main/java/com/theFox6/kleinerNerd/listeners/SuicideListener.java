@@ -2,6 +2,8 @@ package com.theFox6.kleinerNerd.listeners;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,14 +16,19 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class SuicideListener {
-	Map<String,Instant> lastSuicide = new ConcurrentHashMap<>();
+	private Map<String,Instant> lastSuicide = new ConcurrentHashMap<>();
+	private static final List<String> kms = Arrays.asList(
+			"ich geh mich umbringen","ich geh mich erhängen", "ich bring mich um");
+	private static final List<String> howMany = Arrays.asList(
+			"wie oft habe ich mich schon umgebracht?","wie oft habe ich mich schon umgebracht",
+			"wie oft habe ich mich schon erhängt?","wie oft habe ich mich schon erhängt");
 	
 	@SubscribeEvent
 	public void onMessage(MessageReceivedEvent event) {
 		Message msg = event.getMessage();
 		String raw = msg.getContentRaw();
 		//TODO: total suicide count
-		if (raw.equals("ich geh mich umbringen")) {
+		if (kms.stream().anyMatch((t) -> t.equalsIgnoreCase(raw))) {
 			User author = msg.getAuthor();
 			String authorId = author.getId();
 			Instant now = Instant.now();
@@ -42,6 +49,10 @@ public class SuicideListener {
 				return;
 			}
 			msg.getChannel().sendMessage(member.getEffectiveName()+" hat sich zum " + count + ". mal umgebracht.").queue(SuicideListener::reactWithF);
+		} else if (howMany.stream().anyMatch((t) -> t.equalsIgnoreCase(raw))) {
+			String authorId = msg.getAuthor().getId();
+			int count = CounterStorage.getCounter("suicides_"+authorId).get();
+			msg.getChannel().sendMessage("Du hast dich " + count + " mal umgebracht.").queue();
 		}
 	}
 	
