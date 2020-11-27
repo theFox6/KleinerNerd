@@ -33,7 +33,7 @@ public class ManualMessagingListener {
     	MessageChannel chan = event.getChannel();
     	if (raw.startsWith(echoCommand)) {
     		User author = msg.getAuthor();
-    		if (!author.getId().equals(ConfigFiles.getOwner())) {
+    		if (!ConfigFiles.getOwners().contains(author.getId())) {
     			//chan.sendMessage("This command is restricted to be used by my owner only.").queue();
     			QueuedLog.action("cought "+ author.getDiscriminator() + " trying to use the echo command");
     			return;

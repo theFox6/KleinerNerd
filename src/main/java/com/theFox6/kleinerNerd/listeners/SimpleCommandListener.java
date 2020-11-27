@@ -1,6 +1,7 @@
 package com.theFox6.kleinerNerd.listeners;
 
 import com.theFox6.kleinerNerd.KleinerNerd;
+import com.theFox6.kleinerNerd.storage.ConfigFiles;
 
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
@@ -29,6 +30,10 @@ public class SimpleCommandListener {
     	} else if (raw.equals(KleinerNerd.prefix + "pong")) {
     		chan.sendMessage("PENG!");
     	} else if (raw.equals(KleinerNerd.prefix + "shutdown")) {
+    		if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId())) {
+    			//perhaps inform the user
+    			return;
+    		}
     		chan.sendMessage("Shutting down").queue();
     		QueuedLog.action("Shutdown requested by " + msg.getAuthor().getName());
     		event.getJDA().shutdown();

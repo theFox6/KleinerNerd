@@ -104,7 +104,7 @@ public class KleinerNerd {
 			QueuedLog.warning("bot unbuilt, trying to exit");
 			System.exit(1);
 		}
-		ModLog.sendToOwner(jda,"I started up.");
+		ModLog.sendToOwners(jda,"I started up.");
 		Runtime.getRuntime().addShutdownHook(new Thread("KleinerNerd-shutdownHook") {
 			@Override
 			public void run() {

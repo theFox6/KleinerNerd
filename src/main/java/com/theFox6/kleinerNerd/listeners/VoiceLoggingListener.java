@@ -34,7 +34,7 @@ public class VoiceLoggingListener {
 	@SubscribeEvent
 	public void onMessageReceived(MessageReceivedEvent event) {
     	Message msg = event.getMessage();
-    	if (!msg.getAuthor().getId().equals(ConfigFiles.getOwner()))
+    	if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId()))
     		return;
     	String raw = msg.getContentRaw();
     	MessageChannel chan = event.getChannel();
