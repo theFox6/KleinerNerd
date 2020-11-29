@@ -18,7 +18,11 @@ import net.dv8tion.jda.api.hooks.SubscribeEvent;
 public class SuicideListener {
 	private Map<String,Instant> lastSuicide = new ConcurrentHashMap<>();
 	private static final List<String> kms = Arrays.asList(
-			"ich geh mich umbringen","ich geh mich erhängen", "ich bring mich um");
+			"ich geh mich umbringen","ich gehe mich umbringen",
+			"ich geh mich erhängen","ich gehe mich erhängen",
+			"ich bring mich um", "ich bringe mich um",
+			"ich geh sterben","ich gehe sterben",
+			"ich hab abgeschlossen mit meinem leben","ich habe abgeschlossen mit meinem leben");
 	private static final List<String> howMany = Arrays.asList(
 			"wie oft habe ich mich schon umgebracht?","wie oft habe ich mich schon umgebracht",
 			"wie oft habe ich mich schon erhängt?","wie oft habe ich mich schon erhängt");
