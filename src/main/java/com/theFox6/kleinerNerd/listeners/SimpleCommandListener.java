@@ -28,7 +28,7 @@ public class SimpleCommandListener {
             			+ "last heartbeat: %d ms", System.currentTimeMillis() - time, jda.getGatewayPing()).queue();
             });
     	} else if (raw.equals(KleinerNerd.prefix + "pong")) {
-    		chan.sendMessage("PENG!");
+    		chan.sendMessage("PENG!").queue();
     	} else if (raw.equals(KleinerNerd.prefix + "shutdown")) {
     		if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId())) {
     			//perhaps inform the user
