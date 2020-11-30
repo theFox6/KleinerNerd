@@ -81,7 +81,7 @@ public class KleinerNerd {
 		}
 		GuildStorage.load();
 		ReactionRoleStorage.load();
-		CounterStorage.load();
+		CounterStorage.loadAll();
 		
 		eventManager = new AnnotatedConvertingEventManager();
 		convertEvent(GuildMessageReceivedEvent.class, ConsumableGuildMessageReceivedEvent.class);
@@ -112,7 +112,7 @@ public class KleinerNerd {
 				checkDataFolder();
 				GuildStorage.save();
 				ReactionRoleStorage.save();
-				CounterStorage.save();
+				CounterStorage.saveAll();
 				QueuedLog.printWarningCount();
 				QueuedLog.printErrorCount();
 				QueuedLog.flush();

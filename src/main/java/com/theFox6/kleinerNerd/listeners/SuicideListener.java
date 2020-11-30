@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.storage.CounterStorage;
 
 import net.dv8tion.jda.api.entities.Member;
@@ -17,12 +18,15 @@ import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class SuicideListener {
 	private Map<String,Instant> lastSuicide = new ConcurrentHashMap<>();
+	//TODO: pattern matching
 	private static final List<String> kms = Arrays.asList(
 			"ich geh mich umbringen","ich gehe mich umbringen",
 			"ich geh mich erhängen","ich gehe mich erhängen",
 			"ich bring mich um", "ich bringe mich um",
 			"ich geh sterben","ich gehe sterben",
-			"ich hab abgeschlossen mit meinem leben","ich habe abgeschlossen mit meinem leben");
+			"ich will nicht mehr leben",
+			"ich hab abgeschlossen mit meinem leben","ich habe abgeschlossen mit meinem leben",
+			"i want to die");
 	private static final List<String> howMany = Arrays.asList(
 			"wie oft habe ich mich schon umgebracht?","wie oft habe ich mich schon umgebracht",
 			"wie oft habe ich mich schon erhängt?","wie oft habe ich mich schon erhängt");
@@ -32,7 +36,9 @@ public class SuicideListener {
 		Message msg = event.getMessage();
 		String raw = msg.getContentRaw();
 		//TODO: total suicide count
-		if (kms.stream().anyMatch((t) -> t.equalsIgnoreCase(raw))) {
+		if (raw.equals(KleinerNerd.prefix + "totaldeaths")) {
+			CounterStorage.getUserTotalCount("suicides");
+		} else if (kms.stream().anyMatch((t) -> t.equalsIgnoreCase(raw))) {
 			User author = msg.getAuthor();
 			String authorId = author.getId();
 			Instant now = Instant.now();
@@ -44,7 +50,7 @@ public class SuicideListener {
 					return;
 				}
 			}
-			int count = CounterStorage.getCounter("suicides_"+authorId).incrementAndGet();
+			int count = CounterStorage.getUserCounter("suicides",authorId).incrementAndGet();
 			Member member = msg.getMember();
 			if (member == null) {
 				//probs DM
@@ -55,7 +61,7 @@ public class SuicideListener {
 			msg.getChannel().sendMessage(member.getEffectiveName()+" hat sich zum " + count + ". mal umgebracht.").queue(SuicideListener::reactWithF);
 		} else if (howMany.stream().anyMatch((t) -> t.equalsIgnoreCase(raw))) {
 			String authorId = msg.getAuthor().getId();
-			int count = CounterStorage.getCounter("suicides_"+authorId).get();
+			int count = CounterStorage.getUserCounter("suicides",authorId).get();
 			msg.getChannel().sendMessage("Du hast dich " + count + " mal umgebracht.").queue();
 		}
 	}
