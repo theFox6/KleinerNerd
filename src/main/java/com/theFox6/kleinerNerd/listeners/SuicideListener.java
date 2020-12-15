@@ -8,8 +8,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.theFox6.kleinerNerd.KleinerNerd;
+import com.theFox6.kleinerNerd.patternMatching.OptionalPattern;
+import com.theFox6.kleinerNerd.patternMatching.PatternJunction;
+import com.theFox6.kleinerNerd.patternMatching.PatternPart;
+import com.theFox6.kleinerNerd.patternMatching.PatternSequence;
+import com.theFox6.kleinerNerd.patternMatching.StringPattern;
 import com.theFox6.kleinerNerd.storage.CounterStorage;
 
+import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -18,18 +24,44 @@ import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class SuicideListener {
 	private Map<String,Instant> lastSuicide = new ConcurrentHashMap<>();
-	//TODO: pattern matching
-	private static final List<String> kms = Arrays.asList(
-			"ich geh mich umbringen","ich gehe mich umbringen",
-			"ich geh mich erhängen","ich gehe mich erhängen",
-			"ich bring mich um", "ich bringe mich um",
-			"ich geh sterben","ich gehe sterben",
-			"ich will nicht mehr leben",
-			"ich hab abgeschlossen mit meinem leben","ich habe abgeschlossen mit meinem leben",
-			"i want to die");
+	private final PatternPart kms;
 	private static final List<String> howMany = Arrays.asList(
 			"wie oft habe ich mich schon umgebracht?","wie oft habe ich mich schon umgebracht",
 			"wie oft habe ich mich schon erhängt?","wie oft habe ich mich schon erhängt");
+	
+	public SuicideListener() {
+		OptionalPattern od = new OptionalPattern(new StringPattern("."));
+		PatternPart z = new PatternJunction("ziel ",
+				new StringPattern("ich gehe "),
+				new StringPattern("ich geh "),
+				new StringPattern("ich will "),
+				new StringPattern("ich möchte "));
+		PatternPart haben = new PatternJunction("haben ",
+				new StringPattern("ich habe "),
+				new StringPattern("ich hab "));
+		kms = new PatternJunction("kms",
+				new PatternJunction("umbringen",
+						new PatternSequence(z, new StringPattern("mich umbringen"), od),
+						new PatternSequence(new StringPattern("ich bring mich um"),od),
+						new PatternSequence(new StringPattern("ich bringe mich um"),od)
+					),
+				new PatternSequence(z, new StringPattern("erhängen"),od),
+				new PatternSequence(z, new StringPattern("sterben"),od),
+				new PatternSequence(z, new StringPattern("mein leben beenden"), od),
+				new PatternSequence(z, new StringPattern("nicht mehr leben"),od),
+				new PatternSequence(z, new StringPattern("mich ertränken"),od),
+				new PatternJunction("lebenAbgeschlossen",
+						new PatternSequence(haben,new StringPattern("mein leben abgeschlossen"),od),
+						new PatternSequence(haben,new StringPattern("mit meinem leben abgeschlossen"),od),
+						new PatternSequence(haben,new StringPattern("abgeschlossen mit meinem leben"),od)
+					),
+				new PatternSequence(new StringPattern("i want to die"),od)
+			);
+		//just a smoke test
+		if (!kms.matches("ich hab mit meinem leben abgeschlossen")) {
+			QueuedLog.error("kms does not match");
+		}
+	}
 	
 	@SubscribeEvent
 	public void onMessage(MessageReceivedEvent event) {
@@ -38,7 +70,7 @@ public class SuicideListener {
 		//TODO: total suicide count
 		if (raw.equals(KleinerNerd.prefix + "totaldeaths")) {
 			CounterStorage.getUserTotalCount("suicides");
-		} else if (kms.stream().anyMatch((t) -> t.equalsIgnoreCase(raw))) {
+		} else if (kms.matches(raw.toLowerCase())) {
 			User author = msg.getAuthor();
 			String authorId = author.getId();
 			Instant now = Instant.now();
