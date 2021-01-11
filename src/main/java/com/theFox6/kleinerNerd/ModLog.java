@@ -9,14 +9,18 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class ModLog {
-	public static void sendToOwner(JDA jda, String msg) {
-		jda.retrieveUserById(ConfigFiles.getOwner()).queue(
-				(user) -> user.openPrivateChannel().queue(
-						(channel) -> channel.sendMessage(msg).queue(),
-						(error) -> QueuedLog.error("couldn't open private channel to owner",error)
-				),
-				(error) -> QueuedLog.error("couldn't retrieve owner",error)
-		);
+	public static void sendToOwners(JDA jda, String msg) {
+		ConfigFiles.getOwners().forEach((id) -> {
+			jda.retrieveUserById(id).queue(
+					(user) -> user.openPrivateChannel().queue(
+							(channel) -> channel.sendMessage(msg).queue((s) -> {}, (e) -> {
+								QueuedLog.error("couldn't send message to owner", e);
+							}),
+							(error) -> QueuedLog.error("couldn't open private channel to owner "+id,error)
+					),
+					(error) -> QueuedLog.error("couldn't retrieve owner "+id,error)
+			);
+		});
 	}
 	
 	public static void sendToGuild(JDA jda, String guildId, String msg) {

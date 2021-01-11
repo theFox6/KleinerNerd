@@ -20,7 +20,9 @@ public class StalkerCommandListener {
 	public void onMessageReceived(MessageReceivedEvent event) {
 		Message msg = event.getMessage();
     	String raw = msg.getContentRaw();
-    	if (raw.startsWith(avatarCommand)) {
+    	if (raw.equals(avatarCommand.substring(0, avatarCommand.length()-1))) {
+    		sendAvatarEmbed(msg,msg.getAuthor());
+    	} else if (raw.startsWith(avatarCommand)) {
     		if (msg.getMentionedUsers().isEmpty()) {
     			MessageChannel chan = event.getChannel();
 	    		try {

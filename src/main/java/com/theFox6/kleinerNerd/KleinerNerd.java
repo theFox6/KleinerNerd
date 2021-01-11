@@ -83,7 +83,7 @@ public class KleinerNerd {
 		}
 		GuildStorage.load();
 		ReactionRoleStorage.load();
-		CounterStorage.load();
+		CounterStorage.loadAll();
 		
 		eventManager = new AnnotatedConvertingEventManager();
 		convertEvent(GuildMessageReceivedEvent.class, ConsumableGuildMessageReceivedEvent.class);
@@ -109,7 +109,7 @@ public class KleinerNerd {
 			QueuedLog.warning("bot unbuilt, trying to exit");
 			System.exit(1);
 		}
-		ModLog.sendToOwner(jda,"I started up.");
+		ModLog.sendToOwners(jda,"I started up.");
 		Runtime.getRuntime().addShutdownHook(new Thread("KleinerNerd-shutdownHook") {
 			@Override
 			public void run() {
@@ -117,7 +117,7 @@ public class KleinerNerd {
 				checkDataFolder();
 				GuildStorage.save();
 				ReactionRoleStorage.save();
-				CounterStorage.save();
+				CounterStorage.saveAll();
 				QueuedLog.printWarningCount();
 				QueuedLog.printErrorCount();
 				QueuedLog.flush();
