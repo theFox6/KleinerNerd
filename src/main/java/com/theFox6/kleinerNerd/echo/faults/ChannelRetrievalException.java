@@ -6,4 +6,8 @@ public class ChannelRetrievalException extends EchoException {
 	public ChannelRetrievalException(String msg) {
 		super(msg);
 	}
+
+	public ChannelRetrievalException(String msg, Throwable e) {
+		super(msg,e);
+	}
 }

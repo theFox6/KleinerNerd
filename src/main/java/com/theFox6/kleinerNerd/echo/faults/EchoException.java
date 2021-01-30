@@ -6,4 +6,8 @@ public class EchoException extends Exception {
 	public EchoException(String msg) {
 		super(msg);
 	}
+
+	public EchoException(String msg, Throwable e) {
+		super(msg,e);
+	}
 }

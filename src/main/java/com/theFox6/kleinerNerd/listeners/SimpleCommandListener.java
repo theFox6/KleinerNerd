@@ -3,6 +3,7 @@ package com.theFox6.kleinerNerd.listeners;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 
+import foxLog.deamon.ConditionNotifier.NotNotifiableException;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -37,6 +38,20 @@ public class SimpleCommandListener {
     		chan.sendMessage("Shutting down").queue();
     		QueuedLog.action("Shutdown requested by " + msg.getAuthor().getName());
     		event.getJDA().shutdown();
+    	} else if (raw.equals(KleinerNerd.prefix + "logfile")) {
+    		if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId())) {
+    			return;
+    		}
+    		QueuedLog.action("Logfile requested by " + msg.getAuthor().getName());
+    		try {
+				QueuedLog.flushInterruptibly();
+			} catch (InterruptedException e) {
+				QueuedLog.warning("SimpleCommandListener was interrupted", e);
+			} catch (NotNotifiableException e) {
+				//this exception doesn't even exist in the latest version...
+				QueuedLog.error("Yo Fox, your log implementation is faulty.", e);
+			}
+    		chan.sendFile(KleinerNerd.logFile).queue();
     	}
     }
 }

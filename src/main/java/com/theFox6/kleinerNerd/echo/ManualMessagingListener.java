@@ -70,7 +70,7 @@ public class ManualMessagingListener {
 						+ "because I " + e.getMessage() + ".\n"
 						+ "This kind of fault means that either you or my developer messed up.\n"
 						+ "Please provide more info about the target place next time.\n"
-						+ "See `\" + HelpListener.helpCommand + \" location format` for help about providing a target location."
+						+ "See `" + HelpListener.helpCommand + " location format` for help about providing a target location."
 						).queue();
 				return;
 			}
