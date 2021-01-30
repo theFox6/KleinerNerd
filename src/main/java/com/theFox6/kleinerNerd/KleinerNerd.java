@@ -8,6 +8,7 @@ import com.theFox6.kleinerNerd.consumable.AnnotatedConvertingEventManager;
 import com.theFox6.kleinerNerd.consumable.ConsumableGuildMessageReceivedEvent;
 import com.theFox6.kleinerNerd.echo.ManualMessagingListener;
 import com.theFox6.kleinerNerd.listeners.ConfigurationListener;
+import com.theFox6.kleinerNerd.listeners.ConvoSnippetListener;
 import com.theFox6.kleinerNerd.listeners.VoiceLoggingListener;
 import com.theFox6.kleinerNerd.listeners.HelpListener;
 import com.theFox6.kleinerNerd.listeners.LoggingListener;
@@ -32,6 +33,7 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 public class KleinerNerd {
 	public static final String dataFolder = ".KleinerNerd/";
+	public static final File logFile = new File("log.txt");
 	//this could later become guild and dm-channel individual
 	public static String prefix = ".";
 	private static AnnotatedConvertingEventManager eventManager;
@@ -75,7 +77,7 @@ public class KleinerNerd {
 		}
 		// set the log file
 		try {
-			QueuedLog.setLogFile(new File("log.txt"));
+			QueuedLog.setLogFile(logFile);
 		} catch (FileNotFoundException e) {
 			QueuedLog.error("Error while trying to set logfile",e);
 		}
@@ -90,15 +92,18 @@ public class KleinerNerd {
 		
 		eventManager.register(new HelpListener());
 		eventManager.register(new SimpleCommandListener());
-		eventManager.register(new StalkerCommandListener());
 		eventManager.register(new ConfigurationListener());
 		eventManager.register(new ManualMessagingListener());
 		eventManager.register(new ReactionRoleListener());
 		
+		eventManager.register(new ConvoSnippetListener());
 		eventManager.register(new SuicideListener());
 		
+		eventManager.register(new StalkerCommandListener());
 		eventManager.register(new VoiceLoggingListener());
+		
 		eventManager.register(new TestListener());
+		
 		JDA jda = buildBot();
 		if (jda == null) {
 			QueuedLog.warning("bot unbuilt, trying to exit");

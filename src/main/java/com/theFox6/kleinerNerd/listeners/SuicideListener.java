@@ -20,8 +20,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class SuicideListener {
@@ -56,6 +54,7 @@ public class SuicideListener {
 				new PatternSequence(z, new StringPattern("mich ertränken"),od),
 				new PatternSequence(z, new StringPattern("mich erschießen"),od),
 				new PatternSequence(z, new StringPattern("mich vergiften"),od),
+				new PatternSequence(z, new StringPattern("mich aufschlitzen"),od),
 				new PatternJunction("klippe",
 						new PatternSequence(z, new StringPattern("mich von ner klippe stürzen"),od),
 						new PatternSequence(z, new StringPattern("mich von einer klippe stürzen"),od)

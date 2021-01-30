@@ -9,4 +9,9 @@ public class UserIdNotFoundException extends ChannelRetrievalException {
 		this.userId = userId;
 	}
 
+	public UserIdNotFoundException(String userId, Throwable e) {
+		super("could not find a user with the Id " + userId, e);
+		this.userId = userId;
+	}
+
 }

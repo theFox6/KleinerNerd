@@ -112,13 +112,20 @@ public class PreparedEcho {
 			}
 			QueuedLog.action("Prepared echo message to #" + channel.getName() + "@" + channel.getGuild().getName());
 		} else if (targetPlace == ChannelType.PRIVATE) {
-			user = jda.getUserById(channelId);
-			if (user == null) {
+			//FIXME: make it possible to delay further actions until this queue is completed
+			jda.retrieveUserById(channelId).queue((user) -> {
+				if (user == null) {
+					stage = EchoState.INVALID;
+					//TODO: properly handle these exceptions
+					QueuedLog.error("Tried to retrieve user, got null.", new UserIdNotFoundException(channelId));
+				}
+				QueuedLog.action("Prepared echo message to " + user.getAsTag());
+				stage = EchoState.READY;
+			}, (e) -> {
 				stage = EchoState.INVALID;
-				throw new UserIdNotFoundException(channelId);
-			}
-			QueuedLog.action("Prepared echo message to " + user.getAsTag());
-			stage = EchoState.READY;
+				//TODO: properly handle these exceptions
+				QueuedLog.error("Could not retrieve.", new UserIdNotFoundException(channelId));
+			});
 		} else if (targetPlace == null) {
 			if (guildId == null) {
 				if (channelId == null) {
