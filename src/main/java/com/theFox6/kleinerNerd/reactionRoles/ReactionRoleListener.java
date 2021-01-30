@@ -1,5 +1,7 @@
 package com.theFox6.kleinerNerd.reactionRoles;
 
+import java.util.function.Consumer;
+
 import com.theFox6.kleinerNerd.data.MessageLocation;
 
 import foxLog.queued.QueuedLog;
@@ -49,27 +51,56 @@ public class ReactionRoleListener {
 		return r;
 	}
 	
+	/* unused, but enforces correct usage
+	private void getMember(GenericGuildMessageReactionEvent event, Consumer<Member> action) {
+		Member member = event.getMember();
+		if (member == null) {
+			event.getGuild().retrieveMemberById(event.getUserId()).queue(action, (e) -> {
+				QueuedLog.error("could not retrieve member that caused a GuildEvent",e);
+			});
+		} else {
+			action.accept(member);
+		}
+	}
+	*/
+	
+	private void getMember(Member eventMember, Guild guild, String userId, Consumer<Member> action) {
+		if (eventMember == null) {
+			guild.retrieveMemberById(userId).queue(action, (e) -> {
+				QueuedLog.error("could not retrieve member",e);
+			});
+		} else {
+			action.accept(eventMember);
+		}
+	}
+	
 	@SubscribeEvent
 	public void onReactionAdded(GuildMessageReactionAddEvent event) {
 		Role r = getReactionRoleFromEvent(event);
 		if (r == null) {
 			return;
 		}
-		Member member = event.getMember();
-		event.getGuild().addRoleToMember(member, r).queue(
-				(s) -> {
-					QueuedLog.action("Rolle \""+r.getName()+"\" wurde "+member.getEffectiveName()+" zugewiesen.");
-					event.getUser().openPrivateChannel().queue((pc) -> {
-						pc.sendMessage("Rolle \""+r.getName()+"\" zugewiesen.").queue();
-					});
-				},
-				(f) -> {
-					QueuedLog.warning("Konnte Rolle \""+r.getName()+"\" nicht zuweisen.",f.getCause());
-					event.getUser().openPrivateChannel().queue((pc) -> {
-						pc.sendMessage("Konnte Rolle \""+r.getName()+"\" nicht zuweisen.").queue();
-					});
-				}
-			);
+		String userId = event.getUserId();
+		if (event.getJDA().getSelfUser().getId().equals(userId))
+			return;
+		Guild guild = event.getGuild();
+		getMember(event.getMember(), guild, userId, (member) -> {
+			final String name = member.getEffectiveName();
+			guild.addRoleToMember(member, r).queue(
+					(s) -> {
+						QueuedLog.action("Rolle \""+r.getName()+"\" wurde "+name+" zugewiesen.");
+						member.getUser().openPrivateChannel().queue((pc) -> {
+							pc.sendMessage("Rolle \""+r.getName()+"\" zugewiesen.").queue();
+						});
+					},
+					(f) -> {
+						QueuedLog.warning("Konnte Rolle \""+r.getName()+"\" nicht zuweisen.",f.getCause());
+						member.getUser().openPrivateChannel().queue((pc) -> {
+							pc.sendMessage("Konnte Rolle \""+r.getName()+"\" nicht zuweisen.").queue();
+						});
+					}
+				);
+		});
 	}
 	
 	@SubscribeEvent
@@ -77,21 +108,27 @@ public class ReactionRoleListener {
 		Role r = getReactionRoleFromEvent(event);
 		if (r == null) {
 			return;
-		}
-		Member member = event.getMember();
-		event.getGuild().removeRoleFromMember(member, r).queue(
-				(s) -> {
-					QueuedLog.action("Rolle \""+r.getName()+"\" wurde von "+member.getEffectiveName()+" entfernt.");
-					event.getUser().openPrivateChannel().queue((pc) -> {
-						pc.sendMessage("Rolle \""+r.getName()+"\" entfernt.").queue();
-					});
-				},
-				(f) -> {
-					QueuedLog.warning("Konnte Rolle \""+r.getName()+"\" nicht entfernen.",f.getCause());
-					event.getUser().openPrivateChannel().queue((pc) -> {
-						pc.sendMessage("Konnte Rolle \""+r.getName()+"\" nicht entfernen.").queue();
-					});
-				}
-			);
+		} 
+		String userId = event.getUserId();
+		if (event.getJDA().getSelfUser().getId().equals(userId))
+			return;
+		Guild guild = event.getGuild();
+		getMember(event.getMember(), guild, userId, (member) -> {
+			final String name = member.getEffectiveName();
+			guild.removeRoleFromMember(member, r).queue(
+					(s) -> {
+						QueuedLog.action("Rolle \""+r.getName()+"\" wurde von "+name+" entfernt.");
+						member.getUser().openPrivateChannel().queue((pc) -> {
+							pc.sendMessage("Rolle \""+r.getName()+"\" entfernt.").queue();
+						});
+					},
+					(f) -> {
+						QueuedLog.warning("Konnte Rolle \""+r.getName()+"\" nicht entfernen.",f.getCause());
+						member.getUser().openPrivateChannel().queue((pc) -> {
+							pc.sendMessage("Konnte Rolle \""+r.getName()+"\" nicht entfernen.").queue();
+						});
+					}
+				);
+		});
 	}
 }

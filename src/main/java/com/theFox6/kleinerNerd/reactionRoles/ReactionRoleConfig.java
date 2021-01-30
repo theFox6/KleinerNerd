@@ -5,16 +5,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.theFox6.kleinerNerd.data.MessageLocation;
 
 /**
  * a JSON Serializable, single object reaction role configuration for a message
  */
 public class ReactionRoleConfig {
+	@JsonProperty
 	private MessageLocation loc;
+	@JsonProperty
 	private ReactionRoleMap rRoles;
 
-	public ReactionRoleConfig(MessageLocation location, ReactionRoleMap reactionRoles) {
+	@JsonCreator
+	public ReactionRoleConfig(@JsonProperty("loc") MessageLocation location, @JsonProperty("rRoles") ReactionRoleMap reactionRoles) {
 		loc = location;
 		rRoles = reactionRoles;
 	}

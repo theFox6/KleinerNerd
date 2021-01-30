@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import javax.security.auth.login.LoginException;
 
+import com.theFox6.kleinerNerd.categories.CategoryCreationListener;
+import com.theFox6.kleinerNerd.categories.CategoryStorage;
 import com.theFox6.kleinerNerd.consumable.AnnotatedConvertingEventManager;
 import com.theFox6.kleinerNerd.consumable.ConsumableGuildMessageReceivedEvent;
+import com.theFox6.kleinerNerd.conversation.rulebased.RPGConvoListener;
 import com.theFox6.kleinerNerd.echo.ManualMessagingListener;
 import com.theFox6.kleinerNerd.listeners.ConfigurationListener;
 import com.theFox6.kleinerNerd.listeners.ConvoSnippetListener;
@@ -83,6 +86,7 @@ public class KleinerNerd {
 		}
 		GuildStorage.load();
 		ReactionRoleStorage.load();
+		CategoryStorage.load();
 		CounterStorage.loadAll();
 		
 		eventManager = new AnnotatedConvertingEventManager();
@@ -95,6 +99,7 @@ public class KleinerNerd {
 		eventManager.register(new ConfigurationListener());
 		eventManager.register(new ManualMessagingListener());
 		eventManager.register(new ReactionRoleListener());
+		eventManager.register(new CategoryCreationListener());
 		
 		eventManager.register(new ConvoSnippetListener());
 		eventManager.register(new SuicideListener());
@@ -103,6 +108,7 @@ public class KleinerNerd {
 		eventManager.register(new VoiceLoggingListener());
 		
 		eventManager.register(new TestListener());
+		eventManager.register(new RPGConvoListener());
 		
 		JDA jda = buildBot();
 		if (jda == null) {
@@ -117,6 +123,7 @@ public class KleinerNerd {
 				checkDataFolder();
 				GuildStorage.save();
 				ReactionRoleStorage.save();
+				CategoryStorage.save();
 				CounterStorage.saveAll();
 				QueuedLog.printWarningCount();
 				QueuedLog.printErrorCount();

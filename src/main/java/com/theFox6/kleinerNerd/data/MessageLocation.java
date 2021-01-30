@@ -1,13 +1,25 @@
 package com.theFox6.kleinerNerd.data;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import net.dv8tion.jda.api.events.message.guild.GenericGuildMessageEvent;
 
 public class MessageLocation extends MessageChannelLocation {
-
+	@JsonProperty
 	public final String messageId;
+	
+	@JsonCreator
+	private MessageLocation(@JsonProperty("type") String chType,
+			@JsonProperty("channelId") String chanId,
+			@JsonProperty("guildId") String gId,
+			@JsonProperty("messageId") String msgId) {
+		super(ChannelType.valueOf(chType),chanId, gId);
+		messageId = msgId;
+	}
 
 	public MessageLocation(Message msg) {
 		super(msg.getChannelType(),msg.getChannel().getId(),msg.isFromGuild() ? msg.getGuild().getId() : null);

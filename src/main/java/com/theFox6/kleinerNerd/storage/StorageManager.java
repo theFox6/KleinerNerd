@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.theFox6.kleinerNerd.KleinerNerd;
-
 import foxLog.queued.QueuedLog;
 
 public class StorageManager {
@@ -27,20 +26,20 @@ public class StorageManager {
 			try {
 				return new ObjectMapper().readValue(sf, dataType);
 			} catch (JsonParseException e) {
-				QueuedLog.error("parse error while trying to load guild settings", e);
-				loadingError(filename, "JSON parse error while loading guild settings");
+				QueuedLog.error("parse error while trying to load " + filename + "", e);
+				loadingError(filename, "JSON parse error while loading " + filename + "");
 			} catch (JsonMappingException e) {
-				QueuedLog.error("mapping error while trying to load guild settings", e);
-				loadingError(filename,"JSON mapping error while loading guild settings");
+				QueuedLog.error("mapping error while trying to load " + filename + "", e);
+				loadingError(filename,"JSON mapping error while loading " + filename + "");
 			} catch (IOException e) {
-				QueuedLog.error("io error while trying to load guild settings", e);
-				loadingError(filename,"io error while loading guild settings");
+				QueuedLog.error("io error while trying to load " + filename + "", e);
+				loadingError(filename,"io error while loading " + filename + "");
 			}
 		}
 		return new ConcurrentHashMap<>();
 	}
-	
-	private static void loadingError(String filename, String message) {
+
+	public static void loadingError(String filename, String message) {
 		if (brokenFiles.containsKey(filename))
 			brokenFiles.get(filename).set(true);
 		else
@@ -49,20 +48,20 @@ public class StorageManager {
 		// probably ask the owner whether to shutdown without quit hooks
 	}
 
-	public static void save(String filename,ConcurrentHashMap<String, ConcurrentHashMap<String, AtomicInteger>> data) {
+	public static <T> void save(String filename,T data) {
 		if (!brokenFiles.containsKey(filename))
 			brokenFiles.put(filename, new AtomicBoolean(false));
 		File sf = new File(KleinerNerd.dataFolder + filename + ".json");
 		if (brokenFiles.get(filename).get()) {
-			if (sf.exists()) {
-				QueuedLog.error("previous guild setting file was broken, not overriding");
+			File bf = new File(KleinerNerd.dataFolder + filename + "_broken.json");
+			if (bf.exists()) {
+				QueuedLog.error("previous "+filename+" file was broken, not overriding");
 				return;
 			} else {
-				File bf = new File(KleinerNerd.dataFolder + filename + "_broken.json");
 				if (sf.renameTo(bf)) {
-					QueuedLog.warning("previous guild setting file was broken and renamed to " + bf.getAbsolutePath());
+					QueuedLog.warning("previous "+filename+" file was broken and renamed to " + bf.getAbsolutePath());
 				} else {
-					QueuedLog.error("failed to rename prevoius (broken) guild setting file, aborting save");
+					QueuedLog.error("failed to rename prevoius (broken) "+filename+" file, aborting save");
 					return;
 				}
 			}
@@ -70,14 +69,14 @@ public class StorageManager {
 		try {
 			new ObjectMapper().writeValue(sf, data);
 		} catch (JsonGenerationException e) {
-			QueuedLog.error("generation error while trying to save guild settings", e);
-			saveError(filename,"JSON generation error while writing guild settings");
+			QueuedLog.error("generation error while trying to save " + filename + "", e);
+			saveError(filename,"JSON generation error while writing " + filename + "");
 		} catch (JsonMappingException e) {
-			QueuedLog.error("mapping error while trying to save guild settings", e);
-			saveError(filename,"JSON mapping error while writing guild settings");
+			QueuedLog.error("mapping error while trying to save " + filename + "", e);
+			saveError(filename,"JSON mapping error while writing " + filename + "");
 		} catch (IOException e) {
-			QueuedLog.error("io error while trying to save guild settings", e);
-			saveError(filename,"io error while writing guild settings");
+			QueuedLog.error("io error while trying to save " + filename + "", e);
+			saveError(filename,"io error while writing " + filename + "");
 		}
 	}
 

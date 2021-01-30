@@ -1,17 +1,20 @@
 package com.theFox6.kleinerNerd.data;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.theFox6.kleinerNerd.storage.ChannelTypeDeserializer;
 import com.theFox6.kleinerNerd.storage.ChannelTypeSerializer;
 
 import net.dv8tion.jda.api.entities.ChannelType;
 
 public class MessageChannelLocation {
-	@JsonSerialize(using = ChannelTypeSerializer.class, as=String.class)
-	@JsonDeserialize(using = ChannelTypeDeserializer.class)
+	//warning: not json deserializable yet cuz creator constructor is missing
+	
+	//@JsonDeserialize(using = ChannelTypeDeserializer.class)
+	@JsonSerialize(using = ChannelTypeSerializer.class)
 	public final ChannelType type;
+	@JsonProperty
 	public final String channelId;
+	@JsonProperty
 	public final String guildId;
 	
 	public MessageChannelLocation(ChannelType channelType, String userId) {
