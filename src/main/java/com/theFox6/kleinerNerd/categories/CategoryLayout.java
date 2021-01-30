@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -61,7 +62,7 @@ public class CategoryLayout {
 	 * @param emotes 
 	 * @return whether the configuration is finished
 	 */
-	public boolean configMessage(Guild g, MessageChannel chan, String raw, List<Emote> emotes) {
+	public boolean configMessage(String raw, MessageChannel chan, Message msg) {
 		switch (configurationState) {
 		case CONFIGURED:
 			QueuedLog.warning("CategoryLayout received a configMessage despite already being configured");
@@ -77,6 +78,7 @@ public class CategoryLayout {
 			}
 			return false;
 		case SET_ROLE:
+			Guild g = msg.getGuild();
 			if (raw.equals("everyone")) {
 				g.getCategoryById(id).upsertPermissionOverride(g.getPublicRole()).grant(Permission.MESSAGE_READ).queue();
 				afterSetupRole(chan);
@@ -104,9 +106,10 @@ public class CategoryLayout {
 			}
 			return false;
 		case CHOOSE_ANNCOUNCE_CHANNEL:
+			Guild guild = msg.getGuild();
 			//can't remember my thoughts behind: FIX ME get channel first
 			if (raw.equalsIgnoreCase("keiner")) {
-				g.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
+				guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
 					ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
 					reaction = null;
 				},(e) -> {
@@ -122,20 +125,31 @@ public class CategoryLayout {
 				configurationState = ConfigState.CONFIGURED;
 				return true;
 			} else {
-				g.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
-					ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
-				},(e) -> {
-					QueuedLog.debug("old category announce not found");
-				});
+				//remove reaction role from old announce
+				if (announceChannel != null && announceId != null && reaction != null) {
+					guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
+						ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
+					},(e) -> {
+						QueuedLog.debug("old category announce not found");
+					});
+				}
+				
 				TextChannel target;
-				try {
-					target = g.getTextChannelById(raw);
-				} catch (NumberFormatException e) {
+				List<TextChannel> chans = msg.getMentionedChannels();
+				if (chans.isEmpty())
 					target = null;
-					QueuedLog.verbose("not an id");
+				else
+					target = chans.get(0);
+				if (target == null) {
+					try {
+						target = guild.getTextChannelById(raw);
+					} catch (NumberFormatException e) {
+						target = null;
+						QueuedLog.verbose("not an id");
+					}
 				}
 				if (target == null) {
-					List<TextChannel> list = g.getTextChannelsByName(raw, true);
+					List<TextChannel> list = guild.getTextChannelsByName(raw, true);
 					if (list.isEmpty()) {
 						chan.sendMessage("Konnte Kanal \"" + raw + "\" nicht finden.").queue();
 						return false;
@@ -165,7 +179,7 @@ public class CategoryLayout {
 			//should be unreachable
 		case CHOOSE_ANNOUNCE:
 			announceId = raw;
-			g.getTextChannelById(announceChannel).retrieveMessageById(raw).queue((t) -> {
+			msg.getGuild().getTextChannelById(announceChannel).retrieveMessageById(raw).queue((t) -> {
 				chan.sendMessage("Vorhandene Nachricht ausgewählt.\n"
 						+ "Bei einer Reaktion mit welchem emote soll ich die Rolle vergeben? (`keins` um keine Reaktionsrolle einzurichten)").queue();
 				configurationState = ConfigState.SET_RR_EMOTE;
@@ -176,7 +190,7 @@ public class CategoryLayout {
 			});
 			return false;
 		case ADD_ANNOUNCE:
-			g.getTextChannelById(announceChannel).sendMessage(raw).queue((m) -> {
+			msg.getGuild().getTextChannelById(announceChannel).sendMessage(raw).queue((m) -> {
 				announceId = m.getId();
 				chan.sendMessage("Nachricht gesendet.\n"
 						+ "Bei einer Reaktion mit welchem emote soll ich die Rolle vergeben? (`keins` um keine Reaktionsrolle einzurichten)").queue();
@@ -189,6 +203,7 @@ public class CategoryLayout {
 			});
 			return false;
 		case SET_RR_EMOTE:
+			List<Emote> emotes = msg.getEmotes();
 			if (raw.equalsIgnoreCase("keins")) {
 				configurationState = ConfigState.CONFIGURED;
 				chan.sendMessage("Einrichtung fertig").queue();
@@ -196,7 +211,7 @@ public class CategoryLayout {
 			} else if (!emotes.isEmpty()) {
 				Emote rrEmote = emotes.get(0);
 				reaction = rrEmote.getId();
-				g.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((a) -> {
+				msg.getGuild().getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((a) -> {
 					ReactionRoleStorage.getConfig(new MessageLocation(a)).addReactionRole(reaction, roleId);
 					a.addReaction(rrEmote).queue((s) -> {
 						chan.sendMessage("Reaktion hinzugefügt").queue();
@@ -213,7 +228,7 @@ public class CategoryLayout {
 				return true;
 			} else if (!raw.isEmpty()) {
 				reaction = raw;
-				g.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((a) -> {
+				msg.getGuild().getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((a) -> {
 					if (roleId == null)
 						QueuedLog.error("trying to set rr emote for null roleId");
 					ReactionRoleStorage.getConfig(new MessageLocation(a)).addReactionRole(reaction, roleId);

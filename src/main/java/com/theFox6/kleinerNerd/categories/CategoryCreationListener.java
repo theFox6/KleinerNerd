@@ -59,7 +59,7 @@ public class CategoryCreationListener {
 				l.startEditing(msg.getGuild(),chan);
 			}
 		} else if (startedConfigs.containsKey(chanId)) {
-			if (startedConfigs.get(chanId).configMessage(msg.getGuild(),chan,raw,msg.getEmotes()))
+			if (startedConfigs.get(chanId).configMessage(raw,chan,msg))
 				startedConfigs.remove(chanId);
 		}
 	}
