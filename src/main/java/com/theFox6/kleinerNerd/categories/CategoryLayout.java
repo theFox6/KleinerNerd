@@ -107,14 +107,18 @@ public class CategoryLayout {
 			return false;
 		case CHOOSE_ANNCOUNCE_CHANNEL:
 			Guild guild = msg.getGuild();
-			//can't remember my thoughts behind: FIX ME get channel first
+			//perhaps add a null check for get channel
 			if (raw.equalsIgnoreCase("keiner")) {
-				guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
-					ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
-					reaction = null;
-				},(e) -> {
-					QueuedLog.debug("old category announce not found");
-				});
+				//remove reaction role from old announce
+				if (announceChannel != null && announceId != null && reaction != null) {
+					guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
+						ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
+						reaction = null;
+					},(e) -> {
+						QueuedLog.debug("old category announce not found");
+					});
+				}
+				
 				announceChannel = null;
 				announceId = null;
 				configurationState = ConfigState.CONFIGURED;
@@ -289,6 +293,27 @@ public class CategoryLayout {
 				+ "`behalten` um die Konfiguration beizubehalten (falls die Kategorie neu ist ist keiner eingestellt)\n"
 				+ "Ein Kanalname oder eine KanalID um den Kanal zu verwenden.").queue();
 		configurationState = ConfigState.CHOOSE_ANNCOUNCE_CHANNEL;
+	}
+
+	public void delete(Guild guild) {
+		configurationState = ConfigState.UNCONFIGURED;
+		//perhaps ask whether to delete reaction role
+		//remove reaction role from old announce
+		if (announceChannel != null && announceId != null && reaction != null) {
+			guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
+				ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
+				reaction = null;
+			},(e) -> {
+				QueuedLog.debug("old category announce not found");
+			});
+		}
+		//perhaps ask whether to delete announce
+		announceChannel = null;
+		announceId = null;
+		reaction = null;
+		//perhaps ask whether to delete role
+		roleId = null;
+		guild.getCategoryById(id).delete().reason("deleted category via command").queue();
 	}
 
 }

@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class CategoryCreationListener {
+	private static final String rcCommand = KleinerNerd.prefix+"removecategory ";
 	private Collection<String> startedChannels = new ConcurrentLinkedQueue<>();
 	private Map<String, CategoryLayout> startedConfigs = new ConcurrentHashMap<>();
 
@@ -27,7 +28,14 @@ public class CategoryCreationListener {
 		TextChannel chan = event.getChannel();
 		String raw = msg.getContentRaw();
 		String chanId = chan.getId();
-		if (raw.equals(KleinerNerd.prefix+"addcategory")) {
+		if (raw.startsWith(rcCommand)) {
+			String category = raw.substring(rcCommand.length());
+			if (CategoryStorage.deleteByName(msg.getGuild(),category)) {
+				chan.sendMessage("Kategorie gelöscht.").queue();
+			} else {
+				chan.sendMessage("Kategorie konnte nicht gelöscht werden.").queue();
+			}
+		} else if (raw.equals(KleinerNerd.prefix+"addcategory")) {
 			if (!msg.getMember().hasPermission(Permission.ADMINISTRATOR))
 				return;
 			chan.sendMessage("Wie soll die Kategorie heißen?").queue();

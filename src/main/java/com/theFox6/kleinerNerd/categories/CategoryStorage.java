@@ -13,6 +13,7 @@ import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.storage.StorageManager;
 
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.entities.Guild;
 
 public class CategoryStorage {
 	private static ConcurrentHashMap<String,ConcurrentHashMap<String,CategoryLayout>> categories = null;
@@ -59,6 +60,16 @@ public class CategoryStorage {
 		CategoryLayout cl = new CategoryLayout();
 		inServer.put(name, cl);
 		return cl;
+	}
+
+	public static boolean deleteByName(Guild guild, String name) {
+		Map<String, CategoryLayout> inServer = categories.get(guild.getId());
+		if (inServer == null)
+			return false;
+		CategoryLayout cl = inServer.get(name);
+		cl.delete(guild);
+		inServer.remove(name);
+		return true;
 	}
 
 }
