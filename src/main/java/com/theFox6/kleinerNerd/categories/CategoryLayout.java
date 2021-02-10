@@ -295,7 +295,7 @@ public class CategoryLayout {
 		configurationState = ConfigState.CHOOSE_ANNCOUNCE_CHANNEL;
 	}
 
-	public void delete(Guild guild) {
+	public boolean delete(Guild guild) {
 		configurationState = ConfigState.UNCONFIGURED;
 		//perhaps ask whether to delete reaction role
 		//remove reaction role from old announce
@@ -313,7 +313,17 @@ public class CategoryLayout {
 		reaction = null;
 		//perhaps ask whether to delete role
 		roleId = null;
-		guild.getCategoryById(id).delete().reason("deleted category via command").queue();
+		if (id != null) {
+			Category category = guild.getCategoryById(id);
+			if (category == null) {
+				return false;
+			} else {
+				//perhaps check if this action succeeded 
+				category.delete().reason("deleted category via command").queue();
+				id = null;
+			}
+		}
+		return true;
 	}
 
 }

@@ -67,6 +67,8 @@ public class CategoryStorage {
 		if (inServer == null)
 			return false;
 		CategoryLayout cl = inServer.get(name);
+		if (cl == null)
+			return false;
 		cl.delete(guild);
 		inServer.remove(name);
 		return true;
