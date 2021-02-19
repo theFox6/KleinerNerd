@@ -41,7 +41,7 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	@Override
 	@SubscribeEvent
 	public void onResume(ResumedEvent event) {
-		QueuedLog.action("Bot resumed");
+		QueuedLog.debug("Bot resumed");
 	}
 	
 	@Override
@@ -53,7 +53,7 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	@Override
 	@SubscribeEvent
     public void onDisconnect(DisconnectEvent event) {
-		QueuedLog.warning("Bot disconnected");
+		QueuedLog.debug("Bot disconnected");
 	}
 	
 	@Override
@@ -65,14 +65,13 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	@Override
 	@SubscribeEvent
     public void onStatusChange(StatusChangeEvent event) {
-		QueuedLog.info(event.toString());
+		QueuedLog.verbose(event.toString());
     }
     
 	@Override
 	@SubscribeEvent
     public void onException(ExceptionEvent event) {
-    	if (!event.isLogged())
-    		QueuedLog.warning("Unlogged exception occured", event.getCause());
+    	QueuedLog.warning("exception occured", event.getCause());
     }
     
 	@Override

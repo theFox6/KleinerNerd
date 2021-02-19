@@ -36,72 +36,112 @@ public class SuicideListener {
 		PatternPart haben = new PatternJunction("haben",
 				new StringPattern("ich habe "),
 				new StringPattern("ich hab "));
-		kms = new PatternJunction("kms",
-				new PatternJunction("umbringen",
-						new PatternSequence(z, new StringPattern("mich umbringen"), od),
-						new PatternSequence(new StringPattern("ich bring mich um"),od),
-						new PatternSequence(new StringPattern("ich bringe mich um"),od)
-					),
-				new PatternSequence(z, new StringPattern("mich erhängen"),od),
-				new PatternSequence(z, new StringPattern("sterben"),od),
-				new PatternSequence(z, new StringPattern("mein leben beenden"), od),
-				new PatternSequence(z, new StringPattern("nicht mehr leben"),od),
-				new PatternSequence(z, new StringPattern("mich ertränken"),od),
-				new PatternSequence(z, new StringPattern("mich erschießen"),od),
-				new PatternSequence(z, new StringPattern("mich vergiften"),od),
-				new PatternSequence(z, new StringPattern("mich aufschlitzen"),od),
-				new PatternSequence(new StringPattern("ich "), new PatternJunction("schießen",
-						new StringPattern("schieße"),
-						new StringPattern("schieß"),
-						new StringPattern("schieß'")
-						), new StringPattern(" mir in den kopf")),
-				new PatternJunction("klippe",
-						new PatternSequence(z, new StringPattern("mich von ner klippe stürzen"),od),
-						new PatternSequence(z, new StringPattern("mich von einer klippe stürzen"),od)
-					),
-				new PatternJunction("bus",
-						new PatternSequence(z, new StringPattern("mich vom bus überfahren lassen"),od),
-						new PatternSequence(z, new StringPattern("mich von einem bus überfahren lassen"),od)
-					),
-				new PatternJunction("pulsadern",
-						new PatternSequence(z, new StringPattern("meine pulsadern aufschlitzen"),od),
-						new PatternSequence(z, new StringPattern("mir die pulsadern aufschlitzen"),od),
-						new PatternSequence(z, new StringPattern("mir meine pulsadern aufschlitzen"),od)
-					),
-				new PatternJunction("lebenAbgeschlossen",
-						new PatternSequence(haben,new StringPattern("mein leben abgeschlossen"),od),
-						new PatternSequence(haben,new StringPattern("mit meinem leben abgeschlossen"),od),
-						new PatternSequence(haben,new StringPattern("abgeschlossen mit meinem leben"),od)
-					),
-				new PatternSequence(new StringPattern("i "), new OptionalPattern(new StringPattern("just ")),new StringPattern("want to die"),od),
-				new PatternJunction("suicide",
-						new PatternSequence(new StringPattern("im gonna suicide"),od),
-						new PatternSequence(new StringPattern("i'm gonna suicide"),od)
-					),
-				new PatternJunction("toasterbad",
-						new PatternSequence(new StringPattern("ich begehe toasterbad"),od),
-						new PatternSequence(new StringPattern("ich nehme ein toasterbad"),od),
-						new PatternSequence(new StringPattern("ich nehme ein bad mit "),
-								new PatternJunction("one", new StringPattern("meinem"),new StringPattern("einem")),
-								new StringPattern("toaster"),od)
+		PatternPart iamgoingto = new PatternJunction("iamgoingto",
+				new StringPattern("ima "),
+				new PatternSequence(
+						new PatternJunction("im",new StringPattern("i am "), new StringPattern("i'm "), new StringPattern("im ")),
+						new PatternJunction("gonna", new StringPattern("gonna "), new StringPattern("going to "))
 					)
 			);
-		//just a smoke test
-		if (!kms.matches("ich hab mit meinem leben abgeschlossen")) {
-			QueuedLog.error("kms does not match");
-		}
+		kms = new PatternJunction("kms",
+				new PatternSequence(z, new PatternJunction("lebenbeenden",
+						new StringPattern("mein leben beenden"),
+						new StringPattern("meine pulsadern aufschlitzen"),
+						new StringPattern("mir die pulsadern aufschlitzen"),
+						new StringPattern("mir meine pulsadern aufschlitzen"),
+						new StringPattern("nicht mehr leben"),
+						new StringPattern("sterben"),
+						new StringPattern("von einer klippe springen"),
+						new StringPattern("von ner klippe springen"),
+						new PatternSequence(new StringPattern("mich "), new PatternJunction("totmachen",
+								new StringPattern("aufschlitzen"),
+								new StringPattern("erhängen"),
+								new StringPattern("ertränken"),
+								new StringPattern("erschießen"),
+								new StringPattern("tot machen"),
+								new StringPattern("töten"),
+								new StringPattern("umbringen"),
+								new StringPattern("verbuddeln"),
+								new StringPattern("vergiften"),
+								new StringPattern("vom bus überfahren lassen"),
+								new StringPattern("von einem bus überfahren lassen"),
+								new StringPattern("von einer klippe stürzen"),
+								new StringPattern("von ner klippe stürzen")
+						))
+					), od),
+				new PatternSequence(new StringPattern("ich "), new PatternJunction("tätigkeit",
+						new StringPattern("bring mich um"),
+						new StringPattern("bringe mich um"),
+						new StringPattern("springe von einer klippe"),
+						new StringPattern("spring von einer klippe"),
+						new StringPattern("vergifte mich"),
+						new StringPattern("begehe toasterbad"),
+						new StringPattern("nehme ein toasterbad"),
+						new PatternSequence(new StringPattern("nehme ein bad mit "),
+								new PatternJunction("one", new StringPattern("meinem "),new StringPattern("einem ")),
+								new StringPattern("toaster")),
+						new PatternSequence(new PatternJunction("schießen",
+								new StringPattern("schieße "),
+								new StringPattern("schieß "),
+								new StringPattern("schieß' ")
+						), new StringPattern("mir in den kopf"))
+					),od),
+				new PatternSequence(haben,new PatternJunction("lebenAbgeschlossen",
+						new StringPattern("mein leben abgeschlossen"),
+						new StringPattern("mit meinem leben abgeschlossen"),
+						new StringPattern("abgeschlossen mit meinem leben")
+					),od),
+				new PatternSequence(iamgoingto,
+						new OptionalPattern(new StringPattern("commit ")),
+						new PatternJunction("die",
+								new StringPattern("die"),
+								new StringPattern("kill myself"),
+								new StringPattern("suicide"),
+								new StringPattern("the not living"),
+								new StringPattern("not living")
+							),od
+					),
+				new PatternSequence(new StringPattern("i "),
+						new OptionalPattern(new StringPattern("just ")),
+						new PatternJunction("wanna",
+								new StringPattern("want to "),
+								new StringPattern("wanna ")
+							),
+						new StringPattern("die"),od
+					)
+			);
+		kmsSmokeTests();
 		
 		howMany = new PatternSequence(
-				new StringPattern("wie oft habe ich mich "),
-				new PatternJunction("Methode",
-						new StringPattern("schon umgebracht"),
-						new StringPattern("umgebracht"),
-						new StringPattern("schon erhängt"),
-						new StringPattern("erhängt")
-						),
-				new OptionalPattern(new StringPattern("?")));
+				new StringPattern("wie oft "),
+				new PatternJunction("tot",
+						new PatternSequence(
+								new StringPattern("habe ich mich "),
+								new OptionalPattern(new StringPattern("schon ")),
+								new PatternJunction("Methode",
+										new StringPattern("umgebracht"),
+										new StringPattern("getötet")
+										)
+							),
+						new PatternSequence(
+								new StringPattern("bin ich "),
+								new OptionalPattern(new StringPattern("schon ")),
+								new StringPattern("gestorben")
+							)
+					),
+				new OptionalPattern(new StringPattern("?"))
+			);
 	}
 	
+	private void kmsSmokeTests() {
+		if (!kms.matches("ich hab mit meinem leben abgeschlossen")) {
+			QueuedLog.error("abgeschlossen kms does not match");
+		}
+		if (!kms.matches("i am going to commit suicide.")) {
+			QueuedLog.error("commit suicide kms does not match");
+		}
+	}
+
 	@SubscribeEvent
 	public void onMessage(MessageReceivedEvent event) {
 		Message msg = event.getMessage();

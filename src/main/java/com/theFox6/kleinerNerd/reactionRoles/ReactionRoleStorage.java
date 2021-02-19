@@ -50,6 +50,10 @@ public class ReactionRoleStorage {
 	}
 	
 	public static ReactionRoleMap getConfig(MessageLocation msgLoc) {
+		return rrConfig.get(msgLoc);
+	}
+	
+	public static ReactionRoleMap getOrCreateConfig(MessageLocation msgLoc) {
 		ReactionRoleMap rrm = rrConfig.get(msgLoc);
 		if (rrm == null) {
 			rrm = new ReactionRoleMap();

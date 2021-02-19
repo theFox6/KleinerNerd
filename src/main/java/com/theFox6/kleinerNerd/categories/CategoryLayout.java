@@ -112,7 +112,8 @@ public class CategoryLayout {
 				//remove reaction role from old announce
 				if (announceChannel != null && announceId != null && reaction != null) {
 					guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
-						ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
+						//actually get would be more appropriate
+						ReactionRoleStorage.getOrCreateConfig(new MessageLocation(announce)).removeReactionRole(reaction);
 						reaction = null;
 					},(e) -> {
 						QueuedLog.debug("old category announce not found");
@@ -132,7 +133,8 @@ public class CategoryLayout {
 				//remove reaction role from old announce
 				if (announceChannel != null && announceId != null && reaction != null) {
 					guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
-						ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
+						//actually get could be more appropriate
+						ReactionRoleStorage.getOrCreateConfig(new MessageLocation(announce)).removeReactionRole(reaction);
 					},(e) -> {
 						QueuedLog.debug("old category announce not found");
 					});
@@ -216,7 +218,7 @@ public class CategoryLayout {
 				Emote rrEmote = emotes.get(0);
 				reaction = rrEmote.getId();
 				msg.getGuild().getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((a) -> {
-					ReactionRoleStorage.getConfig(new MessageLocation(a)).addReactionRole(reaction, roleId);
+					ReactionRoleStorage.getOrCreateConfig(new MessageLocation(a)).addReactionRole(reaction, roleId);
 					a.addReaction(rrEmote).queue((s) -> {
 						chan.sendMessage("Reaktion hinzugefügt").queue();
 					}, (e) -> {
@@ -235,7 +237,7 @@ public class CategoryLayout {
 				msg.getGuild().getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((a) -> {
 					if (roleId == null)
 						QueuedLog.error("trying to set rr emote for null roleId");
-					ReactionRoleStorage.getConfig(new MessageLocation(a)).addReactionRole(reaction, roleId);
+					ReactionRoleStorage.getOrCreateConfig(new MessageLocation(a)).addReactionRole(reaction, roleId);
 					a.addReaction(raw).queue((s) -> {
 						chan.sendMessage("Reaktion hinzugefügt").queue();
 					}, (e) -> {
@@ -301,7 +303,8 @@ public class CategoryLayout {
 		//remove reaction role from old announce
 		if (announceChannel != null && announceId != null && reaction != null) {
 			guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
-				ReactionRoleStorage.getConfig(new MessageLocation(announce)).removeReactionRole(reaction);
+				//actually get would be more appropriate
+				ReactionRoleStorage.getOrCreateConfig(new MessageLocation(announce)).removeReactionRole(reaction);
 				reaction = null;
 			},(e) -> {
 				QueuedLog.debug("old category announce not found");
