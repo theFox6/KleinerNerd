@@ -1,0 +1,86 @@
+$od; = (".")
+$oe; = ({stop: ".", "!"})
+$z; = {ziel: "ich gehe ", "ich geh ", "ich will ", "ich möchte "}
+$haben; = {haben: "ich habe ", "ich hab "}
+$vorn; = {davor: "vor den ", "vorn ", "vor n ", "vor einen", "vor ein "}
+$fahrzeug; = {fahrzeug: "bus", "zug", "auto", "lkw", "lastwagen", "lastkraftwagen", "traktor"}
+$iamgoingto; = {iamgoingto: "ima ",  "i want to ", "i wanna ", "i will ", "i'll ", [{im: "i am ", "i'm ", "im "}, {gonna: "gonna ", "going to "}]}
+
+# I don't like these patterns since they are ambigious
+$muffinSong; = {muffinsong:
+	"who wants a muffin?",
+	"have you had a muffin today?"
+	["it's muffin time", $oe;]
+}
+
+$kms; = {kms:
+	[$z;,
+		{lebenbeenden:
+			"mein leben beenden",
+			"meine pulsadern aufschlitzen",
+			"mir die pulsadern aufschlitzen",
+			"mir meine pulsadern aufschlitzen",
+			"nicht mehr leben",
+			"sterben",
+			"von einer klippe springen",
+			"von ner klippe springen",
+			[$vorn;, $fahrzeug;, " springen"]
+			[new StringPattern("mich "), {"totmachen":
+				"anzünden",
+				"aufschlitzen",
+				"beenden",
+				"erhängen",
+				"ertränken",
+				"erschießen",
+				"in die steckdose fassen",
+				"tot machen",
+				"töten",
+				"umbringen",
+				#"verbuddeln",
+				#"vergraben",
+				"vergiften",
+				"vom bus überfahren lassen",
+				"von einem bus überfahren lassen",
+				"von einer klippe stürzen",
+				"von ner klippe stürzen",
+				[$vorn;, $fahrzeug;, {werfen: " werfen", " schmeißen"}]
+			}]
+		}, $od
+	],
+	["ich ", {tätigkeit:
+		"bring mich um",
+		"bringe mich um",
+		[{springen: "springe ", "spring ", "werf mich ", "werfe mich"},{indentod:
+			"in den tod",
+			"von einer klippe",
+			[$vorn;, $fahrzeug;]
+		}]
+		"vergifte mich",
+		"begehe toasterbad",
+		"nehme ein toasterbad",
+		["nehme ein bad mit ", {one: "meinem ", "einem "}, "toaster"],
+		[{schießen: "schieße ", "schieß ", "schieß' "}, "mir in den kopf"]
+	},$od;],
+	[$haben;,{lebenAbgeschlossen:
+		"mein leben abgeschlossen",
+		"mit meinem leben abgeschlossen",
+		"abgeschlossen mit meinem leben"
+	},$od;],
+	[$iamgoingto;, ("fucking "), ("commit "), ("fucking "), {die:
+		"die",
+		"kill myself",
+		"kms",
+		"suicide",
+		"the not living",
+		"not living",
+		"seppuku"
+	},$od;],
+	["i ", ("just "), {wanna: "want to ", "wanna "}, "die"),$od;],
+	["somebody kill me",$oe;],
+	$muffinSong;
+}
+
+$howMany; = ["wie oft ", {tot:
+	["habe ich mich ", ("schon "), {Methode: "umgebracht", "getötet"}],
+	#["bin ich ", ("schon "), "gestorben"]
+}, ("?")]

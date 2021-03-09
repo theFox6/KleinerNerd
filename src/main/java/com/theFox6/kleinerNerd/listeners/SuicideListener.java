@@ -1,16 +1,19 @@
 package com.theFox6.kleinerNerd.listeners;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.theFox6.kleinerNerd.KleinerNerd;
-import com.theFox6.kleinerNerd.patternMatching.OptionalPattern;
-import com.theFox6.kleinerNerd.patternMatching.PatternJunction;
 import com.theFox6.kleinerNerd.patternMatching.PatternPart;
-import com.theFox6.kleinerNerd.patternMatching.PatternSequence;
-import com.theFox6.kleinerNerd.patternMatching.StringPattern;
+import com.theFox6.kleinerNerd.patternMatching.PatternWrapper;
 import com.theFox6.kleinerNerd.storage.CounterStorage;
 
 import foxLog.queued.QueuedLog;
@@ -25,8 +28,30 @@ public class SuicideListener {
 	private final PatternPart kms;
 	private final PatternPart howMany;
 	
+	public SuicideListener() throws IOException {
+		URL patternFile = KleinerNerd.class.getClassLoader().getResource("suicidePatterns");
+		if (patternFile == null) {
+			throw new FileNotFoundException("sucicidePatterns file not found in resources");
+		}
+		File file = new File(patternFile.getFile());
+		if (!file.exists()) {
+			throw new FileNotFoundException("sucicidePatterns file found but does not exist");
+		}
+		Map<String, PatternPart> loaded;
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+			loaded = PatternWrapper.load(br);
+		}
+		kms = loaded.get("kms");
+		if (kms == null)
+			QueuedLog.error("missing kms in sucicidePatterns file");
+		howMany = loaded.get("howMany");
+		if (howMany == null)
+			QueuedLog.error("missing kms in sucicidePatterns file");
+		kmsSmokeTests();
+	}
+	
+	/*
 	public SuicideListener() {
-		//file format: $laterne = [{"ich gehe ","ich geh "},"mit meiner Laterne",(".")]
 		OptionalPattern od = new OptionalPattern(new StringPattern("."));
 		PatternPart z = new PatternJunction("ziel",
 				new StringPattern("ich gehe "),
@@ -38,11 +63,28 @@ public class SuicideListener {
 				new StringPattern("ich hab "));
 		PatternPart iamgoingto = new PatternJunction("iamgoingto",
 				new StringPattern("ima "),
+				new StringPattern("i want to"),
+				new StringPattern("i wanna"),
 				new PatternSequence(
 						new PatternJunction("im",new StringPattern("i am "), new StringPattern("i'm "), new StringPattern("im ")),
 						new PatternJunction("gonna", new StringPattern("gonna "), new StringPattern("going to "))
 					)
 			);
+		PatternPart muffinSong = new PatternJunction("miffinSong",
+				new StringPattern("who wants a muffin?"),
+				new StringPattern("have you had a muffin today?"),
+				new PatternSequence(
+						new StringPattern("somebody kill me"),
+						new StringPattern("it's muffin time"),
+						new OptionalPattern(new PatternJunction("end",new StringPattern("."),new StringPattern("!")))
+					)
+			);
+		//TODO:
+		// i will commit not living
+		// ich gehe in die Steckdose fassen 
+		// Ich gehe mich anzünden
+		// ich möchte mich beenden
+		// Ich spring vorn Zug
 		kms = new PatternJunction("kms",
 				new PatternSequence(z, new PatternJunction("lebenbeenden",
 						new StringPattern("mein leben beenden"),
@@ -55,13 +97,16 @@ public class SuicideListener {
 						new StringPattern("von ner klippe springen"),
 						new PatternSequence(new StringPattern("mich "), new PatternJunction("totmachen",
 								new StringPattern("aufschlitzen"),
+								new StringPattern("aufschlitzen"),
+								new StringPattern("beenden"),
 								new StringPattern("erhängen"),
 								new StringPattern("ertränken"),
 								new StringPattern("erschießen"),
 								new StringPattern("tot machen"),
 								new StringPattern("töten"),
 								new StringPattern("umbringen"),
-								new StringPattern("verbuddeln"),
+								//new StringPattern("verbuddeln"),
+								//new StringPattern("vergraben"),
 								new StringPattern("vergiften"),
 								new StringPattern("vom bus überfahren lassen"),
 								new StringPattern("von einem bus überfahren lassen"),
@@ -92,13 +137,16 @@ public class SuicideListener {
 						new StringPattern("abgeschlossen mit meinem leben")
 					),od),
 				new PatternSequence(iamgoingto,
+						new OptionalPattern(new StringPattern("fucking")),
 						new OptionalPattern(new StringPattern("commit ")),
 						new PatternJunction("die",
 								new StringPattern("die"),
 								new StringPattern("kill myself"),
+								new StringPattern("kms"),
 								new StringPattern("suicide"),
 								new StringPattern("the not living"),
-								new StringPattern("not living")
+								new StringPattern("not living"),
+								new StringPattern("seppuku")
 							),od
 					),
 				new PatternSequence(new StringPattern("i "),
@@ -108,7 +156,8 @@ public class SuicideListener {
 								new StringPattern("wanna ")
 							),
 						new StringPattern("die"),od
-					)
+					),
+				muffinSong
 			);
 		kmsSmokeTests();
 		
@@ -132,6 +181,7 @@ public class SuicideListener {
 				new OptionalPattern(new StringPattern("?"))
 			);
 	}
+	*/
 	
 	private void kmsSmokeTests() {
 		if (!kms.matches("ich hab mit meinem leben abgeschlossen")) {

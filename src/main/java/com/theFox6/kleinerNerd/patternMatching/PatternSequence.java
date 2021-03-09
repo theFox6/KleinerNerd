@@ -1,12 +1,17 @@
 package com.theFox6.kleinerNerd.patternMatching;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.IntStream;
 
 public class PatternSequence implements PatternPart {
 	//private String name;
-	private List<PatternPart> parts;
+	private Collection<PatternPart> parts;
+	
+	public PatternSequence() {
+		this.parts = new ConcurrentLinkedQueue<>();
+	}
 	
 	public PatternSequence(/*String name,*/ PatternPart... parts) {
 		//this.name = name;

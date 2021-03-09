@@ -5,6 +5,10 @@ import java.util.stream.IntStream;
 public class OptionalPattern implements PatternPart {
 	private PatternPart optionalPart;
 
+	public OptionalPattern() {
+		this(null);
+	}
+
 	public OptionalPattern(PatternPart optional) {
 		optionalPart = optional;
 	}
@@ -21,7 +25,6 @@ public class OptionalPattern implements PatternPart {
 
 	@Override
 	public String stringRepresentation() {
-		//TODO
-		return "<optional>";
+		return "("+optionalPart.stringRepresentation()+")";
 	}
 }
