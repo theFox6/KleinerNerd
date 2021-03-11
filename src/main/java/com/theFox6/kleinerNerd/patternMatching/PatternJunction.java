@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.IntStream;
 
-public class PatternJunction implements PatternPart {
+public class PatternJunction implements PatternPart, NestingPattern {
 	private String name;
 	private Collection<PatternPart> possibilities;
 	
@@ -22,7 +22,7 @@ public class PatternJunction implements PatternPart {
 	/**
 	 * creates a new PatternJunction with the given possibilities
 	 * this makes the possibility list have a fixed size
-	 * since it is using {@link java.util.Arrays.asList} 
+	 * since it is using {@link java.util.Arrays.asList}
 	 * 
 	 * @param name the name of the PatternJunction (will be displayed in the stringRepresentation)
 	 * @param possibilities the PatternParts of which any has to match
@@ -46,5 +46,14 @@ public class PatternJunction implements PatternPart {
 	
 	public String stringRepresentation() {
 		return "$" + name;
+	}
+
+	/**
+	 * add another option to the junction
+	 * @param possibility the pattern part that should be one of the options in this place
+	 */
+	@Override
+	public void accept(PatternPart possibility) {
+		possibilities.add(possibility);
 	}
 }

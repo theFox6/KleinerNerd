@@ -25,7 +25,7 @@ $kms; = {kms:
 			"von einer klippe springen",
 			"von ner klippe springen",
 			[$vorn;, $fahrzeug;, " springen"]
-			[new StringPattern("mich "), {"totmachen":
+			["mich ", {"totmachen":
 				"anzünden",
 				"aufschlitzen",
 				"beenden",
@@ -45,7 +45,7 @@ $kms; = {kms:
 				"von ner klippe stürzen",
 				[$vorn;, $fahrzeug;, {werfen: " werfen", " schmeißen"}]
 			}]
-		}, $od
+		}, $od;
 	],
 	["ich ", {tätigkeit:
 		"bring mich um",
@@ -75,7 +75,7 @@ $kms; = {kms:
 		"not living",
 		"seppuku"
 	},$od;],
-	["i ", ("just "), {wanna: "want to ", "wanna "}, "die"),$od;],
+	["i ", ("just "), {wanna: "want to ", "wanna "}, {"kill myself","die"}, $od;],
 	["somebody kill me",$oe;],
 	$muffinSong;
 }

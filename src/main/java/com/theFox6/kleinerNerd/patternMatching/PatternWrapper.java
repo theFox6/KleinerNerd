@@ -1,22 +1,21 @@
 package com.theFox6.kleinerNerd.patternMatching;
 
+import foxLog.queued.QueuedLog;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import foxLog.queued.QueuedLog;
-
-public class PatternWrapper implements PatternPart, Supplier<PatternPart>, Consumer<PatternPart> {
+public class PatternWrapper implements PatternPart, Supplier<PatternPart>, NestingPattern {
 	/**
 	 * the wrapped PatternPart
 	 */
-	private PatternPart contents = null;
+	private PatternPart contents;
 	
 	/**
 	 * creates an empty PatternWrapper
@@ -66,110 +65,115 @@ public class PatternWrapper implements PatternPart, Supplier<PatternPart>, Consu
 	public String stringRepresentation() {
 		return "w" + contents.stringRepresentation();
 	}
-	
-	//FIXME: multiline support
-	
+
 	public static ConcurrentHashMap<String,PatternPart> load(BufferedReader r) throws IOException {
-		ConcurrentHashMap<String,PatternPart> parts = new ConcurrentHashMap<>();
 		QueuedLog.verbose("loading pattern");
-		//file format: $laterne; = ["Ich ",{gehen: "gehe ","geh "},"mit meiner Laterne",(".")]
-		String l;
-		while ((l = r.readLine()) != null) {
-			if (l.startsWith("#")) {
-				QueuedLog.verbose(l);
-			} else if (l.startsWith("$")) {
-				int nameEnd = l.indexOf(";");
-				if (nameEnd == -1) {
-					QueuedLog.error("PatternPart name doesn't end with ;");
-					continue;
-				}
-				String name = l.substring(1,nameEnd);
-				int eq = l.indexOf("=");
-				if (eq == -1) {
-					QueuedLog.error("PatternPart forward declaration not supported");
-					continue;
-				}
-			 	if (!l.substring(nameEnd + 1, eq).chars().allMatch((c) -> Character.isWhitespace(c)))
-					QueuedLog.error("Unparsed characters between PatternPart name and equals sign.");
-				String content = l.substring(eq+1);
-				parts.put(name, parsePattern(content,parts));
-			}
-		}
-		return parts;
-	}
-	
-	public static PatternPart parsePattern(String pattern, ConcurrentHashMap<String, PatternPart> entities) {
+		ConcurrentHashMap<String,PatternPart> parts = new ConcurrentHashMap<>();
 		Deque<PatternPart> nesting = new LinkedList<>();
 		nesting.add(new PatternWrapper());
-		
-		for (int i = 0; i < pattern.length(); i++) {
-			char c = pattern.charAt(i);
-			switch (c) {
-			case '#': //comment start
-				//i = l.length();
-				break;
-			case '{': //junction start
-				int nameEnd = pattern.substring(i).indexOf(":");
-				int junctionEnd = pattern.substring(i).indexOf("}");
-				PatternPart j;
-				if (nameEnd < junctionEnd) {
-					j = new PatternJunction(pattern.substring(i + 1, nameEnd));
-					i = nameEnd;
-				} else
-					j = new PatternJunction("j"+i);
-				nest(nesting,j);
-				break;
-			case '}': //junction end
-				//perhaps log this better
-				if (!(nesting.removeLast() instanceof PatternJunction))
-					QueuedLog.error("unexpected junction end");
-				break;
-			case '[': //sequence start
-				nest(nesting,new PatternSequence());
-				break;
-			case ']': //sequence end
-				//perhaps log this better
-				if (!(nesting.removeLast() instanceof PatternSequence))
-					QueuedLog.error("unexpected sequence end");
-				break;
-			case '(': //optional start
-				nest(nesting,new OptionalPattern());
-				break;
-			case ')': //optional end
-				//perhaps log this better
-				if (!(nesting.removeLast() instanceof OptionalPattern))
-					QueuedLog.error("unexpected optional end");
-				break;
-			case ',': // delimiter
-				break;
-			case '"': //string
-				int strStart = i + 1;
-				int strLen = pattern.substring(strStart).indexOf('"');
-				if (strLen == -1) {
-					QueuedLog.error("unterminated string");
-					return null;
-				}				
-				i = strStart + strLen;
-				nest(nesting, new StringPattern(pattern.substring(strStart, i)));
-				break;
-			case '$': //entity
-				int nameStart = i + 1;
-				int nameLen = pattern.substring(nameStart).indexOf(c);
-				if (nameLen == -1) {
-					QueuedLog.error("entity name without ;");
-					return null;
+		String neName = null;
+		String l;
+		int lineNumber = 0;
+		while ((l = r.readLine()) != null) {
+			lineNumber++;
+			//QueuedLog.debug("parsing line: " + l);
+			for (int i = 0; i < l.length(); i++) {
+				switch (l.charAt(i)) {
+				case '#': //comment start
+					QueuedLog.verbose("comment: " + l.substring(i));
+					i = l.length();
+					break;
+				case '{': //junction start
+					int nameEnd = l.substring(i).indexOf(":");
+					int junctionEnd = l.substring(i).indexOf("}");
+					PatternPart j;
+					if (nameEnd != -1 && (junctionEnd == -1 || nameEnd < junctionEnd)) {
+						j = new PatternJunction(l.substring(i + 1, i + nameEnd));
+						i += nameEnd;
+					} else
+						j = new PatternJunction("j"+lineNumber+"_"+i);
+					nest(nesting,j);
+					break;
+				case '}': //junction end
+					//perhaps log this better
+					if (!(nesting.removeLast() instanceof PatternJunction))
+						QueuedLog.error("unexpected junction end in line " + lineNumber);
+					break;
+				case '[': //sequence start
+					nest(nesting,new PatternSequence());
+					break;
+				case ']': //sequence end
+					//perhaps log this better
+					if (!(nesting.removeLast() instanceof PatternSequence))
+						QueuedLog.error("unexpected sequence end in line " + lineNumber);
+					break;
+				case '(': //optional start
+					nest(nesting, new OptionalPattern());
+					break;
+				case ')': //optional end
+					//perhaps log this better
+					if (!(nesting.removeLast() instanceof OptionalPattern))
+						QueuedLog.error("unexpected optional end in line " + lineNumber);
+					break;
+				case ',': // delimiter
+					break;
+				case '"': //string
+					int strStart = i + 1;
+					int strLen = l.substring(strStart).indexOf('"');
+					if (strLen == -1) {
+						QueuedLog.error("unterminated string in line " + lineNumber);
+						return null;
+					}
+					i = strStart + strLen;
+					nest(nesting, new StringPattern(l.substring(strStart, i)));
+					nesting.removeLast();
+					break;
+				case '$': //entity
+					int nameStart = i + 1;
+					int nameLen = l.substring(nameStart).indexOf(';');
+					if (nameLen == -1) {
+						QueuedLog.error("entity name without ; in line " + lineNumber);
+						i = l.length();
+						break;
+					}
+					i = nameStart + nameLen;
+					if (neName == null) {
+						neName = l.substring(nameStart,i);
+						int eq = l.indexOf("=");
+						if (eq == -1) {
+							QueuedLog.error("PatternPart forward declaration not supported in line " + lineNumber);
+							i = l.length();
+							break;
+						}
+						if (!l.substring(i + 1, eq).chars().allMatch(Character::isWhitespace))
+							QueuedLog.error("Unparsed characters between PatternPart name and equals sign in line " + lineNumber);
+						i = eq;
+					} else {
+						PatternPart e = parts.get(l.substring(nameStart, i));
+						if (e == null)
+							QueuedLog.error("undeclared entity " + l.substring(nameStart - 1, i + 1) + " in line "+ lineNumber);
+						nest(nesting,e);
+						nesting.removeLast();
+					}
+					break;
+				default:
+					char c = l.charAt(i);
+					if (!Character.isWhitespace(c)) {
+						QueuedLog.error("unknown character in pattern definition in line " + lineNumber +": " + c);
+						return null;
+					}
 				}
-				i = nameStart + nameLen;
-				PatternPart e = entities.get(pattern.substring(nameStart, i));
-				if (e == null)
-					QueuedLog.error("undeclared entity " + pattern.substring(nameStart - 1, i + 1));
-				nest(nesting,e);
-				nesting.removeLast();
-				break;
-			default:
-				if (!Character.isWhitespace(c)) {
-					QueuedLog.error("unknown character in pattern definition: " + c);
-					return null;
+				if (nesting.size() == 1) {
+					PatternPart w = nesting.getLast();
+					if (w instanceof PatternWrapper) {
+						if (neName != null && ((PatternWrapper) w).get() != null) {
+							parts.put(neName,nesting.removeFirst());
+							nesting.addFirst(new PatternWrapper());
+							neName = null;
+						}
+					} else {
+						QueuedLog.error("outermost element was not a PatternWrapper");
+					}
 				}
 			}
 		}
@@ -179,15 +183,22 @@ public class PatternWrapper implements PatternPart, Supplier<PatternPart>, Consu
 			QueuedLog.error("parsed pattern: " + nesting.getFirst().stringRepresentation());
 		} else if (nesting.size() < 1) {
 			QueuedLog.error("PatternWrapper was removed while parsing pattern");
-			return null;
+			return parts;
 		}
-		PatternPart ret = nesting.getFirst();
-		if (ret instanceof PatternWrapper)
-			return ((PatternWrapper) nesting.getFirst()).get();
-		else {
-			QueuedLog.error("first parsing element was not a PatternWrapper");
-			return ret;
+		PatternPart w = nesting.removeFirst();
+		if (w instanceof PatternWrapper) {
+			PatternPart e = ((PatternWrapper) w).get();
+			if (e != null)
+				if (neName == null)
+					QueuedLog.error("parsed pattern without name");
+				else
+					parts.put(neName,e);
+		} else {
+			QueuedLog.error("outermost element was not a PatternWrapper");
+			if (neName != null)
+				parts.put(neName,w);
 		}
+		return parts;
 	}
 	
 	private static void nest(Deque<PatternPart> nesting, PatternPart n) {
