@@ -1,13 +1,14 @@
 # Gradle project-specific cache directory
-.gradle
+.gradle/
 
 # Gradle build output directory
-build
+build/
+bin/
 
 # log outputs
-/log.txt
+log.txt
 # data storage
-/.KleinerNerd/
+.KleinerNerd/
 
 # secrets
-/secrets/
+secrets/

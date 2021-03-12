@@ -52,6 +52,16 @@ public class SimpleCommandListener {
 				QueuedLog.error("Yo Fox, your log implementation is faulty.", e);
 			}
     		chan.sendFile(KleinerNerd.logFile).queue();
+    	} else if (raw.startsWith("thumbpoll ")) {
+    		try {
+    			//TODO: check whether both succeeded
+    			chan.addReactionById(raw.substring(10), "U+1F44D").queue();
+    			chan.addReactionById(raw.substring(10), "U+1F44E").queue();
+    			msg.delete().reason("thumbpoll command auto deletion").queue();
+			} catch (NumberFormatException e) {
+				QueuedLog.verbose("not an id");
+				chan.sendMessage("Keine valide Nachrichten ID");
+			}
     	}
     }
 }
