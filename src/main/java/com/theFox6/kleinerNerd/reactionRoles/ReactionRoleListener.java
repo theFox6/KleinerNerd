@@ -38,9 +38,10 @@ public class ReactionRoleListener {
 		ReactionRoleMap config = ReactionRoleStorage.getConfig(loc);
 		if (config == null)
 			return null;
-		String roleId = config.getRoleIdForReaction(event.getReactionEmote().getAsReactionCode());
+		String reactionCode = event.getReactionEmote().getAsReactionCode();
+		String roleId = config.getRoleIdForReaction(reactionCode);
 		if (roleId == null) {
-			QueuedLog.debug(event.getUserId() + " reacted to a reaction role message with a different Emote");
+			QueuedLog.debug(event.getUserId() + " reacted to a reaction role message with a different Emote " + reactionCode);
 			return null;
 		}
 		Guild guild = event.getGuild();

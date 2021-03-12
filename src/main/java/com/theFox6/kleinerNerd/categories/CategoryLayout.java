@@ -57,9 +57,9 @@ public class CategoryLayout {
 	 * handles messages after the first configuration stage
 	 * 
 	 * careful: this may submit queues than change the state 
-	 * @param raw the message the user sent
-	 * @param chan 
-	 * @param emotes 
+	 * @param raw the contents of the message the user sent
+	 * @param chan the channel the message was sent in
+	 * @param msg the message the user sent
 	 * @return whether the configuration is finished
 	 */
 	public boolean configMessage(String raw, MessageChannel chan, Message msg) {
@@ -150,7 +150,6 @@ public class CategoryLayout {
 					try {
 						target = guild.getTextChannelById(raw);
 					} catch (NumberFormatException e) {
-						target = null;
 						QueuedLog.verbose("not an id");
 					}
 				}
@@ -216,7 +215,8 @@ public class CategoryLayout {
 				return true;
 			} else if (!emotes.isEmpty()) {
 				Emote rrEmote = emotes.get(0);
-				reaction = rrEmote.getId();
+				//this is the reaction code
+				reaction = rrEmote.getName() + ":" + rrEmote.getId();
 				msg.getGuild().getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((a) -> {
 					ReactionRoleStorage.getOrCreateConfig(new MessageLocation(a)).addReactionRole(reaction, roleId);
 					a.addReaction(rrEmote).queue((s) -> {
