@@ -2,8 +2,12 @@ package com.theFox6.kleinerNerd.patternMatching;
 
 import java.util.stream.IntStream;
 
-public class OptionalPattern implements PatternPart {
+public class OptionalPattern implements PatternPart, NestingPattern {
 	private PatternPart optionalPart;
+
+	public OptionalPattern() {
+		this(null);
+	}
 
 	public OptionalPattern(PatternPart optional) {
 		optionalPart = optional;
@@ -21,7 +25,11 @@ public class OptionalPattern implements PatternPart {
 
 	@Override
 	public String stringRepresentation() {
-		//TODO
-		return "<optional>";
+		return "("+optionalPart.stringRepresentation()+")";
+	}
+
+	@Override
+	public void accept(PatternPart option) {
+		optionalPart = option;
 	}
 }

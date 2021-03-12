@@ -2,6 +2,8 @@ package com.theFox6.kleinerNerd;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import javax.security.auth.login.LoginException;
 
 import com.theFox6.kleinerNerd.categories.CategoryCreationListener;
@@ -102,7 +104,11 @@ public class KleinerNerd {
 		eventManager.register(new CategoryCreationListener());
 		
 		eventManager.register(new ConvoSnippetListener());
-		eventManager.register(new SuicideListener());
+		try {
+			eventManager.register(new SuicideListener());
+		} catch (IOException e) {
+			QueuedLog.error("IOException while trying to load SuicideListener", e);
+		}
 		
 		eventManager.register(new StalkerCommandListener());
 		eventManager.register(new VoiceLoggingListener());

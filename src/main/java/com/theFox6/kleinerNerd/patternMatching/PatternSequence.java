@@ -1,13 +1,18 @@
 package com.theFox6.kleinerNerd.patternMatching;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.IntStream;
 
-public class PatternSequence implements PatternPart {
+public class PatternSequence implements PatternPart, NestingPattern {
 	//private String name;
-	private List<PatternPart> parts;
-	
+	private Collection<PatternPart> parts;
+
+	public PatternSequence() {
+		this.parts = new ConcurrentLinkedQueue<>();
+	}
+
 	public PatternSequence(/*String name,*/ PatternPart... parts) {
 		//this.name = name;
 		this.parts = Arrays.asList(parts);
@@ -33,5 +38,14 @@ public class PatternSequence implements PatternPart {
 	public String stringRepresentation() {
 		// TODO
 		return "<sequence>";
+	}
+
+	/**
+	 * adds a PatternPart to the end of the sequence
+	 * @param patternPart the part that should be added to the sequence
+	 */
+	@Override
+	public void accept(PatternPart patternPart) {
+		parts.add(patternPart);
 	}
 }
