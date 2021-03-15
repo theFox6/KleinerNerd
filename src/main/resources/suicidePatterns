@@ -56,7 +56,11 @@ $kms; = {kms:
 			[$vorn;, $fahrzeug;]
 		}]
 		"vergifte mich",
-		"begehe toasterbad",
+		["begehe ", {suizid:
+			"seppuku",
+			"suizid",
+			"toasterbad"
+		}],
 		"nehme ein toasterbad",
 		["nehme ein bad mit ", {one: "meinem ", "einem "}, "toaster"],
 		[{schießen: "schieße ", "schieß ", "schieß' "}, "mir in den kopf"]

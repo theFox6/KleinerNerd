@@ -41,6 +41,7 @@ public class ReactionRoleListener {
 		String reactionCode = event.getReactionEmote().getAsReactionCode();
 		String roleId = config.getRoleIdForReaction(reactionCode);
 		if (roleId == null) {
+			//TODO: remove empty configs and warn
 			QueuedLog.debug(event.getUserId() + " reacted to a reaction role message with a different Emote " + reactionCode);
 			return null;
 		}

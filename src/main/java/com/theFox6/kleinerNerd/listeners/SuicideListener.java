@@ -124,7 +124,10 @@ public class SuicideListener {
 	}
 	
 	/* coming soon
-	// TODO: do not record your own F reacts
+	 * TODO: do not record your own F reacts
+	 * TODO: record F reacts to suicide count messages
+	 *   (not to messages in general, also the author doesn't get the achievement here)
+
 
 	@SubscribeEvent
 	public void onReact(GuildMessageReactionAddEvent event) {

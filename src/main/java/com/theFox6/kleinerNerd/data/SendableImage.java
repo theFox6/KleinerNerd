@@ -9,6 +9,11 @@ public class SendableImage {
     private String fileName;
     private String resourcePath;
 
+    public SendableImage(String resource, String fileName) {
+        this.resourcePath = resource;
+        this.fileName = fileName;
+    }
+
     public String link() {
         if (url != null)
             return url;
