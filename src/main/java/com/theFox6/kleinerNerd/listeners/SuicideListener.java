@@ -1,28 +1,26 @@
 package com.theFox6.kleinerNerd.listeners;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.IntStream;
-
 import com.theFox6.kleinerNerd.KleinerNerd;
+import com.theFox6.kleinerNerd.data.ResourceNotFoundException;
 import com.theFox6.kleinerNerd.patternMatching.PatternPart;
 import com.theFox6.kleinerNerd.patternMatching.PatternWrapper;
 import com.theFox6.kleinerNerd.storage.CounterStorage;
-
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 public class SuicideListener {
 	private static final PatternPart emptyPattern = new PatternPart() {
@@ -47,17 +45,13 @@ public class SuicideListener {
 	private final PatternPart howMany;
 	
 	public SuicideListener() throws IOException {
-		URL patternFile = KleinerNerd.class.getClassLoader().getResource("suicidePatterns");
-		if (patternFile == null) {
-			throw new FileNotFoundException("sucicidePatterns file not found in resources");
-		}
-		File file = new File(patternFile.getFile());
-		if (!file.exists()) {
-			throw new FileNotFoundException("sucicidePatterns file found but does not exist");
-		}
 		Map<String, PatternPart> loaded;
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-			loaded = PatternWrapper.load(br);
+		try (InputStream scs = SuicideListener.class.getResourceAsStream("/suicidePatterns")) {
+			if (scs == null)
+				throw new ResourceNotFoundException("/suicidePatterns");
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(scs))) {
+				loaded = PatternWrapper.load(br);
+			}
 		}
 		if (loaded == null) {
 			QueuedLog.error("suicidePatterns were not loaded");
@@ -68,13 +62,13 @@ public class SuicideListener {
 		if (loaded.containsKey("kms"))
 			kms = loaded.get("kms");
 		else {
-			QueuedLog.error("missing kms in sucicidePatterns file");
+			QueuedLog.error("missing kms in suicidePatterns file");
 			kms = emptyPattern;
 		}
 		if (loaded.containsKey("howMany"))
 			howMany = loaded.get("howMany");
 		else {
-			QueuedLog.error("missing howMany in sucicidePatterns file");
+			QueuedLog.error("missing howMany in suicidePatterns file");
 			howMany = emptyPattern;
 		}
 		kmsSmokeTests();
@@ -96,7 +90,7 @@ public class SuicideListener {
 		String lowerRaw = raw.toLowerCase();
 		//TODO: total suicide count
 		if (raw.equals(KleinerNerd.prefix + "totaldeaths")) {
-			msg.getChannel().sendMessage(Integer.toString(CounterStorage.getUserTotalCount("suicides"))).queue();
+			msg.getChannel().sendMessage("Insgesamt wurden " + Integer.toString(CounterStorage.getUserTotalCount("suicides")) + " Selbstmorde verzeichnet.").queue();
 		} else if (kms.matches(lowerRaw)) {
 			User author = msg.getAuthor();
 			String authorId = author.getId();

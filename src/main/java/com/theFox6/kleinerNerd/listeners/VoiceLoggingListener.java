@@ -22,14 +22,15 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class VoiceLoggingListener {
-	//TODO: serialization of subscribers, localization
+	// TODO: serialization of subscribers
+	// TODO: localization
 	
 	private List<String> stalkers = new LinkedList<>();
 	
 	//guild, channel
 	private Map<String,String> guildChannels = new LinkedHashMap<>();
 	
-	//TODO add command to log voice joins and leaves
+	// TODO: edit message on extremely short visits
 	
 	@SubscribeEvent
 	public void onMessageReceived(MessageReceivedEvent event) {
