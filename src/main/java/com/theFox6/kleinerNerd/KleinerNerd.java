@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.security.auth.login.LoginException;
 
+import com.theFox6.kleinerNerd.acheivements.EmoteAchievementListener;
 import com.theFox6.kleinerNerd.categories.CategoryCreationListener;
 import com.theFox6.kleinerNerd.categories.CategoryStorage;
 import com.theFox6.kleinerNerd.consumable.AnnotatedConvertingEventManager;
@@ -78,7 +79,7 @@ public class KleinerNerd {
 			QueuedLog.setLevel(LogLevel.ALL);
 			QueuedLog.debug("full logging enabled");
 		} else {
-			QueuedLog.setLevel(LogLevel.INFO);
+			QueuedLog.setLevel(LogLevel.DEBUG);
 		}
 		// set the log file
 		try {
@@ -109,6 +110,7 @@ public class KleinerNerd {
 		} catch (IOException e) {
 			QueuedLog.error("IOException while trying to load SuicideListener", e);
 		}
+		eventManager.register(new EmoteAchievementListener());
 		
 		eventManager.register(new StalkerCommandListener());
 		eventManager.register(new VoiceLoggingListener());
