@@ -3,6 +3,8 @@ package com.theFox6.kleinerNerd.listeners;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 
+import com.theFox6.kleinerNerd.system.InstanceManager;
+import com.theFox6.kleinerNerd.system.InstanceState;
 import foxLog.deamon.ConditionNotifier.NotNotifiableException;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
@@ -37,6 +39,7 @@ public class SimpleCommandListener {
     		}
     		chan.sendMessage("Shutting down").queue();
     		QueuedLog.action("Shutdown requested by " + msg.getAuthor().getName());
+    		InstanceManager.setState(InstanceState.SHUTTING_DOWN);
     		event.getJDA().shutdown();
     	} else if (raw.equals(KleinerNerd.prefix + "logfile")) {
     		if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId())) {
