@@ -88,9 +88,8 @@ public class SuicideListener {
 		Message msg = event.getMessage();
 		String raw = msg.getContentRaw();
 		String lowerRaw = raw.toLowerCase();
-		//TODO: total suicide count
 		if (raw.equals(KleinerNerd.prefix + "totaldeaths")) {
-			msg.getChannel().sendMessage("Insgesamt wurden " + Integer.toString(CounterStorage.getUserTotalCount("suicides")) + " Selbstmorde verzeichnet.").queue();
+			msg.getChannel().sendMessage("Insgesamt wurden " + CounterStorage.getUserTotalCount("suicides") + " Selbstmorde verzeichnet.").queue();
 		} else if (kms.matches(lowerRaw)) {
 			User author = msg.getAuthor();
 			String authorId = author.getId();

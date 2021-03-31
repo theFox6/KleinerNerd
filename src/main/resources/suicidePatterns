@@ -9,7 +9,8 @@ $iamgoingto; = {iamgoingto: "ima ",  "i want to ", "i wanna ", "i will ", "i'll 
 # I don't like these patterns since they are ambigious
 $muffinSong; = {muffinsong:
 	"who wants a muffin?",
-	"have you had a muffin today?"
+	"have you had a muffin today?",
+	["es ist muffin zeit", $oe;],
 	["it's muffin time", $oe;]
 }
 
@@ -48,6 +49,7 @@ $kms; = {kms:
 		}, $od;
 	],
 	["ich ", {tätigkeit:
+		["beende ", {leben: "mein leben", "meine existenz", "mich"}],
 		"bring mich um",
 		"bringe mich um",
 		[{springen: "springe ", "spring ", "werf mich ", "werfe mich"},{indentod:
