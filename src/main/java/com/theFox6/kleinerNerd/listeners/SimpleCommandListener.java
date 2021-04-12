@@ -23,12 +23,15 @@ public class SimpleCommandListener {
     		return;
     	if (raw.equals(KleinerNerd.prefix + "ping")) {
             long time = System.currentTimeMillis();
-            chan.sendMessage("Pong!")
+            chan.sendMessage("Pong!\n(waiting for an answer from Discord)")
             .queue(response -> {
             	JDA jda = response.getJDA();
             	response.editMessageFormat("Pong!\n"
             			+ "sending time: %d ms\n"
-            			+ "last heartbeat: %d ms", System.currentTimeMillis() - time, jda.getGatewayPing()).queue();
+            			+ "last heartbeat: %d ms",
+						System.currentTimeMillis() - time,
+						jda.getGatewayPing()
+				).queue();
             });
     	} else if (raw.equals(KleinerNerd.prefix + "pong")) {
     		chan.sendMessage("PENG!").queue();
@@ -66,5 +69,6 @@ public class SimpleCommandListener {
 				chan.sendMessage("Keine valide Nachrichten ID");
 			}
     	}
+    	//TODO: thumbpoll for last message (no arguments)
     }
 }

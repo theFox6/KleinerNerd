@@ -29,10 +29,7 @@ public class ConfigurationListener {
     	MessageChannel chan = event.getChannel();
     	Member author = msg.getMember();
     	Guild guild = msg.getGuild();
-    	boolean authorized = false;
-    	if (author.hasPermission(Permission.ADMINISTRATOR)) {
-    		authorized = true;
-    	}
+    	boolean authorized = author.hasPermission(Permission.ADMINISTRATOR);
     	String mrid = GuildStorage.getSettings(guild.getId()).getModRole();
     	Role modRole = null;
     	if (mrid != null) {

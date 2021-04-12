@@ -15,6 +15,9 @@ public class ConvoSnippetListener {
     	if (lowerRaw.contains("baum")) {
     		QueuedLog.verbose("Baum");
     		msg.addReaction("U+1f333").queue();
+    	} else if (lowerRaw.contains("cookie") || lowerRaw.contains("keks")) {
+    		QueuedLog.verbose("cookie");
+    		msg.addReaction("U+1f36a").queue();
     	} else if (lowerRaw.equals("oi")) {
     		msg.getChannel().sendMessage("Ooi").queue();
     	} else if (lowerRaw.equals("oooi")) {

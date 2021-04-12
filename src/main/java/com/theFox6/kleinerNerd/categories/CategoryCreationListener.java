@@ -25,6 +25,8 @@ public class CategoryCreationListener {
 		Message msg = event.getMessage();
 		if (msg.isWebhookMessage() || msg.getAuthor().equals(event.getJDA().getSelfUser()))
 			return;
+		if (!msg.getMember().hasPermission(Permission.ADMINISTRATOR))
+			return;
 		TextChannel chan = event.getChannel();
 		String raw = msg.getContentRaw();
 		String chanId = chan.getId();
@@ -36,8 +38,6 @@ public class CategoryCreationListener {
 				chan.sendMessage("Kategorie konnte nicht gelöscht werden.").queue();
 			}
 		} else if (raw.equals(KleinerNerd.prefix+"addcategory")) {
-			if (!msg.getMember().hasPermission(Permission.ADMINISTRATOR))
-				return;
 			chan.sendMessage("Wie soll die Kategorie heißen?").queue();
 			startedChannels.add(chanId);
 		} else if (startedChannels.contains(chanId)) {

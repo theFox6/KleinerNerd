@@ -4,7 +4,28 @@ $z; = {ziel: "ich gehe ", "ich geh ", "ich will ", "ich möchte "}
 $haben; = {haben: "ich habe ", "ich hab "}
 $vorn; = {davor: "vor den ", "vorn ", "vor n ", "vor einen", "vor ein "}
 $fahrzeug; = {fahrzeug: "bus", "zug", "auto", "lkw", "lastwagen", "lastkraftwagen", "traktor"}
-$iamgoingto; = {iamgoingto: "ima ",  "i want to ", "i wanna ", "i will ", "i'll ", [{im: "i am ", "i'm ", "im "}, {gonna: "gonna ", "going to "}]}
+$iamgoingto; = [{iamgoingto:
+	[{ill: "ima ",  "i want to ", "i wanna ", "i will ", "i'll "}, "go "],
+	[{im: "i am ", "i'm ", "im "}, ("just "), {gonna: "gonna ", "going to "}]
+}, ("just ")]
+$ausm; = {raus: "aus dem ", "ausm "}
+$commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
+	"autodeath",
+	"delete myself",
+	"die",
+	"kill myself",
+	"kms",
+	"selfdestruct",
+	"self destruct",
+	"suicide",
+	"the not living",
+	"not living",
+	"seppuku",
+	# this is not exactly a match but the memes
+	"sudoku"
+}]
+
+#TODO: abbreviated articles, abbreviated endings
 
 # I don't like these patterns since they are ambigious
 $muffinSong; = {muffinsong:
@@ -15,6 +36,7 @@ $muffinSong; = {muffinsong:
 }
 
 $kms; = {kms:
+	"kms", "kill myself",
 	[$z;,
 		{lebenbeenden:
 			"mein leben beenden",
@@ -25,7 +47,8 @@ $kms; = {kms:
 			"sterben",
 			"von einer klippe springen",
 			"von ner klippe springen",
-			[$vorn;, $fahrzeug;, " springen"]
+			[$vorn;, $fahrzeug;, " springen"],
+			[$ausm;, "Fenster springen"],
 			["mich ", {"totmachen":
 				"anzünden",
 				"aufschlitzen",
@@ -49,22 +72,33 @@ $kms; = {kms:
 		}, $od;
 	],
 	["ich ", {tätigkeit:
-		["beende ", {leben: "mein leben", "meine existenz", "mich"}],
+		[{quit: "beende ", "lösche ", "entferne "}, {leben: "mein leben", "meine existenz", ["mich", ("selbst")]}],
 		"bring mich um",
 		"bringe mich um",
-		[{springen: "springe ", "spring ", "werf mich ", "werfe mich"},{indentod:
+		[{erschießen: "erschieße ", "erschieß ", "erschieß' "}, " mich"],
+		[{springen: "springe ", "spring ", "werf mich ", "werfe mich", "gehe", "geh", "lauf", "renn", "renne"},{indentod:
+			[$ausm;, "Fenster"],
 			"in den tod",
-			"von einer klippe",
+			"ins Messer",
+			"in ein Messer",
+			"vom turm",
+			["von ", {$höhe:
+				[("ei"), "ner klippe"],
+				[("ei"),"nem turm"],
+				[("ei"), "ner Brücke"]
+			}],
 			[$vorn;, $fahrzeug;]
-		}]
+		}],
 		"vergifte mich",
 		["begehe ", {suizid:
 			"seppuku",
+			# the memes
+			"sudoku",
 			"suizid",
 			"toasterbad"
 		}],
 		"nehme ein toasterbad",
-		["nehme ein bad mit ", {one: "meinem ", "einem "}, "toaster"],
+		["nehme ein bad mit ", {one: "meinem ", "einem ", "nem "}, "toaster"],
 		[{schießen: "schieße ", "schieß ", "schieß' "}, "mir in den kopf"]
 	},$od;],
 	[$haben;,{lebenAbgeschlossen:
@@ -72,21 +106,14 @@ $kms; = {kms:
 		"mit meinem leben abgeschlossen",
 		"abgeschlossen mit meinem leben"
 	},$od;],
-	[$iamgoingto;, ("fucking "), ("commit "), ("fucking "), {die:
-		"die",
-		"kill myself",
-		"kms",
-		"suicide",
-		"the not living",
-		"not living",
-		"seppuku"
-	},$od;],
-	["i ", ("just "), {wanna: "want to ", "wanna "}, {"kill myself","die"}, $od;],
+	[$iamgoingto;, $commitsc;, ("then"), $od;],
+	["i ", ("just "), {wanna: "want to ", "wanna "}, $commitsc;, $od;],
 	["somebody kill me",$oe;],
 	$muffinSong;
 }
 
-$howMany; = ["wie oft ", {tot:
-	["habe ich mich ", ("schon "), {Methode: "umgebracht", "getötet"}],
-	#["bin ich ", ("schon "), "gestorben"]
+$howMany; = ["wie oft habe ich ",{tot:
+	["mich ", ("schon "), {Methode: "umgebracht", "getötet"}],
+	[("schon "), "suizid begangen"]
 }, ("?")]
+#["bin ich ", ("schon "), "gestorben"]

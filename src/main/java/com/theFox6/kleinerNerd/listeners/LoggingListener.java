@@ -40,20 +40,20 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	
 	@Override
 	@SubscribeEvent
-	public void onResume(ResumedEvent event) {
-		QueuedLog.debug("Bot resumed");
+	public void onResumed(ResumedEvent event) {
+		QueuedLog.info("Bot resumed");
 	}
 	
 	@Override
 	@SubscribeEvent
-    public void onReconnect(ReconnectedEvent event) {
-		QueuedLog.action("Bot reconnected");
+    public void onReconnected(ReconnectedEvent event) {
+		QueuedLog.info("Bot reconnected");
 	}
 	
 	@Override
 	@SubscribeEvent
     public void onDisconnect(DisconnectEvent event) {
-		QueuedLog.debug("Bot disconnected");
+		QueuedLog.info("Bot disconnected");
 	}
 	
 	@Override

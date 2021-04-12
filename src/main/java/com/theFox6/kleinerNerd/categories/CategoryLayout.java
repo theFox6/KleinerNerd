@@ -110,18 +110,7 @@ public class CategoryLayout {
 			//perhaps add a null check for get channel
 			if (raw.equalsIgnoreCase("keiner")) {
 				//remove reaction role from old announce
-				if (announceChannel != null && announceId != null && reaction != null) {
-					guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
-						//actually get would be more appropriate
-						ReactionRoleStorage.getOrCreateConfig(new MessageLocation(announce)).removeReactionRole(reaction);
-						reaction = null;
-					},(e) -> {
-						QueuedLog.debug("old category announce not found");
-					});
-				}
-				
-				announceChannel = null;
-				announceId = null;
+				removeAnnounce(guild);
 				configurationState = ConfigState.CONFIGURED;
 				chan.sendMessage("Einrichtung fertig").queue();
 				return true;
@@ -264,6 +253,21 @@ public class CategoryLayout {
 		}
 	}
 
+	private void removeAnnounce(Guild guild) {
+		if (announceChannel != null && announceId != null && reaction != null) {
+			guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
+				//actually get would be more appropriate
+				ReactionRoleStorage.getOrCreateConfig(new MessageLocation(announce)).removeReactionRole(reaction);
+				reaction = null;
+			},(e) -> {
+				QueuedLog.debug("old category announce not found");
+			});
+		}
+
+		announceChannel = null;
+		announceId = null;
+	}
+
 	public static void addRoleQuestion(MessageChannel chan) {
 		chan.sendMessage("Wie soll die Rolle heißen, die Zugriff auf diese Kategorie hat? (everyone für keine spezielle Rolle)").queue();
 	}
@@ -301,18 +305,8 @@ public class CategoryLayout {
 		configurationState = ConfigState.UNCONFIGURED;
 		//perhaps ask whether to delete reaction role
 		//remove reaction role from old announce
-		if (announceChannel != null && announceId != null && reaction != null) {
-			guild.getTextChannelById(announceChannel).retrieveMessageById(announceId).queue((announce) -> {
-				//actually get would be more appropriate
-				ReactionRoleStorage.getOrCreateConfig(new MessageLocation(announce)).removeReactionRole(reaction);
-				reaction = null;
-			},(e) -> {
-				QueuedLog.debug("old category announce not found");
-			});
-		}
 		//perhaps ask whether to delete announce
-		announceChannel = null;
-		announceId = null;
+		removeAnnounce(guild);
 		reaction = null;
 		//perhaps ask whether to delete role
 		roleId = null;
