@@ -14,6 +14,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 public class SimpleCommandListener {
+	public static final String pollcommand = KleinerNerd.prefix + "thumbpoll"
+
 	@SubscribeEvent
 	public void onMessageReceived(MessageReceivedEvent event) {
     	Message msg = event.getMessage();
@@ -58,11 +60,12 @@ public class SimpleCommandListener {
 				QueuedLog.error("Yo Fox, your log implementation is faulty.", e);
 			}
     		chan.sendFile(KleinerNerd.logFile).queue();
-    	} else if (raw.startsWith("thumbpoll ")) {
+    	} else if (raw.startsWith(pollcommand)) {
     		try {
-    			//TODO: check whether both succeeded
-    			chan.addReactionById(raw.substring(10), "U+1F44D").queue();
-    			chan.addReactionById(raw.substring(10), "U+1F44E").queue();
+				int len = pollcommand.length() + 1;
+				//TODO: check whether both succeeded, report any failures, only delete on success
+    			chan.addReactionById(raw.substring(len), "U+1F44D").queue();
+    			chan.addReactionById(raw.substring(len), "U+1F44E").queue();
     			msg.delete().reason("thumbpoll command auto deletion").queue();
 			} catch (NumberFormatException e) {
 				QueuedLog.verbose("not an id");
