@@ -61,4 +61,12 @@ public class ReactionRoleStorage {
 		}
 		return rrm;
 	}
+
+    public static void removeIfEmpty(MessageLocation loc) {
+		ReactionRoleMap rrm = rrConfig.get(loc);
+		if (rrm == null)
+			return;
+		if (rrm.isEmpty())
+			rrConfig.remove(loc,rrm);
+	}
 }

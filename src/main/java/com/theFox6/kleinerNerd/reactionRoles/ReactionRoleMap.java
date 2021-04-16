@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ReactionRoleMap {
@@ -30,4 +31,9 @@ public class ReactionRoleMap {
 	public String dump() {
 		return reactions.entrySet().stream().map((e) -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\n"));
 	}
+
+	@JsonIgnore
+    public boolean isEmpty() {
+		return reactions.isEmpty();
+    }
 }

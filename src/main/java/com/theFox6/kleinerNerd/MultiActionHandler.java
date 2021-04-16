@@ -51,4 +51,9 @@ public class MultiActionHandler<T> {
 		actionCount.decrementAndGet();
 		failure.accept(t);
 	}
+
+	@SuppressWarnings("unused")
+	public void success(Void nothing) {
+		success();
+	}
 }

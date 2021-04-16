@@ -1,6 +1,7 @@
 package com.theFox6.kleinerNerd.listeners;
 
 import com.theFox6.kleinerNerd.KleinerNerd;
+import com.theFox6.kleinerNerd.MultiActionHandler;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 
 import com.theFox6.kleinerNerd.system.InstanceManager;
@@ -8,13 +9,16 @@ import com.theFox6.kleinerNerd.system.InstanceState;
 import foxLog.deamon.ConditionNotifier.NotNotifiableException;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
+import java.util.List;
+
 public class SimpleCommandListener {
-	public static final String pollcommand = KleinerNerd.prefix + "thumbpoll"
+	public static final String pollcommand = KleinerNerd.prefix + "thumbpoll";
 
 	@SubscribeEvent
 	public void onMessageReceived(MessageReceivedEvent event) {
@@ -61,17 +65,49 @@ public class SimpleCommandListener {
 			}
     		chan.sendFile(KleinerNerd.logFile).queue();
     	} else if (raw.startsWith(pollcommand)) {
-    		try {
+    		if (raw.length() == pollcommand.length()) {
+    			chan.getHistoryBefore(msg.getId(),2).queue((h) -> {
+    				List<Message> msgs = h.getRetrievedHistory();
+    				int i = 0;
+					if (msgs.get(i).getId().equals(msg.getId()))
+						i++;
+					String id = msgs.get(i).getId();
+					MultiActionHandler<? super Void> poll = new MultiActionHandler<>(2, (s) -> {
+						//I don't really care but it causes errors to try
+						if (chan.getType() != ChannelType.PRIVATE)
+							msg.delete().reason("thumb poll command auto deletion").queue();
+					}, (e) -> {
+						QueuedLog.error("Could not create thumb poll", e);
+					});
+					try {
+						chan.addReactionById(id, "U+1F44D").queue(poll::success, poll::failure);
+						chan.addReactionById(id, "U+1F44E").queue(poll::success, poll::failure);
+					} catch (NumberFormatException e) {
+						QueuedLog.verbose("not an id");
+						chan.sendMessage("Keine valide Nachrichten ID");
+					}
+				},(e) -> {
+					QueuedLog.error("could not retrieve message history",e);
+					chan.sendMessage("Ich konnte die Nachrichtenhistorie vor der Nachricht nicht abfragen.\n" +
+							"Versuch doch mal die Nachrichten ID hinter den Befehl zu schreiben.").queue();
+				});
+			} else {
 				int len = pollcommand.length() + 1;
-				//TODO: check whether both succeeded, report any failures, only delete on success
-    			chan.addReactionById(raw.substring(len), "U+1F44D").queue();
-    			chan.addReactionById(raw.substring(len), "U+1F44E").queue();
-    			msg.delete().reason("thumbpoll command auto deletion").queue();
-			} catch (NumberFormatException e) {
-				QueuedLog.verbose("not an id");
-				chan.sendMessage("Keine valide Nachrichten ID");
+				MultiActionHandler<? super Void> poll = new MultiActionHandler<>(2, (s) -> {
+					//Discord doesn't allow deleting other peoples messages in DMs
+					if (chan.getType() != ChannelType.PRIVATE)
+						msg.delete().reason("thumb poll command auto deletion").queue();
+				}, (e) -> {
+					QueuedLog.error("Could not create thumb poll", e);
+				});
+				try {
+					chan.addReactionById(raw.substring(len), "U+1F44D").queue(poll::success, poll::failure);
+					chan.addReactionById(raw.substring(len), "U+1F44E").queue(poll::success, poll::failure);
+				} catch (NumberFormatException e) {
+					QueuedLog.verbose("not an id");
+					chan.sendMessage("Keine valide Nachrichten ID");
+				}
 			}
     	}
-    	//TODO: thumbpoll for last message (no arguments)
     }
 }
