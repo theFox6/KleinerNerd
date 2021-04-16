@@ -76,7 +76,7 @@ $kms; = {kms:
 		"bring mich um",
 		"bringe mich um",
 		[{erschießen: "erschieße ", "erschieß ", "erschieß' "}, " mich"],
-		[{springen: "springe ", "spring ", "werf mich ", "werfe mich", "gehe", "geh", "lauf", "renn", "renne"},{indentod:
+		[{springen: "springe ", "spring ", "werf mich ", "werfe mich ", "gehe ", "geh ", "lauf ", "renn ", "renne ", "schmeiß mich ", "schmeiße mich "},{indentod:
 			[$ausm;, "Fenster"],
 			"in den tod",
 			"ins Messer",
@@ -89,6 +89,7 @@ $kms; = {kms:
 			}],
 			[$vorn;, $fahrzeug;]
 		}],
+		["ich mache einen köpfer auf den ",{material: "asphalt","beton"}],
 		"vergifte mich",
 		["begehe ", {suizid:
 			"seppuku",
@@ -98,6 +99,7 @@ $kms; = {kms:
 			"toasterbad"
 		}],
 		"nehme ein toasterbad",
+		["nehme ein Bad ",{im: "in einem ", "im "},"mixer"],
 		["nehme ein bad mit ", {one: "meinem ", "einem ", "nem "}, "toaster"],
 		[{schießen: "schieße ", "schieß ", "schieß' "}, "mir in den kopf"]
 	},$od;],

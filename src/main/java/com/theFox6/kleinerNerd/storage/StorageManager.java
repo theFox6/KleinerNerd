@@ -49,6 +49,7 @@ public class StorageManager {
 	}
 
 	public static <T> void save(String filename,T data) {
+		QueuedLog.action("saving " + filename);
 		if (!brokenFiles.containsKey(filename))
 			brokenFiles.put(filename, new AtomicBoolean(false));
 		File sf = new File(KleinerNerd.dataFolder + filename + ".json");

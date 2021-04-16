@@ -2,6 +2,7 @@ package com.theFox6.kleinerNerd.reactionRoles;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -24,5 +25,9 @@ public class ReactionRoleMap {
 	
 	public void removeReactionRole(String reaction) {
 		reactions.remove(reaction);
+	}
+
+	public String dump() {
+		return reactions.entrySet().stream().map((e) -> e.getKey() + ": " + e.getValue()).collect(Collectors.joining("\n"));
 	}
 }

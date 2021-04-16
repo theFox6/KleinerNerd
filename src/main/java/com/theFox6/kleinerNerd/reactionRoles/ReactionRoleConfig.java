@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,9 +25,9 @@ public class ReactionRoleConfig {
 		rRoles = reactionRoles;
 	}
 
-	public static LinkedList<ReactionRoleConfig> list(Map<MessageLocation, ReactionRoleMap> rrConfig) {
+    public static LinkedList<ReactionRoleConfig> list(Map<MessageLocation, ReactionRoleMap> rrConfig) {
 		return rrConfig.entrySet().stream().map(ReactionRoleConfig::fromEntry)
-				.collect(LinkedList::new,LinkedList::add,LinkedList::addAll);
+				.collect(Collectors.toCollection(LinkedList::new));
 	}
 	
 	public static ReactionRoleConfig fromEntry(Entry<MessageLocation, ReactionRoleMap> entry) {

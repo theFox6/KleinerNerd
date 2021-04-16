@@ -1,37 +1,47 @@
 package com.theFox6.kleinerNerd.reactionRoles;
 
-import java.util.function.Consumer;
-
+import com.theFox6.kleinerNerd.KNHelpers;
+import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.data.MessageLocation;
-
 import foxLog.queued.QueuedLog;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
 public class ReactionRoleListener {
-	//private static final String addrrCommand = KleinerNerd.prefix + "rr add ";
-	
-	/*
+	private static final String addrrCommand = KleinerNerd.prefix + "rr add";
+	private Map<String, RRConfigurator> started = new LinkedHashMap<>();
+
 	@SubscribeEvent
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Guild guild = event.getGuild();
 		Member author = event.getMember();
+		if (author.getId().equals(event.getJDA().getSelfUser().getId()))
+			return;
 		if (!KNHelpers.isModerator(author, guild))
 			return;
-		String raw = event.getMessage().getContentRaw();
+		Message msg = event.getMessage();
+		String raw = msg.getContentRaw();
+		TextChannel chan = event.getChannel();
+		String chanId = chan.getId();
 		//associate reaction roles with a message
-		if (raw.startsWith(addrrCommand)) {
-			String args = raw.substring(addrrCommand.length());
-			// args are: message id, emoji, role id
+		if (raw.equals(addrrCommand)) {
+			started.put(chanId, new RRConfigurator(chan));
+		} else if (started.containsKey(chanId)) {
+			if (started.get(chanId).handle(raw, chan, msg)) {
+				started.remove(chanId);
+			}
 		}
 		//edit reaction role configurations
+		//delete reaction role configurations
 	}
-	*/
 	
 	private Role getReactionRoleFromEvent(GenericGuildMessageReactionEvent event) {
 		MessageLocation loc = new MessageLocation(event);
@@ -43,6 +53,12 @@ public class ReactionRoleListener {
 		if (roleId == null) {
 			//TODO: remove empty configs and warn
 			QueuedLog.debug(event.getUserId() + " reacted to a reaction role message with a different Emote " + reactionCode);
+			if (config.isEmpty()) {
+				QueuedLog.warning("empty configuration for message " + loc.messageId + " in channel <#"+loc.channelId+">");
+				ReactionRoleStorage.removeIfEmpty(loc);
+			} else {
+				QueuedLog.debug("available reaction roles for this message:\n" + config.dump());
+			}
 			return null;
 		}
 		Guild guild = event.getGuild();
@@ -90,7 +106,7 @@ public class ReactionRoleListener {
 			final String name = member.getEffectiveName();
 			guild.addRoleToMember(member, r).queue(
 					(s) -> {
-						QueuedLog.action("Rolle \""+r.getName()+"\" wurde "+name+" zugewiesen.");
+						QueuedLog.debug("Rolle \""+r.getName()+"\" wurde "+name+" zugewiesen.");
 						member.getUser().openPrivateChannel().queue((pc) -> {
 							pc.sendMessage("Rolle \""+r.getName()+"\" zugewiesen.").queue();
 						});
@@ -119,7 +135,7 @@ public class ReactionRoleListener {
 			final String name = member.getEffectiveName();
 			guild.removeRoleFromMember(member, r).queue(
 					(s) -> {
-						QueuedLog.action("Rolle \""+r.getName()+"\" wurde von "+name+" entfernt.");
+						QueuedLog.debug("Rolle \""+r.getName()+"\" wurde von "+name+" entfernt.");
 						member.getUser().openPrivateChannel().queue((pc) -> {
 							pc.sendMessage("Rolle \""+r.getName()+"\" entfernt.").queue();
 						});
