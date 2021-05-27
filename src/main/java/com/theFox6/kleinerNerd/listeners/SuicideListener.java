@@ -76,7 +76,7 @@ public class SuicideListener {
 	
 	private void kmsSmokeTests() {
 		if (!kms.matches("ich hab mit meinem leben abgeschlossen")) {
-			QueuedLog.error("abgeschlossen kms does not match");
+			QueuedLog.error("\"abgeschlossen\" kms does not match");
 		}
 		if (!kms.matches("i am going to commit suicide.")) {
 			QueuedLog.error("commit suicide kms does not match");

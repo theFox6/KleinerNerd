@@ -2,6 +2,9 @@ package com.theFox6.kleinerNerd.echo;
 
 import java.util.function.Consumer;
 
+import com.theFox6.kleinerNerd.ChannelRetrievalException;
+import com.theFox6.kleinerNerd.GuildNotFoundException;
+import com.theFox6.kleinerNerd.TextChannelIdInGuildNotFoundException;
 import com.theFox6.kleinerNerd.echo.faults.*;
 import com.theFox6.kleinerNerd.matchers.ChannelLocationMatch;
 
@@ -100,7 +103,7 @@ public class PreparedEcho {
 				Guild guild = jda.getGuildById(guildId);
 				if (guild == null) {
 					stage = EchoState.INVALID;
-					throw new GuildIdNotFoundException(guildId);
+					GuildNotFoundException.forGuildId(guildId);
 				}
 				channel = guild.getTextChannelById(channelId);
 				if (target == null) {
@@ -149,7 +152,7 @@ public class PreparedEcho {
 				Guild guild = jda.getGuildById(guildId);
 				if (guild == null) {
 					stage = EchoState.INVALID;
-					throw new GuildIdNotFoundException(guildId);
+					GuildNotFoundException.forGuildId(guildId);
 				}
 				TextChannel channel = guild.getTextChannelById(channelId);
 				if (target == null) {

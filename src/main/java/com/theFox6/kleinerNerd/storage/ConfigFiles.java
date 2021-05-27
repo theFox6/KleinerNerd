@@ -1,12 +1,13 @@
 package com.theFox6.kleinerNerd.storage;
 
+import foxLog.queued.QueuedLog;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.stream.Collectors;
-
-import foxLog.queued.QueuedLog;
 
 public class ConfigFiles {
 	private static String token;
@@ -52,7 +53,7 @@ public class ConfigFiles {
 	}
 	
 	/**
-	 * @return the user ID of the owner of this bot
+	 * @return the user IDs of the owners of this bot
 	 */
 	public static Collection<String> getOwners() {
 		if (owners == null) {
@@ -60,7 +61,7 @@ public class ConfigFiles {
 				owners = getFileContents("secrets/owners.txt",true);
 			} catch (IOException e) {
 				QueuedLog.error("error while trying to read secrets/owner.txt resource file",e);
-				return null;
+				return new LinkedList<>();
 			}
 		}
 		return owners;

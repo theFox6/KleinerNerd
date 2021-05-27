@@ -52,7 +52,6 @@ public class MultiActionHandler<T> {
 		failure.accept(t);
 	}
 
-	@SuppressWarnings("unused")
 	public void success(Void nothing) {
 		success();
 	}

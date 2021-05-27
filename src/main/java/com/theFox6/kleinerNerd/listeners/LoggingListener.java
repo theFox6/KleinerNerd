@@ -1,19 +1,9 @@
 package com.theFox6.kleinerNerd.listeners;
 
-import javax.annotation.Nonnull;
-
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.DisconnectEvent;
-import net.dv8tion.jda.api.events.ExceptionEvent;
-import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.events.ReconnectedEvent;
-import net.dv8tion.jda.api.events.ResumedEvent;
-import net.dv8tion.jda.api.events.ShutdownEvent;
-import net.dv8tion.jda.api.events.StatusChangeEvent;
-import net.dv8tion.jda.api.events.channel.priv.PrivateChannelCreateEvent;
-import net.dv8tion.jda.api.events.channel.priv.PrivateChannelDeleteEvent;
+import net.dv8tion.jda.api.events.*;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
@@ -21,9 +11,6 @@ import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.update.GuildUpdateOwnerEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageUpdateEvent;
@@ -31,37 +18,39 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
+import javax.annotation.Nonnull;
+
 public class LoggingListener extends ListenerAdapter implements EventListener {
 	@Override
 	@SubscribeEvent
-	public void onReady(ReadyEvent event) {
+	public void onReady(@Nonnull ReadyEvent event) {
 		QueuedLog.action("bot ready");
 	}
 	
 	@Override
 	@SubscribeEvent
-	public void onResumed(ResumedEvent event) {
+	public void onResumed(@Nonnull ResumedEvent event) {
 		QueuedLog.info("Bot resumed");
 	}
 	
 	@Override
 	@SubscribeEvent
-    public void onReconnected(ReconnectedEvent event) {
+    public void onReconnected(@Nonnull ReconnectedEvent event) {
 		QueuedLog.info("Bot reconnected");
 	}
 	
 	@Override
 	@SubscribeEvent
-    public void onDisconnect(DisconnectEvent event) {
+    public void onDisconnect(@Nonnull DisconnectEvent event) {
 		QueuedLog.info("Bot disconnected");
 	}
 	
 	@Override
 	@SubscribeEvent
-    public void onShutdown(ShutdownEvent event) {
+    public void onShutdown(@Nonnull ShutdownEvent event) {
 		QueuedLog.action("Bot shutdown");
 	}
-	
+
 	@Override
 	@SubscribeEvent
     public void onStatusChange(StatusChangeEvent event) {
@@ -73,12 +62,14 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
     public void onException(ExceptionEvent event) {
     	QueuedLog.warning("exception occured", event.getCause());
     }
-    
+
+    /*
 	@Override
 	@SubscribeEvent
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
     	Message msg = event.getMessage();
-    	QueuedLog.verbose("message from guild " + msg.getGuild().getName() + " in channel " + msg.getChannel().getName());
+    	QueuedLog.verbose("message from guild " + msg.getGuild().getName() + "\n" +
+				msg.getContentRaw());
     }
     
 	@Override
@@ -93,6 +84,7 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
     public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
 		QueuedLog.verbose("message deleted in channel " + event.getChannel().getName());
     }
+     */
     
 	@Override
 	@SubscribeEvent
@@ -122,18 +114,6 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
     public void onPrivateMessageDelete(@Nonnull PrivateMessageDeleteEvent event) {
 		QueuedLog.info("private message deleted from " + event.getChannel().getName());
     	//later also print message ID
-    }
-    
-	@Override
-	@SubscribeEvent
-    public void onPrivateChannelCreate(@Nonnull PrivateChannelCreateEvent event) {
-		QueuedLog.verbose("private channel created: " + event.getChannel().getName());
-    }
-    
-	@Override
-	@SubscribeEvent
-    public void onPrivateChannelDelete(@Nonnull PrivateChannelDeleteEvent event) {
-		QueuedLog.info("private channel deleted: " + event.getChannel().getName());
     }
     
 	@Override

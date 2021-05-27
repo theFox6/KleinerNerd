@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
@@ -41,7 +42,8 @@ public class SimpleCommandListener {
             });
     	} else if (raw.equals(KleinerNerd.prefix + "pong")) {
     		chan.sendMessage("PENG!").queue();
-    	} else if (raw.equals(KleinerNerd.prefix + "shutdown")) {
+    	} else if (raw.equals(KleinerNerd.prefix + "shutdown") ||
+				(raw.startsWith(KleinerNerd.prefix + "shutdown") && msg.getMentionedUsers().stream().map(User::getId).anyMatch(el -> el.equals(event.getJDA().getSelfUser().getId())))) {
     		if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId())) {
     			//perhaps inform the user
     			return;

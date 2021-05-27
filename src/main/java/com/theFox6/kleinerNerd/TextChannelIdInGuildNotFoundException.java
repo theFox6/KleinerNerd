@@ -1,4 +1,4 @@
-package com.theFox6.kleinerNerd.echo.faults;
+package com.theFox6.kleinerNerd;
 
 public final class TextChannelIdInGuildNotFoundException extends ChannelRetrievalException {
 	private static final long serialVersionUID = 7698717751850395553L;
@@ -12,5 +12,4 @@ public final class TextChannelIdInGuildNotFoundException extends ChannelRetrieva
 		this.guildId = guildId;
 		this.guildName = guildName;
 	}
-
 }

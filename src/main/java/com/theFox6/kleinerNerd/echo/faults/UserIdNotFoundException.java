@@ -1,5 +1,7 @@
 package com.theFox6.kleinerNerd.echo.faults;
 
+import com.theFox6.kleinerNerd.ChannelRetrievalException;
+
 public class UserIdNotFoundException extends ChannelRetrievalException {
 	private static final long serialVersionUID = 4491239802690224990L;
 	public final String userId;

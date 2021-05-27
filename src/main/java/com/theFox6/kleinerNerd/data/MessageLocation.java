@@ -3,10 +3,13 @@ package com.theFox6.kleinerNerd.data;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import net.dv8tion.jda.api.events.message.guild.GenericGuildMessageEvent;
+
+import java.util.function.Consumer;
 
 public class MessageLocation extends MessageChannelLocation {
 	@JsonProperty
@@ -55,5 +58,16 @@ public class MessageLocation extends MessageChannelLocation {
 
 	public int hashCode() {
 		return super.hashCode()^messageId.hashCode();
+	}
+
+	public void fetchMessage(JDA jda, Consumer<? super Message> success, Consumer<? super Throwable> fail) {
+		fetchChannel(jda,
+				(chan) -> chan.retrieveMessageById(messageId).queue(success, fail),
+				fail
+		);
+	}
+
+	public MessageChannelLocation location() {
+		return new MessageChannelLocation(type,channelId,guildId);
 	}
 }

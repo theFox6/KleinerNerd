@@ -3,9 +3,9 @@ package com.theFox6.kleinerNerd.echo;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.theFox6.kleinerNerd.ChannelRetrievalException;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.data.MessageLocation;
-import com.theFox6.kleinerNerd.echo.faults.ChannelRetrievalException;
 import com.theFox6.kleinerNerd.echo.faults.InvalidTargetPlaceException;
 import com.theFox6.kleinerNerd.listeners.HelpListener;
 import com.theFox6.kleinerNerd.matchers.ChannelLocationMatch;
