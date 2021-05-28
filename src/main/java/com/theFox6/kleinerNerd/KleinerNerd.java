@@ -1,6 +1,6 @@
 package com.theFox6.kleinerNerd;
 
-import com.theFox6.kleinerNerd.acheivements.EmoteAchievementListener;
+import com.theFox6.kleinerNerd.achievements.EmoteAchievementListener;
 import com.theFox6.kleinerNerd.categories.CategoryCreationListener;
 import com.theFox6.kleinerNerd.categories.CategoryStorage;
 import com.theFox6.kleinerNerd.conversation.rulebased.RPGConvoListener;
