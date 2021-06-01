@@ -119,8 +119,9 @@ public class KleinerNerd {
 		eventManager.register(new LoggingListener());
 
 		eventManager.register(new HelpListener());
-		eventManager.register(new SimpleCommandListener());
+		eventManager.register(new SystemCommandListener());
 		eventManager.register(new ConfigurationListener());
+		eventManager.register(new PollListener());
 		eventManager.register(new ManualMessagingListener());
 		eventManager.register(new ReactionRoleListener());
 		eventManager.register(new CategoryCreationListener());

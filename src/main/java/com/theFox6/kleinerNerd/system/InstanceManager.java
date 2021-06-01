@@ -9,10 +9,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.Queue;
 
 public class InstanceManager {
-    private static File instanceFile = new File(KleinerNerd.dataFolder + "instance.properties");
+    private static final File instanceFile = new File(KleinerNerd.dataFolder + "instance.properties");
+    private static final int maxTries = 12;
     private static Properties instanceProperties;
 
     public static void setState(InstanceState state) {
@@ -21,34 +21,35 @@ public class InstanceManager {
     }
 
     public static void ensureLastShutdown() {
-        if (!load()) {
-            QueuedLog.error("Canceling startup because instance file was not loaded.");
-            try {
-                QueuedLog.flushInterruptibly();
-            } catch (InterruptedException e) {
-                QueuedLog.warning("interrupted log flushing", e);
-            } catch (ConditionNotifier.NotNotifiableException e) {
-                //this exception shouldn't even exist in the QueuedLog
-                QueuedLog.error("Oi Fox, fix that log of yours!",e);
+        InstanceState s = loadState(true);
+        if (!s.running) {
+            //TODO: check whether it's a normal state or not
+            QueuedLog.debug(s.message);
+            return;
+        }
+        QueuedLog.message("Der KleineNerd läuft scheinbar noch.");
+        QueuedLog.message("Falls der KleineNerd nicht mehr läuft, " +
+                "kann in das instance file als Zustand \"OVERRIDE\" eingetragen werden.");
+        InstanceState last = null;
+        int attempts = 0;
+        //perhaps add support for maxTries = -1
+        while (s.running && attempts++ < maxTries) {
+            if (last != s) {
+                QueuedLog.debug(s.message);
+                last = s;
             }
-            System.exit(1);
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                QueuedLog.error("Interrupted waiting for other instance.",e);
+                s = loadState(true);
+                break;
+            }
+            s = loadState(true);
         }
-        String stateString = instanceProperties.getProperty("state");
-        InstanceState s;
-        if (stateString == null) {
-            s = InstanceState.UNKNOWN;
-            instanceProperties.setProperty("state",s.name());
-            save();
-        } else {
-            s = InstanceState.valueOf(stateString);
-        }
-        //TODO: just wait if he is shutting down, etc.
         if (s.running) {
             QueuedLog.warning("Der KleinerNerd ist nicht ordentlich heruntergefahren. " +
                     "Dies kann zu Datenverlust führen.");
-            QueuedLog.debug(s.message);
-            QueuedLog.message("Falls der KleineNerd nicht mehr läuft, " +
-                    "kann in das instance file als Zustand \"OVERRIDE\" eingetragen werden.");
             try {
                 QueuedLog.flushInterruptibly();
             } catch (InterruptedException e) {
@@ -59,9 +60,36 @@ public class InstanceManager {
             }
             //let's quit
             System.exit(1);
+        }
+    }
+
+    private static InstanceState loadState(boolean exitOnFail) {
+        if (!load()) {
+            if (exitOnFail) {
+                    QueuedLog.error("Cancelling startup due to an error while loading instance file.");
+                try {
+                    QueuedLog.flushInterruptibly();
+                } catch (InterruptedException e) {
+                    QueuedLog.warning("interrupted log flushing", e);
+                } catch (ConditionNotifier.NotNotifiableException e) {
+                    //this exception shouldn't even exist in the QueuedLog
+                    QueuedLog.error("Oi Fox, fix that log of yours!",e);
+                }
+                System.exit(1);
+                return null;
+            }
         } else {
-            //perhaps check whether it's a normal state or not
-            QueuedLog.debug(s.message);
+            QueuedLog.debug("Instance file not loaded");
+            return null;
+        }
+        String stateString = instanceProperties.getProperty("state");
+        if (stateString == null) {
+            InstanceState s = InstanceState.UNKNOWN;
+            instanceProperties.setProperty("state",s.name());
+            save();
+            return s;
+        } else {
+            return InstanceState.valueOf(stateString);
         }
     }
 
