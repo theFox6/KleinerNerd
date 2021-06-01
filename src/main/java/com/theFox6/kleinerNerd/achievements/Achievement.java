@@ -1,4 +1,4 @@
-package com.theFox6.kleinerNerd.acheivements;
+package com.theFox6.kleinerNerd.achievements;
 
 import com.theFox6.kleinerNerd.data.SendableImage;
 
