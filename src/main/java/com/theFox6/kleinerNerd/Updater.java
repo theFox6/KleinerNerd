@@ -14,6 +14,12 @@ public class Updater {
     public static final File logFile = new File("updater-log.txt");
 
     public static void main(String[] args) {
+        // set the log file
+        try {
+            QueuedLog.setLogFile(logFile);
+        } catch (FileNotFoundException e) {
+            QueuedLog.error("Error while trying to set logfile",e);
+        }
         //set colorization
         if (MainHelper.hasOption(args, "C", "no-colorize"))
             QueuedLog.setOutputColorized(false);
@@ -29,17 +35,14 @@ public class Updater {
         // wait for last to finish
         InstanceManager.ensureLastShutdown();
         InstanceManager.setState(InstanceState.UPDATING);
-        // set the log file
-        try {
-            QueuedLog.setLogFile(logFile);
-        } catch (FileNotFoundException e) {
-            QueuedLog.error("Error while trying to set logfile",e);
-        }
-        // update
-        if (update())
+        //update
+        if (update()) {
+            QueuedLog.action("update successful");
             InstanceManager.setState(InstanceState.UPDATED);
-        else
+        } else {
+            QueuedLog.warning("trouble while updating");
             InstanceManager.setState(InstanceState.UPDATE_FAILED);
+        }
         //close logs
         QueuedLog.printWarningCount();
         QueuedLog.printErrorCount();
@@ -49,6 +52,7 @@ public class Updater {
 
     private static boolean update() {
         boolean errorFree = true;
+        QueuedLog.action("pulling latest commits");
         Process git = null;
         try {
             git = new ProcessBuilder("git","pull").start();
@@ -71,6 +75,7 @@ public class Updater {
                 errorFree = false;
             }
         }
+        QueuedLog.action("restarting main process");
         try {
             new ProcessBuilder("bash","KleinerNerd.sh").start();
         } catch (IOException e) {

@@ -77,10 +77,10 @@ public class InstanceManager {
                 }
                 System.exit(1);
                 return null;
+            } else {
+                QueuedLog.debug("Instance file not loaded");
+                return null;
             }
-        } else {
-            QueuedLog.debug("Instance file not loaded");
-            return null;
         }
         String stateString = instanceProperties.getProperty("state");
         if (stateString == null) {
@@ -95,6 +95,7 @@ public class InstanceManager {
 
     private static void save() {
         QueuedLog.action("saving instance properties");
+        KleinerNerd.checkDataFolder();
         try (FileWriter fw = new FileWriter(instanceFile)) {
             instanceProperties.store(fw, "KleinerNerd instance properties");
         } catch (IOException e) {
