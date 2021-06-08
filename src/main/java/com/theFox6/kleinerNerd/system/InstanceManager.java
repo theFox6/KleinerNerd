@@ -1,7 +1,6 @@
 package com.theFox6.kleinerNerd.system;
 
 import com.theFox6.kleinerNerd.KleinerNerd;
-import foxLog.deamon.ConditionNotifier;
 import foxLog.queued.QueuedLog;
 
 import java.io.File;
@@ -54,9 +53,6 @@ public class InstanceManager {
                 QueuedLog.flushInterruptibly();
             } catch (InterruptedException e) {
                 QueuedLog.warning("interrupted log flushing",e);
-            } catch (ConditionNotifier.NotNotifiableException e) {
-                //this exception shouldn't even exist in the QueuedLog
-                QueuedLog.error("Oi Fox, fix that log of yours!",e);
             }
             //let's quit
             System.exit(1);
@@ -71,9 +67,6 @@ public class InstanceManager {
                     QueuedLog.flushInterruptibly();
                 } catch (InterruptedException e) {
                     QueuedLog.warning("interrupted log flushing", e);
-                } catch (ConditionNotifier.NotNotifiableException e) {
-                    //this exception shouldn't even exist in the QueuedLog
-                    QueuedLog.error("Oi Fox, fix that log of yours!",e);
                 }
                 System.exit(1);
                 return null;

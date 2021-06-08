@@ -19,6 +19,8 @@ public class ReactionRoleListener {
 	private static final String addrrCommand = KleinerNerd.prefix + "rr add";
 	private Map<String, RRConfigurator> started = new LinkedHashMap<>();
 
+	//FIXME: last stage doesn't work
+
 	@SubscribeEvent
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		Guild guild = event.getGuild();

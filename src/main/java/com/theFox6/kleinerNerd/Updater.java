@@ -13,6 +13,9 @@ import java.io.IOException;
 public class Updater {
     public static final File logFile = new File("updater-log.txt");
 
+    //TODO: make it run in jar
+    //perhaps make it run on windows
+
     public static void main(String[] args) {
         // set the log file
         try {

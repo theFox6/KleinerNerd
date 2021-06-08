@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
   implementation fileTree(dir: 'libs', include: '*.jar')
-  implementation 'net.dv8tion:JDA:4.2.1_265'
+  implementation 'net.dv8tion:JDA:4.2.1_272'
   implementation 'com.fasterxml.jackson.core:jackson-core:2.10.1'
   implementation 'com.fasterxml.jackson.core:jackson-annotations:2.10.1'
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.1'

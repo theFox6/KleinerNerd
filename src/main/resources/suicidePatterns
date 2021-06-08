@@ -116,6 +116,10 @@ $kms; = {kms:
 			"tod durch strick"
 		}],
 		"nehme ein toasterbad",
+		["bade ",{imtod:
+			["mit ", {one: "meinem ", "einem ", "nem "}, "toaster"],
+			[{im: "in einem ", "im "},"mixer"],
+		}],
 		["nehme ein Bad ",{im: "in einem ", "im "},"mixer"],
 		["nehme ein bad mit ", {one: "meinem ", "einem ", "nem "}, "toaster"],
 		[{schießen: "schieße ", "schieß ", "schieß' "}, "mir in den kopf"],

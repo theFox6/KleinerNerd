@@ -61,9 +61,6 @@ public class SystemCommandListener {
 				QueuedLog.flushInterruptibly();
 			} catch (InterruptedException e) {
 				QueuedLog.warning("logfile request was interrupted", e);
-			} catch (NotNotifiableException e) {
-				//this exception doesn't even exist in the latest version...
-				QueuedLog.error("Yo Fox, your log implementation is faulty.", e);
 			}
     		chan.sendFile(KleinerNerd.logFile).queue();
     	} else if (raw.equals(KleinerNerd.prefix + "update") ||
