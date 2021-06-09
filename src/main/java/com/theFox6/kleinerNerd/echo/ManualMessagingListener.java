@@ -1,16 +1,11 @@
 package com.theFox6.kleinerNerd.echo;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.theFox6.kleinerNerd.ChannelRetrievalException;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.data.MessageLocation;
 import com.theFox6.kleinerNerd.echo.faults.InvalidTargetPlaceException;
-import com.theFox6.kleinerNerd.listeners.HelpListener;
 import com.theFox6.kleinerNerd.matchers.ChannelLocationMatch;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
-
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -20,6 +15,9 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ManualMessagingListener {
 	public static final String echoCommand = KleinerNerd.prefix + "echo ";
@@ -44,7 +42,7 @@ public class ManualMessagingListener {
     		ChannelLocationMatch loc = ChannelLocationMatch.matchLocation(args);
     		if (!loc.isValidMatch()) {
     			//TODO: send the reason why it is invalid
-    			chan.sendMessage("Please provide a valid location. For help about the format use `" + HelpListener.helpCommand + " location format`.").queue();
+    			chan.sendMessage("Please provide a valid location. For help about the format use `/help location format`.").queue();
     			return;
     		}
     		
@@ -70,7 +68,7 @@ public class ManualMessagingListener {
 						+ "because I " + e.getMessage() + ".\n"
 						+ "This kind of fault means that either you or my developer messed up.\n"
 						+ "Please provide more info about the target place next time.\n"
-						+ "See `" + HelpListener.helpCommand + " location format` for help about providing a target location."
+						+ "See `/help location format` for help about providing a target location."
 						).queue();
 				return;
 			}

@@ -25,6 +25,7 @@ import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 public class KleinerNerd {
 	public static final String dataFolder = ".KleinerNerd/";
@@ -104,21 +105,31 @@ public class KleinerNerd {
 			}
 		});
 
-		JDA jda = buildBot(setUpEventManager());
+		AnnotatedEventManager manager = setUpEventManager();
+		JDA jda = buildBot(manager);
 		if (jda == null) {
 			QueuedLog.warning("bot unbuilt, trying to exit");
 			InstanceManager.setState(InstanceState.DYING);
 			System.exit(1);
 		}
+		setupCommands(jda, manager.getRegisteredListeners());
 		ModLog.sendToOwners(jda,"I started up.");
 		InstanceManager.setState(InstanceState.RUNNING);
+	}
+
+	private static void setupCommands(JDA jda, List<Object> listeners) {
+		listeners.forEach((l) -> {
+			if (l instanceof CommandListener) {
+				((CommandListener) l).setupCommands(jda);
+			}
+		});
 	}
 
 	private static AnnotatedEventManager setUpEventManager() {
 		AnnotatedEventManager eventManager = new AnnotatedEventManager();
 		eventManager.register(new LoggingListener());
 
-		eventManager.register(new HelpListener());
+		//eventManager.register(new HelpListener());
 		eventManager.register(new SystemCommandListener());
 		eventManager.register(new ConfigurationListener());
 		eventManager.register(new PollListener());
