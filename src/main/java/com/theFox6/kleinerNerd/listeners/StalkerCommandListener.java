@@ -1,62 +1,50 @@
 package com.theFox6.kleinerNerd.listeners;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+
 import java.time.Instant;
 
-import com.theFox6.kleinerNerd.KleinerNerd;
-
-import foxLog.queued.QueuedLog;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.SubscribeEvent;
-
-public class StalkerCommandListener {
-	private static final String avatarCommand = KleinerNerd.prefix + "avatar ";
-	
-	@SubscribeEvent
-	public void onMessageReceived(MessageReceivedEvent event) {
-		Message msg = event.getMessage();
-    	String raw = msg.getContentRaw();
-    	if (raw.equals(avatarCommand.substring(0, avatarCommand.length()-1))) {
-    		sendAvatarEmbed(msg,msg.getAuthor());
-    	} else if (raw.startsWith(avatarCommand)) {
-    		if (msg.getMentionedUsers().isEmpty()) {
-    			MessageChannel chan = event.getChannel();
-	    		try {
-		    		event.getJDA().retrieveUserById(
-		    				raw.substring(avatarCommand.length()))
-		    		.queue((u) -> {
-		    			sendAvatarEmbed(msg,u);
-		    		}, (e) -> {
-		    			if (e.getMessage().equals("10013: Unknown User")) {
-		    				QueuedLog.debug("couldn't find the user with the given id");
-		    				chan.sendMessage("Discord could not find a user with that ID.").queue();
-		    			} else {
-			    			QueuedLog.warning("couldn't retrieve user", e);
-			    			chan.sendMessage("error " + e.getMessage()).queue();
-		    			}
-		    		});
-	    		} catch (NumberFormatException e) {
-	    			QueuedLog.debug("user misformatted number: "+e.getMessage());
-	    			chan.sendMessage(e.getMessage()).queue();
-	    		}
-    		} else {
-    			msg.getMentionedUsers().forEach((u) -> sendAvatarEmbed(msg,u));
-    		}
-		}
+public class StalkerCommandListener implements CommandListener {
+	@Override
+	public void setupCommands(JDA jda) {
+		jda.upsertCommand(
+				new CommandData("avatar", "sendet den avatar von einem Benutzer")
+						.addOption(OptionType.USER,"benutzer","der Benutzer dessen Profilbild gesendet werden soll",true)
+		).queue();
+		jda.upsertCommand(
+				new CommandData("servericon", "sendet das icon von einer Gilde (einem Server)")
+						.addOption(OptionType.STRING,"guild","die ID vom Server",true)
+		).queue();
 	}
 
-	private void sendAvatarEmbed(Message request,User u) {
-		User author = request.getAuthor();
-		EmbedBuilder avatarEmbed = new EmbedBuilder()
-				.setTitle("avatar of "+u.getAsTag())
-				.setTimestamp(Instant.now())
-				.setImage(u.getEffectiveAvatarUrl());
-		if (!request.isFromType(ChannelType.PRIVATE))
-			avatarEmbed.setFooter("requested by " + author.getAsTag(),author.getEffectiveAvatarUrl());
-		request.getChannel().sendMessage(avatarEmbed.build()).queue();
+	@SubscribeEvent
+	public void onCommand(SlashCommandEvent ev) {
+		if (ev.getName().equals("avatar")) {
+			//User c = ev.getUser();
+			User u = ev.getOption("benutzer").getAsUser();
+			EmbedBuilder avatarEmbed = new EmbedBuilder()
+					.setTitle("avatar of "+u.getAsTag())
+					.setTimestamp(Instant.now())
+					.setImage(u.getEffectiveAvatarUrl());
+			ev.replyEmbeds(avatarEmbed.build()).queue();
+		} else if (ev.getName().equals("servericon")) {
+			Guild g = ev.getJDA().getGuildById(ev.getOption("guild").getAsString());
+			if (g == null) {
+				ev.reply("Konnte keinen Server mit der ID finden.").setEphemeral(true).queue();
+				return;
+			}
+			EmbedBuilder iconEmbed = new EmbedBuilder()
+					.setTitle("icon of "+g.getName())
+					.setTimestamp(Instant.now())
+					.setImage(g.getIconUrl());
+			ev.replyEmbeds(iconEmbed.build()).queue();
+		}
 	}
 }

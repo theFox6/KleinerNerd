@@ -48,6 +48,7 @@ $kms; = {kms:
 			"meine pulsadern aufschlitzen",
 			"mir die pulsadern aufschlitzen",
 			"mir meine pulsadern aufschlitzen",
+			"mit betonschuhen baden",
 			"nicht mehr leben",
 			"sterben",
 			"von einer klippe springen",
@@ -84,7 +85,10 @@ $kms; = {kms:
 		}, $od;
 	],
 	["ich ", {tätigkeit:
-		[{quit: "beende ", "lösche ", "entferne "}, {leben: "mein leben", "meine existenz", ["mich", ("selbst")]}],
+		[
+			{quit: "beende ", "lösche ", "entferne ", "überspringe ", "skippe "},
+			{leben: "mein leben", "meine existenz", "den rest meines lebens", ["mich", ("selbst")]}
+		],
 		"bring mich um",
 		"bringe mich um",
 		[{verbindemit: "fasse in ", "uriniere in "},{einz: "eine", "die"}, " steckdose"],
