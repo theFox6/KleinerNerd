@@ -24,11 +24,18 @@ public class ConfigFiles {
 			return reader.lines().collect(Collectors.joining("\n"));
 		}
 	}
-		
-	private static Collection<String> getFileContents(String filename, boolean ignoreEmpty) throws IOException {
-		if (ignoreEmpty) {
+
+	/**
+	 * Reads a file and returns its contents
+	 * @param filename the path to the file to read
+	 * @param ignoreEC whether to ignore empty lines and comments
+	 * @return a list containing the lines from the file
+	 * @throws IOException if something goes wrong while reading the file
+	 */
+	private static Collection<String> getFileContents(String filename, boolean ignoreEC) throws IOException {
+		if (ignoreEC) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-				return reader.lines().filter(s -> !s.isEmpty()).collect(Collectors.toList());
+				return reader.lines().filter(s -> !s.isEmpty()).filter(s -> !s.startsWith("#")).collect(Collectors.toList());
 			}
 		} else {
 			try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {

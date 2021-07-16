@@ -11,11 +11,11 @@ public class ConvoSnippetListener {
 		Message msg = event.getMessage();
     	String raw = msg.getContentRaw();
     	String lowerRaw = raw.toLowerCase();
-    	//caution: you may want to create a separate if clause for messages that contain baum
-    	if (lowerRaw.contains("baum")) {
+    	if (lowerRaw.contains("baum") || lowerRaw.contains(" tree ")) {
     		QueuedLog.verbose("Baum");
     		msg.addReaction("U+1f333").queue();
-    	} else if (lowerRaw.contains("cookie") || lowerRaw.contains("keks")) {
+    	}
+    	if (lowerRaw.contains("cookie") || lowerRaw.contains("keks")) {
     		QueuedLog.verbose("cookie");
     		msg.addReaction("U+1f36a").queue();
     	} else if (lowerRaw.equals("oi")) {

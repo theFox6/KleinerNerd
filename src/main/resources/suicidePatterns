@@ -86,6 +86,7 @@ $kms; = {kms:
 		}, $od;
 	],
 	["ich ", {tätigkeit:
+		"mache ein nickerchen auf den gleisen",
 		[
 			{quit: "beende ", "lösche ", "entferne ", "überspringe ", "skippe "},
 			{leben: "mein leben", "meine existenz", "den rest meines lebens", ["mich", ("selbst")]}
