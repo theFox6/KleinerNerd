@@ -3,48 +3,87 @@ package com.theFox6.kleinerNerd.reactionRoles;
 import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.data.MessageLocation;
+import com.theFox6.kleinerNerd.listeners.CommandListener;
+import com.theFox6.kleinerNerd.storage.GuildStorage;
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.commands.privileges.CommandPrivilege;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class ReactionRoleListener {
-	private static final String addrrCommand = KleinerNerd.prefix + "rr add";
-	private Map<String, RRConfigurator> started = new LinkedHashMap<>();
-
-	//FIXME: last stage doesn't work
+public class ReactionRoleListener implements CommandListener {
+	@Override
+	public void setupCommands(JDA jda) {
+		jda.upsertCommand(new CommandData("rr", "ändert die Reaktions-Rollen Konfiguration").addSubcommands(
+				new SubcommandData("add", "fügt eine Reaktion hinzu, die zum verteilen einer Rolle dient")
+						.addOption(OptionType.CHANNEL, "kanal", "der Kanal in dem die Nachricht ist, unter die die Reaktion soll", true)
+						.addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht der die Reaktion angehängt werden soll", true)
+						.addOption(OptionType.STRING, "emote", "das emote für die Rollenänderung", true)
+						.addOption(OptionType.ROLE, "rolle", "die Rolle die reagierenden Benutzern zugewiesen wird", true)
+		)).setDefaultEnabled(false).queue((c) -> jda.getGuilds().forEach((g) -> {
+			List<CommandPrivilege> privileges = new LinkedList<>();
+			privileges.add(CommandPrivilege.enableUser(g.getOwnerId()));
+			String modrole = GuildStorage.getSettings(g.getId()).getModRole();
+			if (modrole != null)
+				privileges.add(CommandPrivilege.enableRole(modrole));
+			c.updatePrivileges(g,privileges).queue();
+		}));
+		//TODO: update privileges on modrole update
+	}
 
 	@SubscribeEvent
-	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		Guild guild = event.getGuild();
-		Member author = event.getMember();
-		if (author.getId().equals(event.getJDA().getSelfUser().getId()))
+	public void onCommand(SlashCommandEvent ev) {
+		if (!ev.getName().equals("rr"))
 			return;
-		if (!KNHelpers.isModerator(author, guild))
+		if (!ev.isFromGuild()) //not supported for now
 			return;
-		Message msg = event.getMessage();
-		String raw = msg.getContentRaw();
-		TextChannel chan = event.getChannel();
-		String chanId = chan.getId();
-		//associate reaction roles with a message
-		if (raw.equals(addrrCommand)) {
-			started.put(chanId, new RRConfigurator(chan));
-		} else if (started.containsKey(chanId)) {
-			if (started.get(chanId).handle(raw, chan, msg)) {
-				started.remove(chanId);
-			}
+		if ("add".equals(ev.getSubcommandName())) {
+			Emoji emote = Emoji.fromMarkdown(ev.getOption("emote").getAsString());
+			ev.getOption("kanal").getAsMessageChannel().retrieveMessageById(ev.getOption("nachrichtenid").getAsString()).queue((tmsg) -> {
+				if (emote.isUnicode()) {
+					String emoji = emote.getAsMention();
+					ReactionRoleStorage.getOrCreateConfig(new MessageLocation(tmsg)).addReactionRole(emoji, ev.getOption("rolle").getAsRole().getId());
+					tmsg.addReaction(emoji).queue(s -> {
+					}, (e) -> {
+						QueuedLog.warning("could not add rr emoji", e);
+						ev.getChannel().sendMessage("could not add rr emoji, you will have to add it manually").queue();
+					});
+				} else {
+					ReactionRoleStorage.getOrCreateConfig(new MessageLocation(tmsg))
+							.addReactionRole(emote.getName() + ":" + emote.getId(), ev.getOption("rolle").getAsRole().getId());
+					tmsg.addReaction(ev.getGuild().getEmoteById(emote.getId())).queue((s) -> {
+					}, (e) -> {
+						QueuedLog.warning("could not add rr emote", e);
+						ev.getChannel().sendMessage("could not add rr emote, you will have to add it manually").queue();
+					});
+				}
+				ev.reply("reaction role added").queue();
+			}, (e) -> {
+				if ("10008: Unknown Message".equals(e.getMessage())) {
+					ev.reply("konnte Nachricht mit angegebener id nicht finden").setEphemeral(true).queue();
+				} else {
+					ev.reply("konnte nachricht nicht finden: " + e.getMessage()).setEphemeral(true).queue();
+				}
+			});
+		} else {
+			QueuedLog.warning("unknown subcommand rr " + ev.getSubcommandName());
 		}
-		//edit reaction role configurations
-		//delete reaction role configurations
 	}
-	
+
 	private Role getReactionRoleFromEvent(GenericGuildMessageReactionEvent event) {
 		MessageLocation loc = new MessageLocation(event);
 		ReactionRoleMap config = ReactionRoleStorage.getConfig(loc);

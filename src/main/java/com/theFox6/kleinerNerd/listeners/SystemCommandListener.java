@@ -66,6 +66,16 @@ public class SystemCommandListener implements CommandListener {
 				event.reply("fahre herunter").queue((m) -> {
 					InstanceManager.setState(InstanceState.SHUTTING_DOWN);
 					event.getJDA().shutdown();
+					/* unregister all the commands
+					event.getJDA().retrieveCommands().queue((cl) -> {
+						Consumer<? super Void> shutdown = (v) -> event.getJDA().shutdown();
+						MultiActionHandler<Void> unregister = new MultiActionHandler<>(cl.size(), shutdown, (e) -> {
+							QueuedLog.error("couldn't unregister command: " + e.getMessage());
+							shutdown.accept(null);
+						});
+						cl.forEach((c) -> c.delete().queue(unregister::success, unregister::failure));
+					});
+					*/
 				});
 				break;
 			case "logfile":

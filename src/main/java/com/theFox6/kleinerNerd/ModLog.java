@@ -2,10 +2,10 @@ package com.theFox6.kleinerNerd;
 
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 import com.theFox6.kleinerNerd.storage.GuildStorage;
-
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class ModLog {
@@ -78,5 +78,12 @@ public class ModLog {
 			throw new IllegalArgumentException("given channel is not within given guild");
 		}
 		GuildStorage.getSettings(gid).setModLogChannel(chan.getId());
+	}
+
+	public static void setModLogChannel(Guild guild, MessageChannel chan) {
+		TextChannel tc = guild.getTextChannelById(chan.getId());
+		if (tc == null)
+			throw new IllegalArgumentException("given channel is not a text channel");
+		setModLogChannel(guild, tc);
 	}
 }

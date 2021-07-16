@@ -1,15 +1,10 @@
-package com.theFox6.kleinerNerd.storage;
+package com.theFox6.kleinerNerd.data;
 
 public class GuildSettings {
 	/**
 	 * the Id of a channel where log messages will be sent for moderators
 	 */
 	private String modLogChannel;
-	
-	/**
-	 * the Id of a role that is immune to spam rate limiting
-	 */
-	private String allowSpamRole;
 
 	/**
 	 * the Id of a role that can use moderator commands
@@ -22,14 +17,6 @@ public class GuildSettings {
 
 	public void setModLogChannel(String id) {
 		modLogChannel = id;
-	}
-	
-	public String getSpamRole() {
-		return allowSpamRole;
-	}
-
-	public void setSpamRole(String id) {
-		allowSpamRole = id;
 	}
 
 	public String getModRole() {

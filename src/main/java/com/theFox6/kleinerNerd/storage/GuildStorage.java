@@ -12,13 +12,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.theFox6.kleinerNerd.KleinerNerd;
 
+import com.theFox6.kleinerNerd.data.GuildSettings;
 import foxLog.queued.QueuedLog;
 
 public class GuildStorage {
 	private static final File gsf = new File(KleinerNerd.dataFolder + "guilds.json");
 	private static final File bsf = new File(KleinerNerd.dataFolder + "guilds_broken.json");
 	private static boolean broken = false;
-	private static ConcurrentHashMap<String,GuildSettings> settings = null;
+	private static ConcurrentHashMap<String, GuildSettings> settings = null;
 	
 	public static void load() {
 		if (gsf.exists()) {
