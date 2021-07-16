@@ -3,21 +3,54 @@ package com.theFox6.kleinerNerd.reactionRoles;
 import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.data.MessageLocation;
+import com.theFox6.kleinerNerd.listeners.CommandListener;
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Queue;
 import java.util.function.Consumer;
 
-public class ReactionRoleListener {
+public class ReactionRoleListener implements CommandListener {
 	private static final String addrrCommand = KleinerNerd.prefix + "rr add";
 	private Map<String, RRConfigurator> started = new LinkedHashMap<>();
+
+	@Override
+	public void setupCommands(JDA jda) {
+		jda.upsertCommand(new CommandData("rr", "ändert die Reaktions-Rollen Konfiguration").addSubcommands(
+				new SubcommandData("add", "fügt eine Reaktion hinzu, die zum verteilen einer Rolle dient")
+						.addOption(OptionType.CHANNEL, "kanal", "der Kanal in dem die Nachricht ist, unter die die Reaktion soll", true)
+						.addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht der die Reaktion angehängt werden soll", true)
+						.addOption(OptionType.STRING, "emote", "das emote für die Rollenänderung", true)
+						.addOption(OptionType.ROLE, "role", "die Rolle die reagierenden Benutzern zugewiesen wird", true)
+		)).queue();
+	}
+
+	@SubscribeEvent
+	public void onCommand(SlashCommandEvent ev) {
+		if (!ev.getName().equals("rr"))
+			return;
+		ev.reply(ev.getOption("emote").getAsString()).queue();
+		switch (ev.getSubcommandName()) {
+			case "add":
+				break;
+			default:
+				QueuedLog.warning("unknown subcommand rr " + ev.getSubcommandName());
+				break;
+		}
+	}
 
 	//FIXME: last stage doesn't work
 
