@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -24,7 +25,7 @@ public class StalkerCommandListener implements CommandListener {
 						new SubcommandData("von-benutzerid", "sendet den Avatar von einem Benutzer")
 								.addOption(OptionType.STRING,"benutzerid","die ID vom Benutzer dessen Profilbild gesendet werden soll",true),
 						new SubcommandData("von-serverid", "sendet das icon von einer Gilde (einem Server)")
-								.addOption(OptionType.STRING,"guildid","die ID vom Server",true)
+								.addOption(OptionType.STRING,"guildid","die ID vom Server",false)
 				)
 		).queue();
 	}
@@ -55,11 +56,23 @@ public class StalkerCommandListener implements CommandListener {
 					}
 					break;
 				case "von-serverid":
-					Guild g = ev.getJDA().getGuildById(ev.getOption("guildid").getAsString());
-					if (g == null) {
-						ev.reply("Konnte keinen Server mit der ID finden.").setEphemeral(true).queue();
-						return;
+					OptionMapping gid = ev.getOption("guildid");
+					Guild g;
+					if (gid == null) {
+						g = ev.getGuild();
+						if (g == null) {
+							ev.reply("Keine Server ID gegeben und nicht in einem Server gesendet.")
+									.setEphemeral(true).queue();
+							return;
+						}
+					} else {
+						g = ev.getJDA().getGuildById(gid.getAsString());
+						if (g == null) {
+							ev.reply("Konnte keinen Server mit der ID finden.").setEphemeral(true).queue();
+							return;
+						}
 					}
+
 					EmbedBuilder iconEmbed = new EmbedBuilder()
 							.setTitle("icon of "+g.getName())
 							.setTimestamp(Instant.now())
