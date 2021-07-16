@@ -1,11 +1,11 @@
 package com.theFox6.kleinerNerd.reactionRoles;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ReactionRoleMap {
 	//Reaction, Role
@@ -20,8 +20,8 @@ public class ReactionRoleMap {
 		return reactions.get(reaction);
 	}
 	
-	public void addReactionRole(String reaction, String role) {
-		reactions.put(reaction, role);
+	public void addReactionRole(String reaction, String roleid) {
+		reactions.put(reaction, roleid);
 	}
 	
 	public void removeReactionRole(String reaction) {

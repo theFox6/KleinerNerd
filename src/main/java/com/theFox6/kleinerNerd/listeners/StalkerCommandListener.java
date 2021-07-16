@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
 import java.time.Instant;
 
@@ -19,26 +20,32 @@ public class StalkerCommandListener implements CommandListener {
 	@Override
 	public void setupCommands(JDA jda) {
 		jda.upsertCommand(new CommandData("avatar", "sendet einen Avatar")
+			.addSubcommandGroups(new SubcommandGroupData("von", "sendet den Avatar von jemandem oder etwas")
 				.addSubcommands(
-						new SubcommandData("von-benutzer", "sendet den Avatar von einem Benutzer")
-								.addOption(OptionType.USER,"benutzer","der Benutzer dessen Profilbild gesendet werden soll",true),
-						new SubcommandData("von-benutzerid", "sendet den Avatar von einem Benutzer")
-								.addOption(OptionType.STRING,"benutzerid","die ID vom Benutzer dessen Profilbild gesendet werden soll",true),
-						new SubcommandData("von-serverid", "sendet das icon von einer Gilde (einem Server)")
-								.addOption(OptionType.STRING,"guildid","die ID vom Server",false)
+					new SubcommandData("benutzer", "sendet den Avatar von einem Benutzer")
+						.addOption(OptionType.USER,"benutzer","der Benutzer dessen Profilbild gesendet werden soll",true),
+					new SubcommandData("benutzerid", "sendet den Avatar von einem Benutzer")
+						.addOption(OptionType.STRING,"benutzerid","die ID vom Benutzer dessen Profilbild gesendet werden soll",true),
+					new SubcommandData("serverid", "sendet das icon von einer Gilde (einem Server)")
+						.addOption(OptionType.STRING,"guildid","die ID vom Server",false)
 				)
+			)
 		).queue();
 	}
 
 	@SubscribeEvent
 	public void onCommand(SlashCommandEvent ev) {
 		if (ev.getName().equals("avatar")) {
+			if (!ev.getSubcommandGroup().equals("von")) {
+				QueuedLog.warning("unknown subcommand group: " + ev.getSubcommandGroup());
+				return;
+			}
 			switch (ev.getSubcommandName()) {
-				case "von-benutzer":
+				case "benutzer":
 					User u = ev.getOption("benutzer").getAsUser();
 					sendImageEmbed(ev,"avatar of "+u.getAsTag(),u.getEffectiveAvatarUrl());
 					break;
-				case "von-benutzerid":
+				case "benutzerid":
 					try {
 						ev.getJDA().retrieveUserById(ev.getOption("benutzerid").getAsString()).queue(
 								(ru) -> sendImageEmbed(ev, "avatar of " + ru.getAsTag(), ru.getEffectiveAvatarUrl()),
@@ -55,7 +62,7 @@ public class StalkerCommandListener implements CommandListener {
 						ev.reply(e.getMessage()).setEphemeral(true).queue();
 					}
 					break;
-				case "von-serverid":
+				case "serverid":
 					OptionMapping gid = ev.getOption("guildid");
 					Guild g;
 					if (gid == null) {
@@ -80,7 +87,7 @@ public class StalkerCommandListener implements CommandListener {
 					ev.replyEmbeds(iconEmbed.build()).queue();
 					break;
 				default:
-					QueuedLog.warning("avatar subcommand not recognized");
+					QueuedLog.warning("avatar subcommand not recognized: " + ev.getSubcommandName());
 			}
 		}
 	}
