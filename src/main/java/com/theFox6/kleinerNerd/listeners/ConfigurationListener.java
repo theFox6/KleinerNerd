@@ -2,6 +2,7 @@ package com.theFox6.kleinerNerd.listeners;
 
 import com.theFox6.kleinerNerd.ModLog;
 import com.theFox6.kleinerNerd.commands.CommandListener;
+import com.theFox6.kleinerNerd.commands.ModOnlyCommandListener;
 import com.theFox6.kleinerNerd.storage.GuildStorage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
@@ -22,17 +23,15 @@ public class ConfigurationListener implements CommandListener {
 		jda.upsertCommand(new CommandData("modrole","Stellt die Moderatorenrolle des Servers ein"))
 				.setDefaultEnabled(false)
 				.addOption(OptionType.ROLE,"rolle","die Rolle, die Verwaltungs-Befehle ausführen darf",false)
-				.queue(
-						(c) -> jda.getGuilds().forEach((g) -> c.updatePrivileges(g, CommandPrivilege.enableUser(g.getOwnerId())).queue()),
+				.queue(ModOnlyCommandListener::makeOwnerOnly,
 						(e) -> QueuedLog.error("couldn't set up modrole command",e)
 				);
 		//perhaps whitelist modrole for modlog command
 		jda.upsertCommand(new CommandData("modlog", "stellt den Moderator log Kanal de Servers ein"))
 				.setDefaultEnabled(false)
 				.addOption(OptionType.CHANNEL, "kanal", "der Kanal in den der KleineNerd Nachrichten für Moderatoren sendet", true)
-				.queue(
-						(c) -> jda.getGuilds().forEach((g) -> c.updatePrivileges(g, CommandPrivilege.enableUser(g.getOwnerId())).queue()),
-						(e) -> QueuedLog.error("couldn't set up modrole command",e)
+				.queue(ModOnlyCommandListener::makeOwnerOnly,
+						(e) -> QueuedLog.error("couldn't set up modlog command",e)
 				);
 	}
 

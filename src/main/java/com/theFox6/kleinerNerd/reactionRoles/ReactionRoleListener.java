@@ -1,11 +1,12 @@
 package com.theFox6.kleinerNerd.reactionRoles;
 
-import com.theFox6.kleinerNerd.commands.BadOptionTypeException;
 import com.theFox6.kleinerNerd.EmojiFormatException;
-import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
-import com.theFox6.kleinerNerd.data.MessageLocation;
+import com.theFox6.kleinerNerd.ModLog;
+import com.theFox6.kleinerNerd.commands.BadOptionTypeException;
 import com.theFox6.kleinerNerd.commands.CommandListener;
 import com.theFox6.kleinerNerd.commands.ModOnlyCommandListener;
+import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
+import com.theFox6.kleinerNerd.data.MessageLocation;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
@@ -13,16 +14,22 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class ReactionRoleListener extends ModOnlyCommandListener implements CommandListener {
-	//TODO: fix localization
+	// guildId, lastTimestamp
+	private final Map<String, Instant> lastRRFaultMessage = new ConcurrentHashMap<>();
 
 	@Override
 	public void setupCommands(JDA jda) {
@@ -96,7 +103,7 @@ public class ReactionRoleListener extends ModOnlyCommandListener implements Comm
 					ev.getChannel().sendMessage("Ich habe keine Berechtigung mit dem rr Emote zu reagieren.").queue();
 				} else {
 					QueuedLog.warning("could not add rr emote", e);
-					ev.getChannel().sendMessage("could not add rr emote, you will have to add it manually").queue();
+					ev.getChannel().sendMessage("Ich konnte nicht mit dem rr emoji reagieren.").queue();
 				}
 			});
 		} else {
@@ -106,13 +113,13 @@ public class ReactionRoleListener extends ModOnlyCommandListener implements Comm
 			Guild g = ev.getGuild();
 			if (g == null) {
 				QueuedLog.warning("rr add outside of a guild");
-				ev.reply("command can only be used in guilds").setEphemeral(true).queue();
+				ev.reply("Dieser Befehl kann nur in Gilden/Servern verwendet werden.").setEphemeral(true).queue();
 				return;
 			}
 			Emote guildEmote = g.getEmoteById(emote.getId());
 			if (guildEmote == null) {
 				QueuedLog.warning("could not find rr emote " + emote.getAsMention() + " within guild");
-				ev.getChannel().sendMessage("could not find emote in this guild, you will have to add it manually").queue();
+				ev.getChannel().sendMessage("Ich konnte nicht mit dem rr emoji reagieren, da ich es nicht in diesem Server finden konnte.").queue();
 			} else {
 				tmsg.addReaction(guildEmote).queue((s) -> {
 				}, (e) -> {
@@ -121,12 +128,12 @@ public class ReactionRoleListener extends ModOnlyCommandListener implements Comm
 						ev.getChannel().sendMessage("Ich habe keine Berechtigung mit dem rr Emote zu reagieren.").queue();
 					} else {
 						QueuedLog.warning("could not add rr emote", e);
-						ev.getChannel().sendMessage("could not add rr emote, you will have to add it manually").queue();
+						ev.getChannel().sendMessage("Ich konnte nicht mit dem rr emoji reagieren.").queue();
 					}
 				});
 			}
 		}
-		ev.reply("reaction role added").queue();
+		ev.reply("Mit " + emote.getAsMention() + " kann man jetzt die Rolle \"" + role.getName() + "\" bekommen.").queue();
 	}
 
 	private Role getReactionRoleFromEvent(GenericGuildMessageReactionEvent event) {
@@ -166,12 +173,19 @@ public class ReactionRoleListener extends ModOnlyCommandListener implements Comm
 		}
 	}
 	*/
+
+	private boolean ratelimitRRFault(Guild guild) {
+		String gid = guild.getId();
+		if (lastRRFaultMessage.containsKey(gid))
+			if (Instant.now().isBefore(lastRRFaultMessage.get(gid).plus(10, ChronoUnit.MINUTES)))
+				return false;
+		lastRRFaultMessage.put(gid, Instant.now());
+		return true;
+	}
 	
 	private void getMember(Member eventMember, Guild guild, String userId, Consumer<Member> action) {
 		if (eventMember == null) {
-			guild.retrieveMemberById(userId).queue(action, (e) -> {
-				QueuedLog.error("could not retrieve member",e);
-			});
+			guild.retrieveMemberById(userId).queue(action, (e) -> QueuedLog.error("could not retrieve member",e));
 		} else {
 			action.accept(eventMember);
 		}
@@ -189,23 +203,34 @@ public class ReactionRoleListener extends ModOnlyCommandListener implements Comm
 		Guild guild = event.getGuild();
 		getMember(event.getMember(), guild, userId, (member) -> {
 			final String name = member.getEffectiveName();
-			guild.addRoleToMember(member, r).queue(
-					(s) -> {
-						QueuedLog.debug("Rolle \""+r.getName()+"\" wurde "+name+" zugewiesen.");
-						member.getUser().openPrivateChannel().queue((pc) -> {
-							pc.sendMessage("Rolle \""+r.getName()+"\" zugewiesen.").queue();
-						});
-					},
-					(f) -> {
-						QueuedLog.warning("Konnte Rolle \""+r.getName()+"\" nicht zuweisen.",f.getCause());
-						member.getUser().openPrivateChannel().queue((pc) -> {
-							pc.sendMessage("Konnte Rolle \""+r.getName()+"\" nicht zuweisen.").queue();
-						});
-					}
+			try {
+				guild.addRoleToMember(member, r).queue(
+						(s) -> {
+							QueuedLog.debug("Role \"" + r.getName() + "\" was assigned to " + name + ".");
+							member.getUser().openPrivateChannel().queue(
+									(pc) -> pc.sendMessage("Rolle \"" + r.getName() + "\" zugewiesen.").queue()
+							);
+						},
+						(f) -> {
+							QueuedLog.warning("Couldn't assign role \"" + r.getName() + "\".", f.getCause());
+							member.getUser().openPrivateChannel().queue(
+									(pc) -> pc.sendMessage("Ich konnte die Rolle \""
+											+ r.getName() + "\" aufgrund eines Fehlers nicht zuweisen:" +
+											f.getMessage()).queue()
+							);
+						}
 				);
+			} catch (HierarchyException e) {
+				QueuedLog.debug("too low in role hierarchy to assign reaction role");
+				String heMsg = "Ich konnte die Rolle \"" + r.getName() + "\" nicht zuweisen, " +
+						"da ich in der Rollenhierarchie unter ihr stehe.";
+				member.getUser().openPrivateChannel().queue((pc) -> pc.sendMessage(heMsg).queue());
+				if (ratelimitRRFault(guild))
+					ModLog.sendToGuild(guild,heMsg);
+			}
 		});
 	}
-	
+
 	@SubscribeEvent
 	public void onReactionRemoved(GuildMessageReactionRemoveEvent event) {
 		Role r = getReactionRoleFromEvent(event);
@@ -218,20 +243,31 @@ public class ReactionRoleListener extends ModOnlyCommandListener implements Comm
 		Guild guild = event.getGuild();
 		getMember(event.getMember(), guild, userId, (member) -> {
 			final String name = member.getEffectiveName();
-			guild.removeRoleFromMember(member, r).queue(
-					(s) -> {
-						QueuedLog.debug("Rolle \""+r.getName()+"\" wurde von "+name+" entfernt.");
-						member.getUser().openPrivateChannel().queue((pc) -> {
-							pc.sendMessage("Rolle \""+r.getName()+"\" entfernt.").queue();
-						});
-					},
-					(f) -> {
-						QueuedLog.warning("Konnte Rolle \""+r.getName()+"\" nicht entfernen.",f.getCause());
-						member.getUser().openPrivateChannel().queue((pc) -> {
-							pc.sendMessage("Konnte Rolle \""+r.getName()+"\" nicht entfernen.").queue();
-						});
-					}
+			try {
+				guild.removeRoleFromMember(member, r).queue(
+						(s) -> {
+							QueuedLog.debug("Role \"" + r.getName() + "\" was removed from " + name + ".");
+							member.getUser().openPrivateChannel().queue(
+									(pc) -> pc.sendMessage("Rolle \"" + r.getName() + "\" entfernt.").queue()
+							);
+						},
+						(f) -> {
+							QueuedLog.warning("Couldn't remove role \"" + r.getName() + "\".", f.getCause());
+							member.getUser().openPrivateChannel().queue(
+									(pc) -> pc.sendMessage("Ich konnte die Rolle \""
+											+ r.getName() + "\" aufgrund eines Fehlers nicht entfernen:" +
+									f.getMessage()).queue()
+							);
+						}
 				);
+			} catch (HierarchyException e) {
+				QueuedLog.debug("too low in role hierarchy to remove reaction role");
+				String heMsg = "Ich konnte die Rolle \"" + r.getName() + "\" nicht entfernen, " +
+						"da ich in der Rollenhierarchie unter ihr stehe.";
+				member.getUser().openPrivateChannel().queue((pc) -> pc.sendMessage(heMsg).queue());
+				if (ratelimitRRFault(guild))
+					ModLog.sendToGuild(guild,heMsg);
+			}
 		});
 	}
 }

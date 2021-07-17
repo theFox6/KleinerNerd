@@ -9,8 +9,14 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import javax.annotation.Nullable;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ModLog {
+	//guildid, message
+	private static Map<String, Set<String>> sentMessages = new ConcurrentHashMap<>();
+
 	public static void sendToOwners(JDA jda, String msg) {
 		ConfigFiles.getOwners().forEach((id) -> jda.retrieveUserById(id).queue(
 				(user) -> user.openPrivateChannel().queue(
@@ -20,6 +26,30 @@ public class ModLog {
 				),
 				(error) -> QueuedLog.error("couldn't retrieve owner "+id,error)
 		));
+	}
+
+	private static boolean wasSentToGuild(String guildId, String msgId) {
+		if (!sentMessages.containsKey(guildId))
+			return false;
+		return sentMessages.get(guildId).contains(msgId);
+	}
+
+	private static void addSentMessage(String guildId, String msgId) {
+		if (!sentMessages.containsKey(guildId))
+			sentMessages.put(guildId, ConcurrentHashMap.newKeySet());
+		sentMessages.get(guildId).add(msgId);
+	}
+
+	public static void sendToGuildOnce(Guild guild, String msgId, String msg) {
+		String guildId = guild.getId();
+		if (wasSentToGuild(guildId, msgId))
+			return;
+		TextChannel chan = GuildStorage.getModLogChannel(guild);
+		if (chan == null) {
+			QueuedLog.debug("no log channel set for guild " + guild.getName());
+			return;
+		}
+		chan.sendMessage(msg).queue((sm) -> addSentMessage(guildId, msgId));
 	}
 	
 	public static void sendToGuild(JDA jda, String guildId, String msg) {
