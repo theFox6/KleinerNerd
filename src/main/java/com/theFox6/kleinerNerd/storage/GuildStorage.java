@@ -1,9 +1,5 @@
 package com.theFox6.kleinerNerd.storage;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JavaType;
@@ -11,16 +7,27 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.theFox6.kleinerNerd.KleinerNerd;
-
 import com.theFox6.kleinerNerd.data.GuildSettings;
+import com.theFox6.kleinerNerd.commands.ModOnlyCommandListener;
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
+
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GuildStorage {
 	private static final File gsf = new File(KleinerNerd.dataFolder + "guilds.json");
 	private static final File bsf = new File(KleinerNerd.dataFolder + "guilds_broken.json");
 	private static boolean broken = false;
+
 	private static ConcurrentHashMap<String, GuildSettings> settings = null;
-	
+	private static final Set<ModOnlyCommandListener> modroleListeners = ConcurrentHashMap.newKeySet();
+
 	public static void load() {
 		if (gsf.exists()) {
 			JavaType settingsType = TypeFactory.defaultInstance().constructParametricType(ConcurrentHashMap.class, String.class, GuildSettings.class);
@@ -72,7 +79,7 @@ public class GuildStorage {
 		}
 	}
 	
-	public static GuildSettings getSettings(String guildId) {
+	private static GuildSettings getSettings(String guildId) {
 		GuildSettings s = settings.get(guildId);
 		if (s == null) {
 			s = new GuildSettings();
@@ -81,12 +88,67 @@ public class GuildStorage {
 		return s;
 	}
 
+	public static void addModroleListener(ModOnlyCommandListener l) {
+		modroleListeners.add(l);
+	}
+
+	public static Role getModRole(Guild guild) {
+		String mrid = getSettings(guild.getId()).moderatorRole;
+		if (mrid == null) {
+			QueuedLog.info("modrole not set in guild \"" + guild.getName() + "\"");
+			return null;
+		}
+		Role mr = guild.getRoleById(mrid);
+		if (mr == null) {
+			//TODO: throw role not found exception
+			QueuedLog.error("couldn't find modrole with id " + mrid + " for guild \"" + guild.getName() + "\"");
+			return null;
+		}
+		return mr;
+	}
+
+	public static void setModrole(Guild g, @Nullable Role modrole) {
+		GuildSettings s = getSettings(g.getId());
+		if (modrole == null)
+			s.moderatorRole = null;
+		else
+			s.moderatorRole = modrole.getId();
+		modroleListeners.forEach((l) -> l.onModroleChange(g, modrole));
+	}
+
 	private static void loadingError(String msg) {
 		// TODO Ask the owner whether to shutdown without quit hooks
 	}
 
 	private static void saveError(String msg) {
-		// TODO open some idling thread so it doesn't shutdown
 		// TODO ask owner whether to shutdown and risk data loss
+		// 		this might not be easy when already within shutdown process
+	}
+
+	public static void setModLogChannel(Guild guild, @Nullable TextChannel chan) {
+		String gid = guild.getId();
+		if (chan == null)
+			getSettings(gid).modLogChannel = null;
+		else {
+			if (!gid.equals(chan.getGuild().getId()))
+				throw new IllegalArgumentException("given channel is not within given guild");
+			getSettings(gid).modLogChannel = chan.getId();
+		}
+	}
+
+	public static TextChannel getModLogChannel(Guild g) {
+		String mlcid = getSettings(g.getId()).modLogChannel;
+		if (mlcid == null)
+			return null;
+		TextChannel tc = g.getTextChannelById(mlcid);
+		if (tc == null) {
+			QueuedLog.debug("could not get modlog channel channel from guild, trying to fetch it from jda");
+			tc = g.getJDA().getTextChannelById(mlcid);
+		}
+		if (tc == null) {
+			QueuedLog.warning("could not find modlog channel");
+			return null;
+		}
+		return tc;
 	}
 }

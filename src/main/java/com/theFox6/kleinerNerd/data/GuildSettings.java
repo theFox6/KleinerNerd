@@ -1,29 +1,20 @@
 package com.theFox6.kleinerNerd.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+/**
+ * a Json Serializable form of a guild's settings
+ */
 public class GuildSettings {
-	/**
-	 * the Id of a channel where log messages will be sent for moderators
-	 */
-	private String modLogChannel;
+    /**
+     * the Id of a channel where log messages will be sent for moderators
+     */
+    @JsonProperty
+    public String modLogChannel;
 
-	/**
-	 * the Id of a role that can use moderator commands
-	 */
-	private String moderatorRole;
-
-	public String getModLogChannel() {
-		return modLogChannel;
-	}
-
-	public void setModLogChannel(String id) {
-		modLogChannel = id;
-	}
-
-	public String getModRole() {
-		return moderatorRole;
-	}
-
-	public void setModRole(String id) {
-		moderatorRole = id;
-	}
+    /**
+     * the Id of a role that can use moderator commands
+     */
+    @JsonProperty
+    public String moderatorRole;
 }

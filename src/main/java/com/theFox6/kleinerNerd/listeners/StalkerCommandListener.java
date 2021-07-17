@@ -1,5 +1,6 @@
 package com.theFox6.kleinerNerd.listeners;
 
+import com.theFox6.kleinerNerd.commands.CommandListener;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;

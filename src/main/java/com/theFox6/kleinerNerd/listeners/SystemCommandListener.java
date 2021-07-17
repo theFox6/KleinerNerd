@@ -2,6 +2,7 @@ package com.theFox6.kleinerNerd.listeners;
 
 import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.KleinerNerd;
+import com.theFox6.kleinerNerd.commands.CommandListener;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 import com.theFox6.kleinerNerd.system.InstanceManager;
 import com.theFox6.kleinerNerd.system.InstanceState;

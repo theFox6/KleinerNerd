@@ -21,23 +21,4 @@ public class KNHelpers {
 	public static <T> T randomElement(T[] a) {
 		return a[rng.nextInt(a.length)];
 	}
-	
-	public static boolean isModerator(Member member, Guild guild) {
-		if (member.hasPermission(Permission.ADMINISTRATOR)) {
-    		return true;
-    	}
-    	String mrid = GuildStorage.getSettings(guild.getId()).getModRole();
-    	Role modRole = null;
-    	if (mrid != null) {
-    		modRole = guild.getRoleById(mrid);
-    		if (modRole == null) {
-    			QueuedLog.warning("set mod role could not be found");
-    		} else {
-    			if (member.getRoles().contains(modRole)) {
-    				return true;
-    			}
-    		}
-    	}
-    	return false;
-	}
 }
