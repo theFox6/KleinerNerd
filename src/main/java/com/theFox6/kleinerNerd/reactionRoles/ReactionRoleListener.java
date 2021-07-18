@@ -1,14 +1,14 @@
 package com.theFox6.kleinerNerd.reactionRoles;
 
 import com.theFox6.kleinerNerd.EmojiFormatException;
+import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.ModLog;
 import com.theFox6.kleinerNerd.commands.BadOptionTypeException;
-import com.theFox6.kleinerNerd.commands.CommandListener;
-import com.theFox6.kleinerNerd.commands.ModOnlyCommandListener;
+import com.theFox6.kleinerNerd.commands.CommandManager;
 import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
+import com.theFox6.kleinerNerd.commands.PermissionType;
 import com.theFox6.kleinerNerd.data.MessageLocation;
 import foxLog.queued.QueuedLog;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
@@ -27,31 +27,33 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-public class ReactionRoleListener extends ModOnlyCommandListener implements CommandListener {
+public class ReactionRoleListener {
 	// guildId, lastTimestamp
 	private final Map<String, Instant> lastRRFaultMessage = new ConcurrentHashMap<>();
 
-	@Override
-	public void setupCommands(JDA jda) {
-		jda.upsertCommand(new CommandData("rr", "ändert die Reaktions-Rollen Konfiguration").addSubcommands(
-				new SubcommandData("add", "fügt eine Reaktion hinzu, die zum verteilen einer Rolle dient")
-						.addOption(OptionType.CHANNEL, "kanal", "der Kanal in dem die Nachricht ist, unter die die Reaktion soll", true)
-						.addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht der die Reaktion angehängt werden soll", true)
-						.addOption(OptionType.STRING, "emote", "das emote für die Rollenänderung", true)
-						.addOption(OptionType.ROLE, "rolle", "die Rolle die reagierenden Benutzern zugewiesen wird", true)
-		)).setDefaultEnabled(false).queue(this::addModOnlyCommand);
+	public ReactionRoleListener setupCommands(CommandManager cm) {
+		cm.registerCommand(
+				new CommandData("rr", "ändert die Reaktions-Rollen Konfiguration").addSubcommands(
+						new SubcommandData("add", "fügt eine Reaktion hinzu, die zum verteilen einer Rolle dient")
+								.addOption(OptionType.CHANNEL, "kanal", "der Kanal in dem die Nachricht ist, unter die die Reaktion soll", true)
+								.addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht der die Reaktion angehängt werden soll", true)
+								.addOption(OptionType.STRING, "emote", "das emote für die Rollenänderung", true)
+								.addOption(OptionType.ROLE, "rolle", "die Rolle die reagierenden Benutzern zugewiesen wird", true)
+				).setDefaultEnabled(false),
+				this::onRRCommand,
+				PermissionType.MOD_ONLY
+		);
+
+		return this;
 	}
 
-	@SubscribeEvent
-	public void onCommand(SlashCommandEvent ev) {
-		if (!ev.getName().equals("rr"))
-			return;
+	public void onRRCommand(SlashCommandEvent ev) {
 		if (!ev.isFromGuild()) //not supported for now
-			return;
+			return; //TODO: warn
 		if ("add".equals(ev.getSubcommandName())) {
 			try {
 				Emoji emote = parseEmoteOption(ev);
-				Role role = CommandListener.getOptionMapping(ev, "rolle").getAsRole();
+				Role role = KNHelpers.getOptionMapping(ev, "rolle").getAsRole();
 				parseAndFetchMessage(ev, (msg) -> addReactionRoleCommand(ev, emote, msg, role));
 			} catch (OptionNotFoundException e) {
 				QueuedLog.error("could not extract rr add option",e);
@@ -69,7 +71,7 @@ public class ReactionRoleListener extends ModOnlyCommandListener implements Comm
 	}
 
 	private Emoji parseEmoteOption(SlashCommandEvent ev) throws OptionNotFoundException, EmojiFormatException {
-		Emoji emote = Emoji.fromMarkdown(CommandListener.getOptionMapping(ev,"emote").getAsString());
+		Emoji emote = Emoji.fromMarkdown(KNHelpers.getOptionMapping(ev,"emote").getAsString());
 		if (emote.isUnicode())
 			if (emote.getName().length() > 1)
 				throw new EmojiFormatException("too many code points", emote.getAsMention());
@@ -77,11 +79,11 @@ public class ReactionRoleListener extends ModOnlyCommandListener implements Comm
 	}
 
 	private void parseAndFetchMessage(SlashCommandEvent ev, Consumer<? super Message> onMessageFetched) throws OptionNotFoundException, BadOptionTypeException {
-		OptionMapping channelOption = CommandListener.getOptionMapping(ev, "kanal");
+		OptionMapping channelOption = KNHelpers.getOptionMapping(ev, "kanal");
 		MessageChannel chan = channelOption.getAsMessageChannel();
 		if (chan == null)
 			throw new BadOptionTypeException(ev.getCommandPath(), "kanal", channelOption.getType(), OptionType.CHANNEL, MessageChannel.class);
-		chan.retrieveMessageById(CommandListener.getOptionMapping(ev, "nachrichtenid").getAsString()).queue(onMessageFetched, (e) -> {
+		chan.retrieveMessageById(KNHelpers.getOptionMapping(ev, "nachrichtenid").getAsString()).queue(onMessageFetched, (e) -> {
 			if ("10008: Unknown Message".equals(e.getMessage())) {
 				QueuedLog.debug("tried to fetch unknown message id");
 				ev.reply("konnte Nachricht mit angegebener id im angegeben kanal nicht finden").setEphemeral(true).queue();

@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.theFox6.kleinerNerd.KleinerNerd;
+import com.theFox6.kleinerNerd.commands.ModRoleChangeListener;
 import com.theFox6.kleinerNerd.data.GuildSettings;
-import com.theFox6.kleinerNerd.commands.ModOnlyCommandListener;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
@@ -26,7 +26,7 @@ public class GuildStorage {
 	private static boolean broken = false;
 
 	private static ConcurrentHashMap<String, GuildSettings> settings = null;
-	private static final Set<ModOnlyCommandListener> modroleListeners = ConcurrentHashMap.newKeySet();
+	private static final Set<ModRoleChangeListener> modroleListeners = ConcurrentHashMap.newKeySet();
 
 	public static void load() {
 		if (gsf.exists()) {
@@ -88,7 +88,7 @@ public class GuildStorage {
 		return s;
 	}
 
-	public static void addModroleListener(ModOnlyCommandListener l) {
+	public static void addModroleListener(ModRoleChangeListener l) {
 		modroleListeners.add(l);
 	}
 
@@ -113,7 +113,7 @@ public class GuildStorage {
 			s.moderatorRole = null;
 		else
 			s.moderatorRole = modrole.getId();
-		modroleListeners.forEach((l) -> l.onModroleChange(g, modrole));
+		modroleListeners.forEach((l) -> l.onModRoleChange(g, modrole));
 	}
 
 	private static void loadingError(String msg) {

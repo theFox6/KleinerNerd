@@ -4,11 +4,11 @@ import com.theFox6.kleinerNerd.achievements.EmoteAchievementListener;
 import com.theFox6.kleinerNerd.categories.CategoryCreationListener;
 import com.theFox6.kleinerNerd.categories.CategoryStorage;
 import com.theFox6.kleinerNerd.commands.CommandListener;
+import com.theFox6.kleinerNerd.commands.CommandManager;
+import com.theFox6.kleinerNerd.commands.ModRoleChangeListener;
 import com.theFox6.kleinerNerd.conversation.rulebased.RPGConvoListener;
 import com.theFox6.kleinerNerd.echo.ManualMessagingListener;
 import com.theFox6.kleinerNerd.listeners.*;
-import com.theFox6.kleinerNerd.listeners.ConfigurationListener;
-import com.theFox6.kleinerNerd.commands.ModOnlyCommandListener;
 import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleListener;
 import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleStorage;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
@@ -35,6 +35,7 @@ public class KleinerNerd {
 	public static final File logFile = new File("log.txt");
 	//this could later become guild and dm-channel individual
 	public static String prefix = ".";
+	private static CommandManager commandManager;
 
 	public static JDA buildBot(AnnotatedEventManager eventManager) {
 		JDA jda;
@@ -121,9 +122,10 @@ public class KleinerNerd {
 	}
 
 	private static void setupCommands(JDA jda, List<Object> listeners) {
+		commandManager.upsertCommands(jda);
 		listeners.forEach((l) -> {
-			if (l instanceof ModOnlyCommandListener) {
-				GuildStorage.addModroleListener(((ModOnlyCommandListener) l));
+			if (l instanceof ModRoleChangeListener) {
+				GuildStorage.addModroleListener(((ModRoleChangeListener) l));
 			}
 			if (l instanceof CommandListener) {
 				((CommandListener) l).setupCommands(jda);
@@ -135,11 +137,14 @@ public class KleinerNerd {
 		AnnotatedEventManager eventManager = new AnnotatedEventManager();
 		eventManager.register(new LoggingListener());
 
-		eventManager.register(new SystemCommandListener());
-		eventManager.register(new ConfigurationListener());
-		eventManager.register(new PollListener());
-		eventManager.register(new ManualMessagingListener());
-		eventManager.register(new ReactionRoleListener());
+		commandManager = new CommandManager();
+		eventManager.register(commandManager);
+
+		eventManager.register(new SystemCommandListener().setupCommands(commandManager));
+		new ConfigurationListener().setupCommands(commandManager);
+		new PollListener().setupCommands(commandManager);
+		eventManager.register(new ReactionRoleListener().setupCommands(commandManager));
+
 		eventManager.register(new CategoryCreationListener());
 
 		eventManager.register(new ConvoSnippetListener());
@@ -155,6 +160,8 @@ public class KleinerNerd {
 
 		eventManager.register(new TestListener());
 		eventManager.register(new RPGConvoListener());
+
+		eventManager.register(new ManualMessagingListener());
 		return eventManager;
 	}
 

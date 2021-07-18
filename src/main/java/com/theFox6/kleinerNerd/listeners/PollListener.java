@@ -1,64 +1,98 @@
 package com.theFox6.kleinerNerd.listeners;
 
-import com.theFox6.kleinerNerd.KleinerNerd;
+import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.MultiActionHandler;
+import com.theFox6.kleinerNerd.commands.CommandManager;
+import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
 import foxLog.queued.QueuedLog;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.SubscribeEvent;
-
-import java.util.List;
+import net.dv8tion.jda.api.entities.MessageHistory;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 public class PollListener {
-    public static final String pollCommand = KleinerNerd.prefix + "thumbpoll";
+    public void setupCommands(CommandManager cm) {
+        cm.registerCommand(new CommandData("daumenabstimmung", "ertellt einfache Abstimmungen").addSubcommands(
+                new SubcommandData("letzte", "reagiert mit Daumen hoch und runter unter der letzten Nachricht"),
+                new SubcommandData("hier", "reagiert mit Daumen hoch und runter auf die Nachricht mit der gegebenen ID in diesem Kanal")
+                        .addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht", true),
+                new SubcommandData("in-kanal", "reagiert mit Daumen hoch und runter auf die Nachricht mit der gegebenen ID im angegebenen Kanal")
+                        .addOption(OptionType.CHANNEL, "kanal", "der Kanal in dem die Nachricht ist", true)
+                        .addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht", true)
+                ), this::onPollCommand
+        );
+    }
 
-    @SubscribeEvent
-    public void onMessageReceived(MessageReceivedEvent event) {
-        Message msg = event.getMessage();
-        String raw = msg.getContentRaw();
-        MessageChannel chan = event.getChannel();
-        if (raw.startsWith(pollCommand)) {
-            if (raw.length() == pollCommand.length()) {
-                chan.getHistoryBefore(msg.getId(),2).queue((h) -> {
-                    List<Message> msgs = h.getRetrievedHistory();
-                    int i = 0;
-                    if (msgs.get(i).getId().equals(msg.getId()))
-                        i++;
-                    String id = msgs.get(i).getId();
-                    MultiActionHandler<? super Void> poll = new MultiActionHandler<>(2, (s) -> {
-                        //I don't really care but it causes errors to try
-                        if (chan.getType() != ChannelType.PRIVATE)
-                            msg.delete().reason("thumb poll command auto deletion").queue();
-                    }, (e) -> QueuedLog.error("Could not create thumb poll", e));
-                    try {
-                        chan.addReactionById(id, "U+1F44D").queue(poll::success, poll::failure);
-                        chan.addReactionById(id, "U+1F44E").queue(poll::success, poll::failure);
-                    } catch (NumberFormatException e) {
-                        QueuedLog.verbose("not an id");
-                        chan.sendMessage("Keine valide Nachrichten ID").queue();
-                    }
-                },(e) -> {
-                    QueuedLog.error("could not retrieve message history",e);
-                    chan.sendMessage("Ich konnte die Nachrichtenhistorie vor der Nachricht nicht abfragen.\n" +
-                            "Versuch doch mal die Nachrichten ID hinter den Befehl zu schreiben.").queue();
-                });
-            } else {
-                int len = pollCommand.length() + 1;
-                MultiActionHandler<? super Void> poll = new MultiActionHandler<>(2, (s) -> {
-                    //Discord doesn't allow deleting other peoples messages in DMs
-                    if (chan.getType() != ChannelType.PRIVATE)
-                        msg.delete().reason("thumb poll command auto deletion").queue();
-                }, (e) -> QueuedLog.error("Could not create thumb poll", e));
-                try {
-                    chan.addReactionById(raw.substring(len), "U+1F44D").queue(poll::success, poll::failure);
-                    chan.addReactionById(raw.substring(len), "U+1F44E").queue(poll::success, poll::failure);
-                } catch (NumberFormatException e) {
-                    QueuedLog.verbose("not an id");
-                    chan.sendMessage("Keine valide Nachrichten ID").queue();
-                }
-            }
+    public void onPollCommand(SlashCommandEvent ev) {
+        String subcommand = ev.getSubcommandName();
+        if (subcommand == null) {
+            QueuedLog.error("Daumenabstimmung ohne subcommand " + ev.getCommandPath());
+            return;
         }
+        switch (subcommand) {
+            case "letzte":
+                addThumbpollToLast(ev);
+                break;
+            case "hier":
+                try {
+                    addThumbpoll(ev, ev.getChannel(), KNHelpers.getOptionMapping(ev, "nachrichtenid").getAsString());
+                } catch (OptionNotFoundException e) {
+                    QueuedLog.error("could not get message ID option", e);
+                    ev.reply("konnte option nicht extrahieren").setEphemeral(true).queue();
+                }
+            case "in-kanal":
+                try {
+                    addThumbpoll(ev, KNHelpers.getOptionMapping(ev, "kanal").getAsMessageChannel(), KNHelpers.getOptionMapping(ev, "nachrichtenid").getAsString());
+                } catch (OptionNotFoundException e) {
+                    QueuedLog.error("could not get option " + e.getOption(), e);
+                    ev.reply("konnte option nicht extrahieren").setEphemeral(true).queue();
+                }
+                break;
+            default:
+                QueuedLog.error("unexpected subcommand to daumenabstimmung " + ev.getSubcommandName());
+                break;
+        }
+    }
+
+    private void addThumbpoll(SlashCommandEvent ev, MessageChannel chan, String msgId) {
+        if (chan == null) {
+            QueuedLog.error("got no MessageChannel for thumbpoll");
+            ev.reply("konnte Kanal nicht finden").setEphemeral(true).queue();
+            return;
+        }
+        MultiActionHandler<? super Void> poll = new MultiActionHandler<>(2,
+                (s) -> ev.reply("Daumenabstimmung erstellt").setEphemeral(true).queue(),
+                (e) -> QueuedLog.error("Could not create thumb poll", e)
+        );
+        try {
+            chan.addReactionById(msgId, "U+1F44D").queue(poll::success, poll::failure);
+            chan.addReactionById(msgId, "U+1F44E").queue(poll::success, poll::failure);
+        } catch (NumberFormatException e) {
+            QueuedLog.info("bad message id for thumbpoll " + msgId);
+            ev.reply("Keine valide Nachrichten ID").setEphemeral(true).queue();
+        }
+    }
+
+    private void addThumbpollToLast(SlashCommandEvent ev) {
+        MessageChannel chan = ev.getChannel();
+        MessageHistory h = chan.getHistory();
+        h.retrievePast(1).queue((msgs) -> {
+            MultiActionHandler<? super Void> poll = new MultiActionHandler<>(2,
+                    (s) -> ev.reply("Daumenabstimmung erstellt").setEphemeral(true).queue(),
+                    (e) -> {
+                        QueuedLog.error("Could not create thumb poll", e);
+                        ev.reply("Konnte Daumenabstimmung nicht erstellen: " + e.getMessage()).setEphemeral(true).queue();
+                    }
+            );
+            Message msg = msgs.get(0);
+            msg.addReaction("U+1F44D").queue(poll::success, poll::failure);
+            msg.addReaction("U+1F44E").queue(poll::success, poll::failure);
+        }, (e) -> {
+            QueuedLog.error("could not retrieve MessageHistory for thumbpoll",e);
+            ev.reply("Konnte letzte Nachricht nicht ermitteln.").setEphemeral(true).queue();
+        });
     }
 }
