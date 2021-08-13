@@ -7,7 +7,7 @@ $haben; = {haben: "habe ", "hab "}
 $vorn; = {davor: "vor den ", "vorn ", "vor n ", "vor einen", "vor ein "}
 $fahrzeug; = {fahrzeug: "bus", "zug", "auto", "lkw", "lastwagen", "lastkraftwagen", "traktor"}
 $iamgoingto; = [{iamgoingto:
-	[{ill: "ima ",  "i want to ", "i wanna ", "i will ", "i'll "}, "go "],
+	[{ill: "ima ",  "i want to ", "i wanna ", "i will ", "i'll "}, ("go ")],
 	[{im: "i am ", "i'm ", "im "}, ("just "), {gonna: "gonna ", "going to "}]
 }, ("just ")]
 $ausm; = {raus: "aus dem ", "ausm "}
@@ -87,6 +87,7 @@ $kms; = {kms:
 	],
 	["ich ", {tätigkeit:
 		"mache ein nickerchen auf den gleisen",
+		"schließe autobatterien mit meinen arschbacken kurz",
 		[
 			{quit: "beende ", "lösche ", "entferne ", "überspringe ", "skippe "},
 			{leben: "mein leben", "meine existenz", "den rest meines lebens", ["mich", ("selbst")]}
