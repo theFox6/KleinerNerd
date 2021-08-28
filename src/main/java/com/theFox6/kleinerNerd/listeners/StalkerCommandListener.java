@@ -89,12 +89,7 @@ public class StalkerCommandListener {
 						return;
 					}
 				}
-
-				EmbedBuilder iconEmbed = new EmbedBuilder()
-						.setTitle("icon of "+g.getName())
-						.setTimestamp(Instant.now())
-						.setImage(g.getIconUrl());
-				ev.replyEmbeds(iconEmbed.build()).queue();
+				sendImageEmbed(ev, "icon of "+g.getName(), g.getIconUrl());
 				break;
 			default:
 				QueuedLog.error("avatar subcommand not recognized: " + ev.getSubcommandName());

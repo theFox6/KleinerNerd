@@ -6,8 +6,6 @@ import com.theFox6.kleinerNerd.categories.CategoryStorage;
 import com.theFox6.kleinerNerd.commands.CommandListener;
 import com.theFox6.kleinerNerd.commands.CommandManager;
 import com.theFox6.kleinerNerd.commands.ModRoleChangeListener;
-import com.theFox6.kleinerNerd.conversation.rulebased.RPGConvoListener;
-import com.theFox6.kleinerNerd.echo.ManualMessagingListener;
 import com.theFox6.kleinerNerd.listeners.*;
 import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleListener;
 import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleStorage;
@@ -155,14 +153,10 @@ public class KleinerNerd {
 		new PollListener().setupCommands(commandManager);
 		new StalkerCommandListener().setupCommands(commandManager);
 
-		eventManager.register(new VoiceLoggingListener());
-
-		eventManager.register(new TestListener());
-		eventManager.register(new RPGConvoListener());
 
 		eventManager.register(new CategoryCreationListener());
 
-		eventManager.register(new ManualMessagingListener());
+		eventManager.register(new VoiceLoggingListener());
 		return eventManager;
 	}
 

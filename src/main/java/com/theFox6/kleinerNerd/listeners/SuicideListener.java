@@ -145,7 +145,7 @@ public class SuicideListener {
 
 	private void checkFReactAchievement(String userId, int fcount) {
 		// TODO achievements for 10, 20, 50, 100, 200, 1000
-		// should be added before release
+		// should be added before starting to count
 	}
 	*/
 }
