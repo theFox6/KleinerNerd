@@ -4,7 +4,7 @@ $oq; = ("?")
 $ei; = ("ei")
 $z; = {ziel: "ich gehe ", "ich geh ", "ich will ", "ich möchte "}
 $haben; = {haben: "habe ", "hab "}
-$vorn; = {davor: "vor den ", "vorn ", "vor n ", "vor einen", "vor ein "}
+$vorn; = [{davor: "vor den ", "vorn ", "vor n ", "vor einen", "vor ein "},("nächsten ")]
 $fahrzeug; = {fahrzeug: "bus", "zug", "auto", "lkw", "lastwagen", "lastkraftwagen", "traktor"}
 $iamgoingto; = [{iamgoingto:
 	[{ill: "ima ",  "i want to ", "i wanna ", "i will ", "i'll "}, "go "],

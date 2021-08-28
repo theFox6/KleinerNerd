@@ -35,9 +35,11 @@ public class CommandManager implements ModRoleChangeListener {
     }
 
     public void registerCommand(CommandData def, Consumer<SlashCommandEvent> handler, Consumer<Command> setup) {
-        QueuedLog.info("registered command /" + def.getName());
+        String commandName = def.getName();
+        QueuedLog.info("registered command /" + commandName);
         setupDefinitions.put(def, setup);
-        handlers.put(def.getName(), handler);
+        if (handlers.put(commandName, handler) != null)
+            QueuedLog.warning("Overriding handler for command /" + commandName);
     }
 
     public void registerCommand(CommandData def, Consumer<SlashCommandEvent> handler, PermissionType perms) {

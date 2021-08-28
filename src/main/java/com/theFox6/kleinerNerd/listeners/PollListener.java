@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 public class PollListener {
     public void setupCommands(CommandManager cm) {
-        cm.registerCommand(new CommandData("daumenabstimmung", "ertellt einfache Abstimmungen").addSubcommands(
+        cm.registerCommand(new CommandData("thumbpoll", "ertellt einfache Abstimmungen").addSubcommands(
                 new SubcommandData("letzte", "reagiert mit Daumen hoch und runter unter der letzten Nachricht"),
                 new SubcommandData("hier", "reagiert mit Daumen hoch und runter auf die Nachricht mit der gegebenen ID in diesem Kanal")
                         .addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht", true),
@@ -29,7 +29,7 @@ public class PollListener {
     public void onPollCommand(SlashCommandEvent ev) {
         String subcommand = ev.getSubcommandName();
         if (subcommand == null) {
-            QueuedLog.error("Daumenabstimmung ohne subcommand " + ev.getCommandPath());
+            QueuedLog.error("Thumbpoll without subcommand " + ev.getCommandPath());
             return;
         }
         switch (subcommand) {
