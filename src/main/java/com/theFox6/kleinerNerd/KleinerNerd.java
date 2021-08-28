@@ -142,10 +142,7 @@ public class KleinerNerd {
 
 		eventManager.register(new SystemCommandListener().setupCommands(commandManager));
 		new ConfigurationListener().setupCommands(commandManager);
-		new PollListener().setupCommands(commandManager);
 		eventManager.register(new ReactionRoleListener().setupCommands(commandManager));
-
-		eventManager.register(new CategoryCreationListener());
 
 		eventManager.register(new ConvoSnippetListener());
 		try {
@@ -155,11 +152,15 @@ public class KleinerNerd {
 		}
 		eventManager.register(new EmoteAchievementListener());
 
-		eventManager.register(new StalkerCommandListener());
+		new PollListener().setupCommands(commandManager);
+		new StalkerCommandListener().setupCommands(commandManager);
+
 		eventManager.register(new VoiceLoggingListener());
 
 		eventManager.register(new TestListener());
 		eventManager.register(new RPGConvoListener());
+
+		eventManager.register(new CategoryCreationListener());
 
 		eventManager.register(new ManualMessagingListener());
 		return eventManager;
