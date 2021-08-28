@@ -3,10 +3,12 @@ package com.theFox6.kleinerNerd.listeners;
 import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.commands.CommandManager;
+import com.theFox6.kleinerNerd.commands.PermissionType;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 import com.theFox6.kleinerNerd.system.InstanceManager;
 import com.theFox6.kleinerNerd.system.InstanceState;
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
@@ -15,7 +17,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -59,20 +60,7 @@ public class SystemCommandListener {
 			return;
 		}
 		QueuedLog.action("Shutdown requested by " + user.getName());
-		event.reply("fahre herunter").queue((m) -> {
-			InstanceManager.setState(InstanceState.SHUTTING_DOWN);
-			event.getJDA().shutdown();
-			/* unregister all the commands
-			event.getJDA().retrieveCommands().queue((cl) -> {
-				Consumer<? super Void> shutdown = (v) -> event.getJDA().shutdown();
-				MultiActionHandler<Void> unregister = new MultiActionHandler<>(cl.size(), shutdown, (e) -> {
-					QueuedLog.error("couldn't unregister command: " + e.getMessage());
-					shutdown.accept(null);
-				});
-				cl.forEach((c) -> c.delete().queue(unregister::success, unregister::failure));
-			});
-			*/
-		});
+		event.reply("fahre herunter").queue((ih) -> shutdown(ih.getJDA()));
 	}
 
 	public void onLogfileCommand(SlashCommandEvent event) {
@@ -103,25 +91,22 @@ public class SystemCommandListener {
     			return;
     		}
     		QueuedLog.action("Shutdown requested by " + msg.getAuthor().getName());
-    		chan.sendMessage("Fahre herunter").queue((m) -> {
-				InstanceManager.setState(InstanceState.SHUTTING_DOWN);
-				event.getJDA().shutdown();
-			});
-    	} else if (raw.equals(KleinerNerd.prefix + "update") ||
-				(raw.startsWith(KleinerNerd.prefix + "update") && msg.getMentionedUsers().stream().map(User::getId).anyMatch(el -> el.equals(ownId)))) {
-			if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId())) {
-				//perhaps inform the user
-				return;
-			}
-			chan.sendMessage("Starting update").queue();
-			QueuedLog.action("Update requested by " + msg.getAuthor().getName());
-			InstanceManager.setState(InstanceState.UPDATING);
-			try {
-				new ProcessBuilder("bash","update.sh").start();
-			} catch (IOException e) {
-				QueuedLog.error("Could not start update script",e);
-			}
-			event.getJDA().shutdown();
-		}
+    		chan.sendMessage("Fahre herunter").queue((m) -> shutdown(m.getJDA()));
+    	}
     }
+
+	public void shutdown(JDA jda) {
+		InstanceManager.setState(InstanceState.SHUTTING_DOWN);
+		jda.shutdown();
+		/* unregister all the commands
+		jda.retrieveCommands().queue((cl) -> {
+			Consumer<? super Void> shutdown = (v) -> jda.shutdown();
+			MultiActionHandler<Void> unregister = new MultiActionHandler<>(cl.size(), shutdown, (e) -> {
+				QueuedLog.error("couldn't unregister command: " + e.getMessage());
+				shutdown.accept(null);
+			});
+			cl.forEach((c) -> c.delete().queue(unregister::success, unregister::failure));
+		});
+		*/
+	}
 }

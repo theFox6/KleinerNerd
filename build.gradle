@@ -30,15 +30,6 @@ run {
   args "-c"
 }
 
-task update(type: JavaExec) {
-    group = "application"
-    description = "Runs the updater of the application."
-    classpath = sourceSets.main.runtimeClasspath
-    main = "com.theFox6.kleinerNerd.Updater"
-    args "--update"
-    dependsOn(classes)
-}
-
 task fullog(type: JavaExec) {
     group = "debug"
     description = "Runs the application with more logging."

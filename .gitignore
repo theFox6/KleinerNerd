@@ -7,7 +7,6 @@ bin/
 
 # log outputs
 log.txt
-updater-log.txt
 # data storage
 .KleinerNerd/
 
