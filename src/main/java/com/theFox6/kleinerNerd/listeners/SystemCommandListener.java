@@ -3,7 +3,6 @@ package com.theFox6.kleinerNerd.listeners;
 import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.commands.CommandManager;
-import com.theFox6.kleinerNerd.commands.PermissionType;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 import com.theFox6.kleinerNerd.system.InstanceManager;
 import com.theFox6.kleinerNerd.system.InstanceState;
@@ -49,6 +48,7 @@ public class SystemCommandListener {
 		);
 		cm.registerCommand(new CommandData("logfile", "Schickt die Protokolldatei."), this::onLogfileCommand);
 		cm.registerCommand(new CommandData("shutdown", "Fährt den Bot herunter."), this::onShutdownCommand);
+		cm.registerCommand(new CommandData("update", "Aktualisiert den Bot und startet ihn neu."), this::onUpdateCommand);
 
 		return this;
 	}
@@ -60,7 +60,17 @@ public class SystemCommandListener {
 			return;
 		}
 		QueuedLog.action("Shutdown requested by " + user.getName());
-		event.reply("fahre herunter").queue((ih) -> shutdown(ih.getJDA()));
+		event.reply("fahre herunter").queue((ih) -> shutdown(ih.getJDA(), InstanceState.SHUTTING_DOWN));
+	}
+
+	private void onUpdateCommand(SlashCommandEvent event) {
+		User user = event.getUser();
+		if (!ConfigFiles.getOwners().contains(user.getId())) {
+			event.reply(KNHelpers.randomElement(noShutdown)).queue();
+			return;
+		}
+		QueuedLog.action("Update requested by " + user.getName());
+		event.reply("aktualisiere").queue((ih) -> shutdown(ih.getJDA(), InstanceState.PREPARING_UPDATE));
 	}
 
 	public void onLogfileCommand(SlashCommandEvent event) {
@@ -91,12 +101,12 @@ public class SystemCommandListener {
     			return;
     		}
     		QueuedLog.action("Shutdown requested by " + msg.getAuthor().getName());
-    		chan.sendMessage("Fahre herunter").queue((m) -> shutdown(m.getJDA()));
+    		chan.sendMessage("Fahre herunter").queue((m) -> shutdown(m.getJDA(), InstanceState.SHUTTING_DOWN));
     	}
     }
 
-	public void shutdown(JDA jda) {
-		InstanceManager.setState(InstanceState.SHUTTING_DOWN);
+	public void shutdown(JDA jda, InstanceState reason) {
+		InstanceManager.setState(reason);
 		jda.shutdown();
 		/* unregister all the commands
 		jda.retrieveCommands().queue((cl) -> {

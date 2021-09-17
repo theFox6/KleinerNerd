@@ -10,8 +10,12 @@ public enum InstanceState {
 
     STARTING(true, "Eine Instanz vom KleinenNerd scheint zu starten."),
     RUNNING(true, "Der KleineNerd scheint noch zu laufen."),
+    PREPARING_UPDATE(true, "Der KleineNerd bereitet sich auf ein Update vor."),
+    UPDATE(true, "Der KleineNerd wird als nächstes aktualisiert."),
+    RESTART(false, "Der KleineNerd startet gerade neu."),
     SHUTTING_DOWN(true, "Der KleineNerd scheint sich gerade noch herunterzufahren."),
     SHUTDOWN(false, "Der KleineNerd ist zuletzt ordentlich runtergefahren."),
+    @SuppressWarnings("unused")
     UPDATED(false, "Der KleineNerd wurde gerade aktualisiert."),
     DYING(true, "Der KleineNerd scheint sich an einem Fehler verschluckt zu haben."),
     UNKNOWN(true, "Der Zustand des KleinenNerds ist unbekannt.");

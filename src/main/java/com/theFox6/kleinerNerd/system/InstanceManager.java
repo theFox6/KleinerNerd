@@ -3,20 +3,28 @@ package com.theFox6.kleinerNerd.system;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import foxLog.queued.QueuedLog;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
 public class InstanceManager {
-    private static final File instanceFile = new File(KleinerNerd.dataFolder + "instance.properties");
+    private static final Path instanceFile = KleinerNerd.dataFolder.resolve("instance.properties");
     private static final int maxTries = 12;
     private static Properties instanceProperties;
+
+    //perhaps detect wrapper and disable update with no wrapper
 
     public static void setState(InstanceState state) {
         instanceProperties.setProperty("state", state.name());
         save();
+    }
+
+    public static boolean isUpdating() {
+        InstanceState s = loadState(false);
+        return s == InstanceState.PREPARING_UPDATE || s == InstanceState.UPDATED;
     }
 
     public static void ensureLastShutdown() {
@@ -62,21 +70,21 @@ public class InstanceManager {
     private static InstanceState loadState(boolean exitOnFail) {
         if (!load()) {
             if (exitOnFail) {
-                    QueuedLog.error("Cancelling startup due to an error while loading instance file.");
+                QueuedLog.error("Cancelling startup due to an error while loading instance file.");
                 try {
                     QueuedLog.flushInterruptibly();
                 } catch (InterruptedException e) {
                     QueuedLog.warning("interrupted log flushing", e);
                 }
                 System.exit(1);
-                return null;
             } else {
                 QueuedLog.debug("Instance file not loaded");
-                return null;
             }
+            return null;
         }
         String stateString = instanceProperties.getProperty("state");
         if (stateString == null) {
+            QueuedLog.debug("no instance state given");
             InstanceState s = InstanceState.UNKNOWN;
             instanceProperties.setProperty("state",s.name());
             save();
@@ -89,8 +97,8 @@ public class InstanceManager {
     private static void save() {
         QueuedLog.action("saving instance properties");
         KleinerNerd.checkDataFolder();
-        try (FileWriter fw = new FileWriter(instanceFile)) {
-            instanceProperties.store(fw, "KleinerNerd instance properties");
+        try (BufferedWriter w = Files.newBufferedWriter(instanceFile)) {
+            instanceProperties.store(w, "KleinerNerd instance properties");
         } catch (IOException e) {
             QueuedLog.error("could not write instance file", e);
         }
@@ -103,9 +111,9 @@ public class InstanceManager {
         } else {
             QueuedLog.verbose("reloading instance properties");
         }
-        if (instanceFile.exists()) {
-            try (FileReader fr = new FileReader(instanceFile)) {
-                instanceProperties.load(fr);
+        if (Files.exists(instanceFile)) {
+            try (BufferedReader r = Files.newBufferedReader(instanceFile)) {
+                instanceProperties.load(r);
             } catch (IOException e) {
                 QueuedLog.error("failed to load instance file", e);
                 return false;

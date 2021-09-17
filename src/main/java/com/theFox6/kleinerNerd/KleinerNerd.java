@@ -26,10 +26,18 @@ import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.TimerTask;
 
 public class KleinerNerd {
-	public static final String dataFolder = ".KleinerNerd/";
+	public static final Path dataFolder = FileSystems.getDefault().getPath(".KleinerNerd/");
+	public static final Path backupFolder = FileSystems.getDefault().getPath("backup");
 	public static final File logFile = new File("log.txt");
 	//this could later become guild and dm-channel individual
 	public static String prefix = ".";
@@ -79,12 +87,17 @@ public class KleinerNerd {
 	}
 
 	private static void startup() {
+		boolean updated = InstanceManager.isUpdating();
 		InstanceManager.setState(InstanceState.STARTING);
 		// set the log file
 		try {
 			QueuedLog.setLogFile(logFile);
 		} catch (FileNotFoundException e) {
 			QueuedLog.error("Error while trying to set logfile",e);
+		}
+		if (!backupData()) {
+			QueuedLog.error("data not backed up, exiting");
+			System.exit(1);
 		}
 		GuildStorage.load();
 		ReactionRoleStorage.load();
@@ -94,18 +107,24 @@ public class KleinerNerd {
 			@Override
 			public void run() {
 				QueuedLog.action("runtime shutting down");
-				checkDataFolder();
-				GuildStorage.save();
-				ReactionRoleStorage.save();
-				CategoryStorage.save();
-				CounterStorage.saveAll();
+				saveAll();
 				QueuedLog.printWarningCount();
 				QueuedLog.printErrorCount();
 				QueuedLog.flush();
 				QueuedLog.close();
-				InstanceManager.setState(InstanceState.SHUTDOWN);
+				if (InstanceManager.isUpdating())
+					InstanceManager.setState(InstanceState.UPDATE);
+				else
+					InstanceManager.setState(InstanceState.SHUTDOWN);
 			}
 		});
+		final int day = 1000 * 60 * 60 * 24;
+		KNHelpers.timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				saveAll();
+			}
+		}, day, day);
 
 		AnnotatedEventManager manager = setUpEventManager();
 		JDA jda = buildBot(manager);
@@ -115,8 +134,35 @@ public class KleinerNerd {
 			System.exit(1);
 		}
 		setupCommands(jda, manager.getRegisteredListeners());
-		ModLog.sendToOwners(jda,"I started up.");
+		if (updated)
+			ModLog.sendToOwners(jda,"Ich wurde aktualisiert.");
+		else
+			ModLog.sendToOwners(jda,"Ich bin gestartet.");
 		InstanceManager.setState(InstanceState.RUNNING);
+	}
+
+	private static void saveAll() {
+		checkDataFolder();
+		GuildStorage.save();
+		ReactionRoleStorage.save();
+		CategoryStorage.save();
+		CounterStorage.saveAll();
+	}
+
+	private static boolean backupData() {
+		String backupName = "data_" + DateTimeFormatter.BASIC_ISO_DATE.withZone(ZoneId.of("UTC")).format(Instant.now());
+		Path currentBackup = backupFolder.resolve(backupName);
+		if (Files.exists(currentBackup)) {
+			for (int i = 1; Files.exists(currentBackup); i++)
+			currentBackup = backupFolder.resolve(backupName + '_' + i);
+		}
+		try {
+			KNHelpers.copyFolder(dataFolder, currentBackup);
+		} catch (IOException e) {
+			QueuedLog.error("failed to backup data", e);
+			return false;
+		}
+		return true;
 	}
 
 	private static void setupCommands(JDA jda, List<Object> listeners) {
@@ -161,14 +207,17 @@ public class KleinerNerd {
 	}
 
 	public static void checkDataFolder() {
-		File folder = new File(dataFolder);
-		if (folder.exists()) {
-			if (!folder.isDirectory()) {
-				QueuedLog.warning("The data folder is not a directory! Check: " + folder.getAbsolutePath());
+		if (Files.exists(dataFolder)) {
+			if (!Files.isDirectory(dataFolder)) {
+				QueuedLog.warning("The data folder is not a directory! Check: " + dataFolder.toAbsolutePath());
 			}
 		} else {
-			if (!folder.mkdir())
-				QueuedLog.warning("Data folder was not created.");
+			try {
+				Files.createDirectories(dataFolder);
+			} catch (IOException e) {
+				QueuedLog.error("Data folder was not created.", e);
+				e.printStackTrace();
+			}
 		}
 	}
 }
