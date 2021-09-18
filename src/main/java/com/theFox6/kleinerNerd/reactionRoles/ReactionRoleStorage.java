@@ -1,10 +1,5 @@
 package com.theFox6.kleinerNerd.reactionRoles;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -13,11 +8,16 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.data.MessageLocation;
 import com.theFox6.kleinerNerd.storage.StorageManager;
-
 import foxLog.queued.QueuedLog;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ReactionRoleStorage {
-	private static final File gsf = new File(KleinerNerd.dataFolder + "reactionrole.json");
+	private static final Path gsf = KleinerNerd.dataFolder.resolve("reactionrole.json");
 
 	//Cannot serialize message location object as map key
 	//workaround: serialize as list and load into map
@@ -25,10 +25,10 @@ public class ReactionRoleStorage {
 
 	public static void load() {
 		LinkedList<ReactionRoleConfig> ser = null;
-		if (gsf.exists()) {
+		if (Files.exists(gsf)) {
 			JavaType storedType = TypeFactory.defaultInstance().constructParametricType(LinkedList.class, ReactionRoleConfig.class);
 			try {
-				ser = new ObjectMapper().readValue(gsf, storedType);
+				ser = new ObjectMapper().readValue(Files.newBufferedReader(gsf), storedType);
 			} catch (JsonParseException e) {
 				QueuedLog.error("parse error while trying to load guild settings", e);
 				StorageManager.loadingError("reactionrole","JSON parse error while loading guild settings");

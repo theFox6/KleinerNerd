@@ -1,9 +1,5 @@
 package com.theFox6.kleinerNerd.categories;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -11,20 +7,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.storage.StorageManager;
-
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Guild;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CategoryStorage {
 	private static ConcurrentHashMap<String,ConcurrentHashMap<String,CategoryLayout>> categories = null;
 	
 	public static void load() {
-		File sf = new File(KleinerNerd.dataFolder + "category_configurations.json");
-		if (sf.exists()) {
+		Path sf = KleinerNerd.dataFolder.resolve("category_configurations.json");
+		if (Files.exists(sf)) {
 			TypeFactory tf = TypeFactory.defaultInstance();
 			JavaType dataType = tf.constructMapType(ConcurrentHashMap.class, tf.constructType(String.class), tf.constructMapType(ConcurrentHashMap.class, String.class, CategoryLayout.class));
 			try {
-				categories = new ObjectMapper().readValue(sf, dataType);
+				categories = new ObjectMapper().readValue(Files.newBufferedReader(sf), dataType);
 				return;
 			} catch (JsonParseException e) {
 				QueuedLog.error("parse error while trying to load guild settings", e);

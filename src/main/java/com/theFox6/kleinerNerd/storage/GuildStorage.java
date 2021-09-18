@@ -15,24 +15,25 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GuildStorage {
-	private static final File gsf = new File(KleinerNerd.dataFolder + "guilds.json");
-	private static final File bsf = new File(KleinerNerd.dataFolder + "guilds_broken.json");
+	private static final Path gsf = KleinerNerd.dataFolder.resolve("guilds.json");
+	private static final Path bsf = KleinerNerd.dataFolder.resolve("guilds_broken.json");
 	private static boolean broken = false;
 
 	private static ConcurrentHashMap<String, GuildSettings> settings = null;
 	private static final Set<ModRoleChangeListener> modroleListeners = ConcurrentHashMap.newKeySet();
 
 	public static void load() {
-		if (gsf.exists()) {
+		if (Files.exists(gsf)) {
 			JavaType settingsType = TypeFactory.defaultInstance().constructParametricType(ConcurrentHashMap.class, String.class, GuildSettings.class);
 			try {
-				settings = new ObjectMapper().readValue(gsf, settingsType);
+				settings = new ObjectMapper().readValue(Files.newBufferedReader(gsf), settingsType);
 			} catch (JsonParseException e) {
 				broken = true;
 				QueuedLog.error("parse error while trying to load guild settings", e);
@@ -53,20 +54,21 @@ public class GuildStorage {
 	
 	public static void save() {
 		if (broken) {
-			if (bsf.exists()) {
+			if (Files.exists(bsf)) {
 				QueuedLog.error("previous guild setting file was broken, not overriding");
 				return;
 			} else {
-				if (gsf.renameTo(bsf)) {
-					QueuedLog.warning("previous guild setting file was broken and renamed to " + bsf.getAbsolutePath());
-				} else {
-					QueuedLog.error("failed to rename prevoius (broken) guild setting file, aborting save");
+				try {
+					Files.move(gsf, bsf);
+				} catch (IOException e) {
+					QueuedLog.error("failed to rename prevoius (broken) guild setting file, aborting save", e);
 					return;
 				}
+				QueuedLog.warning("previous guild setting file was broken and renamed to " + bsf.toAbsolutePath());
 			}
 		}
 		try {
-			new ObjectMapper().writeValue(gsf, settings);
+			new ObjectMapper().writeValue(Files.newBufferedWriter(gsf), settings);
 		} catch (JsonGenerationException e) {
 			QueuedLog.error("generation error while trying to save guild settings", e);
 			saveError("JSON generation error while writing guild settings");
