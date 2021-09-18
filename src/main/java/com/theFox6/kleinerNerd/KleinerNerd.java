@@ -1,8 +1,6 @@
 package com.theFox6.kleinerNerd;
 
 import com.theFox6.kleinerNerd.achievements.EmoteAchievementListener;
-import com.theFox6.kleinerNerd.categories.CategoryCreationListener;
-import com.theFox6.kleinerNerd.categories.CategoryStorage;
 import com.theFox6.kleinerNerd.commands.CommandListener;
 import com.theFox6.kleinerNerd.commands.CommandManager;
 import com.theFox6.kleinerNerd.commands.ModRoleChangeListener;
@@ -101,7 +99,6 @@ public class KleinerNerd {
 		}
 		GuildStorage.load();
 		ReactionRoleStorage.load();
-		CategoryStorage.load();
 		CounterStorage.loadAll();
 		Runtime.getRuntime().addShutdownHook(new Thread("KleinerNerd-shutdownHook") {
 			@Override
@@ -145,7 +142,6 @@ public class KleinerNerd {
 		checkDataFolder();
 		GuildStorage.save();
 		ReactionRoleStorage.save();
-		CategoryStorage.save();
 		CounterStorage.saveAll();
 	}
 
@@ -199,8 +195,6 @@ public class KleinerNerd {
 		new PollListener().setupCommands(commandManager);
 		new StalkerCommandListener().setupCommands(commandManager);
 
-
-		eventManager.register(new CategoryCreationListener());
 
 		eventManager.register(new VoiceLoggingListener());
 		return eventManager;
