@@ -30,27 +30,31 @@ public class ConfigurationListener {
 		);
 	}
 
-	//TODO: fix localization
-
 	public void onModRoleCommand(SlashCommandEvent ev) {
 		Guild g = ev.getGuild();
-		if (g == null)
-			return; //TODO: warn
+		if (g == null) {
+			QueuedLog.warning("Couldn't get guild for modrole command.");
+			ev.reply("Konnte nicht feststellen in welchem Server der Befehl ausgeführt wurde.").setEphemeral(true).queue();
+			return;
+		}
 		OptionMapping role = ev.getOption("rolle");
 		if (role == null) {
 			GuildStorage.setModrole(g, null);
-			ev.reply("Only the server owner can now use moderator commands.").queue();
+			ev.reply("Nur noch der Servereigentümer kann jetzt moderator Befehle benutzen.").queue();
 		} else {
 			Role nmodrole = role.getAsRole();
 			GuildStorage.setModrole(g, nmodrole);
-			ev.reply("Users with the role \"" + nmodrole.getName() + "\" can now use moderator commands.").queue();
+			ev.reply("Benutzer mit der Rolle \"" + nmodrole.getName() + "\" dürfen jetzt moderator Befehle benutzen.").queue();
 		}
 	}
 
 	public void onModLogCommand(SlashCommandEvent ev) {
 		Guild g = ev.getGuild();
-		if (g == null)
-			return; //TODO warn
+		if (g == null) {
+			QueuedLog.warning("Couldn't get guild for modlog command.");
+			ev.reply("Konnte nicht feststellen in welchem Server der Befehl ausgeführt wurde.").setEphemeral(true).queue();
+			return;
+		}
 		OptionMapping channel = ev.getOption("kanal");
 		if (channel == null) {
 			GuildStorage.setModLogChannel(g, null);

@@ -137,9 +137,14 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 		}
     }
 
+	/**
+	 * Comparison method for ordering and mapping.
+	 * Since discord snowflakes have 64 bits {@code (x.compareTo(y)==0)} does not imply that {@code (x.equals(y))}.
+	 * @param o the other MessageChannelLocation to compare this one to
+	 * @return a value that mostly (but not necessarily) differs if two MessageChannelLocations are not equal
+	 */
 	@Override
 	public int compareTo(@NotNull MessageChannelLocation o) {
-		//TODO: weigh summands
 		if (guildId == null || o.guildId == null)
 			return type.compareTo(o.type) + channelId.compareTo(o.channelId);
 		else

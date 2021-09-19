@@ -72,9 +72,11 @@ public class ReactionRoleListener {
 
 	private Emoji parseEmoteOption(SlashCommandEvent ev) throws OptionNotFoundException, EmojiFormatException {
 		Emoji emote = Emoji.fromMarkdown(KNHelpers.getOptionMapping(ev,"emote").getAsString());
-		if (emote.isUnicode())
-			if (emote.getName().length() > 1)
+		if (emote.isUnicode()) {
+			String u = emote.getName();
+			if (u.codePointCount(0,u.length()) > 1)
 				throw new EmojiFormatException("too many code points", emote.getAsMention());
+		}
 		return emote;
 	}
 

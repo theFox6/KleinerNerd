@@ -69,6 +69,8 @@ public class KleinerNerd {
 	}
 
 	public static void main(String[] args) {
+		//TODO: -t --checks (only run checks then quit, do not log on)
+		//TODO: rewrite command line option parsing (see wrapper)
 		if (MainHelper.hasOption(args, "C", "no-colorize"))
 			QueuedLog.setOutputColorized(false);
 		else /*if (MainHelper.hasOption(args, "c", "colorize"))*/
