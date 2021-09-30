@@ -15,6 +15,12 @@ $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
 	"autodeath",
 	"delete myself",
 	"die",
+	["end my ", {life:
+		"alive status",
+		"life",
+		"life subscription",
+		"suscription to life"
+	}],
 	"kill myself",
 	"kms",
 	"selfdestruct",

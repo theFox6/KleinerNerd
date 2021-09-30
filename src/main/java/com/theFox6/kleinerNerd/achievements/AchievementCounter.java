@@ -58,7 +58,10 @@ public class AchievementCounter {
                 }
             }
         }
-        channel.sendMessage(achievement.build()).queue();
+        channel.sendMessage(achievement.build()).queue(
+                (m) -> QueuedLog.debug(receiver.getName() + " received the achievement \"" + title + '"'),
+                (e) -> QueuedLog.error("couldn't send achievement", e)
+        );
     }
 
     public static void decrement(String key, User user) {

@@ -40,8 +40,8 @@ public class EmoteAchievementListener {
                 User author = o.getAuthor();
                 if (ev.getUserId().equals(author.getId()))
                     return;
-
-                AchievementCounter.increment("Ehre",o.getAuthor());
+                QueuedLog.verbose("Ehre " + author.getId());
+                AchievementCounter.increment("Ehre", author);
             }, (err) -> QueuedLog.error("could not retrieve message, that was reacted to",err));
         }
     }
