@@ -32,6 +32,7 @@ public class AchievementCounter {
     }
 
     public static void sendAchievement(User user, Achievement a) {
+        QueuedLog.verbose(user.getName() + " reached achievement threshold for \"" + a.title + '"');
         //can't send achievements to yourself
         if (user.getJDA().getSelfUser().equals(user))
             return;
@@ -51,7 +52,10 @@ public class AchievementCounter {
             achievement.setThumbnail(image.link());
             if (image.needsAttach()) {
                 try {
-                    channel.sendFile(image.data(), image.name()).embed(achievement.build()).queue();
+                    channel.sendFile(image.data(), image.name()).embed(achievement.build()).queue(
+                            (m) -> QueuedLog.debug(receiver.getName() + " received the achievement \"" + title + '"'),
+                            (e) -> QueuedLog.error("couldn't send achievement", e)
+                    );
                     return;
                 } catch (ResourceNotFoundException e) {
                     QueuedLog.error("achievement image not found", e);

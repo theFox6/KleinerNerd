@@ -212,7 +212,12 @@ public class ReactionRoleListener {
 						(s) -> {
 							QueuedLog.debug("Role \"" + r.getName() + "\" was assigned to " + name + ".");
 							member.getUser().openPrivateChannel().queue(
-									(pc) -> pc.sendMessage("Rolle \"" + r.getName() + "\" zugewiesen.").queue()
+									(pc) -> pc.sendMessage("Rolle \"" + r.getName() + "\" zugewiesen.").queue((m)->{}, (e) -> {
+										if (e.getMessage().equals("50007: Cannot send messages to this user"))
+											QueuedLog.error("cannot send confirmation messages to " + userId, e);
+										else
+											QueuedLog.error("couldn't send rr confirmation message",e);
+									})
 							);
 						},
 						(f) -> {

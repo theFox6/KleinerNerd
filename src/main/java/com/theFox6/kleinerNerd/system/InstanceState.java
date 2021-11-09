@@ -14,7 +14,8 @@ public enum InstanceState {
     UPDATE(true, "Der KleineNerd wird als nächstes aktualisiert."),
     RESTART(false, "Der KleineNerd startet gerade neu."),
     SHUTTING_DOWN(true, "Der KleineNerd scheint sich gerade noch herunterzufahren."),
-    SHUTDOWN(false, "Der KleineNerd ist zuletzt ordentlich runtergefahren."),
+    SHUTDOWN(false, "Der KleineNerd ist zuletzt ordentlich heruntergefahren."),
+    QUIT(false, "Der KleineNerd ist zuletzt spontan heruntergefahren"),
     @SuppressWarnings("unused")
     UPDATED(false, "Der KleineNerd wurde gerade aktualisiert."),
     DYING(true, "Der KleineNerd scheint sich an einem Fehler verschluckt zu haben."),

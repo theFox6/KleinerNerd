@@ -36,7 +36,7 @@ $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
 
 # I don't like these patterns since they are ambigious
 $muffinSong; = {muffinsong:
-	[{muffinquestions: 
+	[{muffinquestions:
 		"who wants a muffin",
 		# "wer möchte einen muffin",
 		"have you had a muffin today"
@@ -92,11 +92,11 @@ $kms; = {kms:
 		}, $od;
 	],
 	["ich ", {tätigkeit:
-		"mache ein nickerchen auf den gleisen",
+		["mache ein nickerchen auf ", {demtod: "den gleisen", "den schienen", "der straße"}],
 		"schließe autobatterien mit meinen arschbacken kurz",
 		[
 			{quit: "beende ", "lösche ", "entferne ", "überspringe ", "skippe "},
-			{leben: "mein leben", "meine existenz", "den rest meines lebens", ["mich", ("selbst")]}
+			{leben: "mein leben", "meine existenz", "den rest meines lebens", ["mich", ("selbst")], ["meinen ", ("master "), "boot record"]}
 		],
 		"bring mich um",
 		"bringe mich um",
@@ -105,7 +105,7 @@ $kms; = {kms:
 		[{verbindemit: "fasse in ", "uriniere in "},{einz: "eine", "die"}, " steckdose"],
 		["ertränke mich",({ort:" in meinen Tränen", " in der toilette", " in einer toilette"})],
 		[{erschießen: "erschieße ", "erschieß ", "erschieß' "}, " mich"],
-		[{springen: "hüpfe ", "springe ", "spring ", "werf mich ", "werfe mich ", "gehe ", "geh ", "lauf ", "renn ", "renne ", "schmeiß mich ", "schmeiße mich ", "mach einen backflip", "mache einen backflip"},{indentod:
+		[{springen: "hüpfe ", "springe ", "spring ", "werf mich ", "werfe mich ", "gehe ", "geh ", "lauf ", "renn ", "renne ", "schmeiß mich ", "schmeiße mich ", "mach einen backflip", "mache einen backflip"}, ("jetzt"), {indentod:
 			[$ausm;, "Fenster"],
 			"in den tod",
 			"ins Messer",
@@ -120,7 +120,7 @@ $kms; = {kms:
 				"nem hochhaus"
 			}],
 			[$vorn;, $fahrzeug;]
-		}],
+		},([" auf ", {boden: "die bundesstraße", "der bundesstraße", "den beton"}])],
 		["mache einen köpfer auf den ",{material: "asphalt","beton"}],
 		"vergifte mich",
 		["begehe ", {suizid:

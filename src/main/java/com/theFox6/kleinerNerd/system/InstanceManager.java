@@ -27,6 +27,11 @@ public class InstanceManager {
         return s == InstanceState.PREPARING_UPDATE || s == InstanceState.UPDATED;
     }
 
+    public static boolean isShuttingDown() {
+        InstanceState s = loadState(false);
+        return s == InstanceState.SHUTTING_DOWN;
+    }
+
     public static void ensureLastShutdown() {
         InstanceState s = loadState(true);
         if (!s.running) {

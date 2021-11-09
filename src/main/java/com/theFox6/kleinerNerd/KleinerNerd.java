@@ -113,8 +113,10 @@ public class KleinerNerd {
 				QueuedLog.close();
 				if (InstanceManager.isUpdating())
 					InstanceManager.setState(InstanceState.UPDATE);
-				else
+				else if (InstanceManager.isShuttingDown())
 					InstanceManager.setState(InstanceState.SHUTDOWN);
+				else
+					InstanceManager.setState(InstanceState.QUIT);
 			}
 		});
 		final int day = 1000 * 60 * 60 * 24;
