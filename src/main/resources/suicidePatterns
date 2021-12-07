@@ -12,6 +12,7 @@ $iamgoingto; = [{iamgoingto:
 }, ("just ")]
 $ausm; = {raus: "aus dem ", "ausm "}
 $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
+    "aliven't",
 	"autodeath",
 	"delete myself",
 	"die",
@@ -68,6 +69,10 @@ $kms; = {kms:
 			[{selbsttod: "selbstmord","suizid","tod durch strick"},"begehen"],
 			[$vorn;, $fahrzeug;, " springen"],
 			[$ausm;, "Fenster springen"],
+			[{imtod:
+				["mit ", {one: "meinem ", "einem ", "nem ", "dem "}, "toaster"],
+				[{im: "in einem ", "im "},"mixer"],
+			}, " baden"],
 			["mich ", {"totmachen":
 				"anzünden",
 				"aufschlitzen",
@@ -100,6 +105,7 @@ $kms; = {kms:
 		],
 		"bring mich um",
 		"bringe mich um",
+		"erhänge mich",
 		"geb mir die kugel",
 		"schwimme in eine Schiffsschraube",
 		[{verbindemit: "fasse in ", "uriniere in "},{einz: "eine", "die"}, " steckdose"],
@@ -133,21 +139,22 @@ $kms; = {kms:
 		}],
 		"nehme ein toasterbad",
 		["bade ",{imtod:
-			["mit ", {one: "meinem ", "einem ", "nem "}, "toaster"],
+			["mit ", {one: "meinem ", "einem ", "nem ", "dem "}, "toaster"],
 			[{im: "in einem ", "im "},"mixer"],
 		}],
 		["nehme ein Bad ",{im: "in einem ", "im "},"mixer"],
 		["nehme ein bad mit ", {one: "meinem ", "einem ", "nem "}, "toaster"],
 		[{schießen: "schieße ", "schieß ", "schieß' "}, "mir in den kopf"],
+		["erhänge mich",(" mit stacheldraht")],
 		"trinke konzentrierte salzsäure",
 		#references
 		"schreibe mich ins death note ein",
-		"signiere das death note"
+		"signiere das death note",
 		[$haben;,{lebenAbgeschlossen:
-            "mein leben abgeschlossen",
-            "mit meinem leben abgeschlossen",
-            "abgeschlossen mit meinem leben"
-        }],
+    	"mein leben abgeschlossen",
+      "mit meinem leben abgeschlossen",
+      "abgeschlossen mit meinem leben"
+    }],
 	},$od;],
 	[$iamgoingto;, $commitsc;, ("then"), $od;],
 	["i ", ("just "), {wanna: "want to ", "wanna "}, $commitsc;, $od;],
