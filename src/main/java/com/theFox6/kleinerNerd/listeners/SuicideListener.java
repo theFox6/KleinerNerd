@@ -98,7 +98,7 @@ public class SuicideListener {
 			lastSuicide.put(authorId, now);
 			if (last != null) {
 				if (last.plus(5, ChronoUnit.MINUTES).isAfter(now)) {
-					msg.getChannel().sendMessage("Momentan bist du definitiv noch tod.").queue();
+					msg.getChannel().sendMessage("Momentan bist du definitiv noch tot.").queue();
 					return;
 				}
 			}

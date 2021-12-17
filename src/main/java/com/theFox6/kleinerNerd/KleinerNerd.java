@@ -71,10 +71,10 @@ public class KleinerNerd {
 	public static void main(String[] args) {
 		//TODO: -t --checks (only run checks then quit, do not log on)
 		//TODO: rewrite command line option parsing (see wrapper)
-		if (MainHelper.hasOption(args, "C", "no-colorize"))
-			QueuedLog.setOutputColorized(false);
-		else /*if (MainHelper.hasOption(args, "c", "colorize"))*/
-			QueuedLog.setOutputColorized(true);
+
+		/*(MainHelper.hasOption(args, "c", "colorize")*/
+		QueuedLog.setOutputColorized(!MainHelper.hasOption(args, "C", "no-colorize"));
+
 		if (MainHelper.hasOption(args, "f", "fullog")) {
 			QueuedLog.setLevel(LogLevel.ALL);
 			QueuedLog.debug("full logging enabled");
@@ -88,6 +88,7 @@ public class KleinerNerd {
 
 	private static void startup() {
 		boolean updated = InstanceManager.isUpdating();
+		//TODO: check if the last state was shutdown
 		InstanceManager.setState(InstanceState.STARTING);
 		// set the log file
 		try {
@@ -135,6 +136,7 @@ public class KleinerNerd {
 			System.exit(1);
 		}
 		setupCommands(jda, manager.getRegisteredListeners());
+		//TODO: add option for shutdown vs other
 		if (updated)
 			ModLog.sendToOwners(jda,"Ich wurde aktualisiert.");
 		else
