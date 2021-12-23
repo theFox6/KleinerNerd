@@ -55,7 +55,7 @@ $muffinSong; = {muffinsong:
 }
 
 $kms; = {kms:
-	"kms", "kill myself",
+	#"kms", "kill myself",
 	[$z;,
 		{lebenbeenden:
 			"mein leben beenden",
@@ -168,7 +168,7 @@ $kms; = {kms:
 	"i am hanging myself",
 	[$iamgoingto;, $commitsc;, ("then"), $od;],
 	[("i "), ("guess "),"i ", ("just "), {wanna: "want to ", "wanna "}, $commitsc;, $od;],
-	"aliven't",
+	#"aliven't",
 	$muffinSong;
 }
 
