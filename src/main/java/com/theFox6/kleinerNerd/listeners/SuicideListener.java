@@ -4,6 +4,7 @@ import com.theFox6.kleinerNerd.KleinerNerd;
 import com.theFox6.kleinerNerd.data.ResourceNotFoundException;
 import com.theFox6.kleinerNerd.patternMatching.PatternPart;
 import com.theFox6.kleinerNerd.patternMatching.PatternWrapper;
+import com.theFox6.kleinerNerd.storage.ConfigFiles;
 import com.theFox6.kleinerNerd.storage.CounterStorage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Member;
@@ -86,6 +87,8 @@ public class SuicideListener {
 	@SubscribeEvent
 	public void onMessage(MessageReceivedEvent event) {
 		Message msg = event.getMessage();
+		if (!ConfigFiles.getSuicideChannels().contains(msg.getChannel().getId()))
+			return;
 		String raw = msg.getContentRaw();
 		String lowerRaw = raw.toLowerCase();
 		if (raw.equals(KleinerNerd.prefix + "totaldeaths")) {

@@ -154,7 +154,7 @@ $kms; = {kms:
 		["nehme ein Bad ",{im: "in einem ", "im "},"mixer"],
 		["nehme ein bad mit ", {one: "meinem ", "einem ", "nem "}, "toaster"],
 		[{schießen: "schieße ", "schieß ", "schieß' "}, "mir in den kopf"],
-		["erhänge mich",(" mit stacheldraht")],
+		["erhänge mich", ({mitstrick: " mit stacheldraht", "mit einer Lichterkette"})],
 		"trinke konzentrierte salzsäure",
 		#references
 		"schreibe mich ins death note ein",

@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 public class ConfigFiles {
 	private static String token;
 	private static Collection<String> owners;
-	
+	private static Collection<String> scc;
+
 	/**
 	 * Read a file and return it's contents as String.
 	 * @param filename the file to be loaded
@@ -79,5 +80,17 @@ public class ConfigFiles {
 	 */
 	public static void reloadOwner() {
 		owners = null;
+	}
+
+	public static Collection<String> getSuicideChannels() {
+		if (scc == null) {
+			try {
+				scc = getFileContents("secrets/suicide-channels.txt",true);
+			} catch (IOException e) {
+				QueuedLog.error("error while trying to read secrets/suicide-channels.txt resource file",e);
+				return new LinkedList<>();
+			}
+		}
+		return scc;
 	}
 }
