@@ -29,6 +29,6 @@ public class CounterStorage {
 	 * @return
 	 */
 	public static int getUserTotalCount(String category) {
-		return userCounters.get(category).values().stream().map((a) -> a.get()).reduce((a,b) -> a+b).orElse(0);
+		return userCounters.get(category).values().stream().map(AtomicInteger::get).reduce( Integer::sum).orElse(0);
 	}	
 }
