@@ -17,8 +17,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
@@ -40,8 +40,10 @@ public class SuicideListener {
 			return "<empty>";
 		}
 	};
+	private static final Duration DEFAULT_PENALTY = Duration.ofMinutes(5);
 
-	private Map<String,Instant> lastSuicide = new ConcurrentHashMap<>();
+	private final Map<String, Instant> lastSuicide = new ConcurrentHashMap<>();
+	private final Map<String, Duration> suicidePenalty = new ConcurrentHashMap<>();
 	private final PatternPart kms;
 	private final PatternPart howMany;
 	
@@ -96,15 +98,21 @@ public class SuicideListener {
 		} else if (kms.matches(lowerRaw)) {
 			User author = msg.getAuthor();
 			String authorId = author.getId();
-			Instant now = Instant.now();
 			Instant last = lastSuicide.get(authorId);
-			lastSuicide.put(authorId, now);
+			Duration penalty = suicidePenalty.getOrDefault(authorId, DEFAULT_PENALTY);
+			Instant now = Instant.now();
 			if (last != null) {
-				if (last.plus(5, ChronoUnit.MINUTES).isAfter(now)) {
+				Instant revive = last.plus(penalty);
+				if (revive.isAfter(now)) {
 					msg.getChannel().sendMessage("Momentan bist du definitiv noch tot.").queue();
 					return;
 				}
+				revive = revive.plus(penalty);
+				if (revive.isAfter(now)) {
+					suicidePenalty.put(authorId, DEFAULT_PENALTY.plus(Duration.between(now, revive)));
+				}
 			}
+			lastSuicide.put(authorId, Instant.now());
 			int count = CounterStorage.getUserCounter("suicides",authorId).incrementAndGet();
 			Member member = msg.getMember();
 			if (member == null) {

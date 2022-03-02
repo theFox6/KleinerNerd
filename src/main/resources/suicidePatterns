@@ -106,7 +106,10 @@ $kms; = {kms:
 	["ich ", {tätigkeit:
 		"gehe über den jordan",
 		["mache ein nickerchen auf ", {demtod: "den gleisen", "den schienen", "der straße"}],
-		"schließe autobatterien mit meinen arschbacken kurz",
+		["schließe ", {stromquelle:
+		    "autobatterien ",
+		    "eine autobatterie "
+        "mit meinen arschbacken kurz"],
 		[
 			{quit: "beende ", "lösche ", "entferne ", "überspringe ", "skippe "},
 			{leben: "mein leben", "meine existenz", "den rest meines lebens", ["mich", ("selbst")], ["meinen ", ("master "), "boot record"]}
