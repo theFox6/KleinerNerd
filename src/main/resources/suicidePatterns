@@ -7,9 +7,9 @@ $haben; = {haben: "habe ", "hab "}
 $vorn; = [{davor: "vor den ", "vorn ", "vor n ", "vor einen ", "vor ein ", "vors "},("nächsten ")]
 $fahrzeug; = {fahrzeug: "bus", "zug", "auto", "lkw", "lastwagen", "lastkraftwagen", "traktor"}
 $iamgoingto; = [{iamgoingto:
-	[{ill: "ima ",  "i want to ", "i wanna ", "i will ", "i'll "}, ("go ")],
+	[{ill: "ima ",  "i want to ", "i wanna ", "i will ", "i'll "}, ("just "), ("go ")],
 	[{im: "i am ", "i'm ", "im "}, ("just "), {gonna: "gonna ", "going to "}]
-}, ("just ")]
+}]
 $ausm; = {raus: "aus dem ", "ausm "}
 $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
   "aliven't",
@@ -22,7 +22,7 @@ $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
 	"drink some bleach",
 	"hang myself",
 	"unalive me",
-	["end my ", {life:
+	[{end: "end ", "terminate "}, "my ", {life:
 		"alive status",
 		"life",
 		"life subscription",
@@ -63,6 +63,7 @@ $kms; = {kms:
 			"mir die pulsadern aufschlitzen",
 			"mir meine pulsadern aufschlitzen",
 			"mit betonschuhen baden",
+			"mit zementschuhen baden",
 			"nicht mehr leben",
 			"sterben",
 			"von einer klippe springen",
@@ -105,11 +106,11 @@ $kms; = {kms:
 	],
 	["ich ", {tätigkeit:
 		"gehe über den jordan",
-		["mache ein nickerchen auf ", {demtod: "den gleisen", "den schienen", "der straße"}],
+		[{ruhe: "mache ein nickerchen ", "schlafe ", "schlaf "}, "auf ", {demtod: "den gleisen", "den schienen", "der straße"}],
 		["schließe ", {stromquelle:
 		    "autobatterien ",
 		    "eine autobatterie "
-        "mit meinen arschbacken kurz"],
+        }, "mit meinen arschbacken kurz"],
 		[
 			{quit: "beende ", "lösche ", "entferne ", "überspringe ", "skippe "},
 			{leben: "mein leben", "meine existenz", "den rest meines lebens", ["mich", ("selbst")], ["meinen ", ("master "), "boot record"]}
@@ -119,7 +120,7 @@ $kms; = {kms:
 		"erhänge mich",
 		"geb mir die kugel",
 		"schwimme in eine Schiffsschraube",
-		[{verbindemit: "fasse in ", "uriniere in "},{einz: "eine", "die"}, " steckdose"],
+		[{verbindemit: "fasse in ", "uriniere in ", "stecke eine gabel in "},{einz: "eine ", "die "}, "steckdose"],
 		["ertränke mich",({ort:" in meinen Tränen", " in der toilette", " in einer toilette"})],
 		[{erschießen: "erschieße ", "erschieß ", "erschieß' ", "ersteche "}, " mich"],
 		[{springen: "hüpfe ", "springe ", "spring ", "werf mich ", "werfe mich ", "gehe ", "geh ", "lauf ", "renn ", "renne ", "schmeiß mich ", "schmeiße mich ", "mach einen backflip ", "mache einen backflip "}, ({wann: "jetzt ", "dann mal "}), {indentod:

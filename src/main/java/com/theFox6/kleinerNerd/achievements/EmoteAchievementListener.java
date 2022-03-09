@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class EmoteAchievementListener {
     public EmoteAchievementListener() {
+        //TODO: get roles by counting on servers separately
         // New file format and parser incoming?
 
         String ehrenReact = " Personen haben auf Nachrichten von dir mit Ehre reagiert.";
@@ -21,7 +22,7 @@ public class EmoteAchievementListener {
         ehre.put(10, new Achievement("Helferlein", "10" + ehrenReact,
                 new SendableImage("/achievements/bulb.png","bulb.png")));
         ehre.put(25, new Achievement("Ehrenmann/frau", "Du bist ein Ehrenmann/eine Ehrenfrau!\n" +
-                "25" + ehrenReact, new SendableImage("/achievements/Ehre.png","Ehre.png")));
+                "25" + ehrenReact, new SendableImage("/achievements/Ehre.png","Ehre.png"), "designierter Ehrenmann"));
         ehre.put(50, new Achievement("gute Arbeit", "Gute Arbeit!\n" +
                 "50" + ehrenReact, new SendableImage("/achievements/clap.png","clap.png")));
         ehre.put(100, new Achievement("wahrer Unterstützer", "Du bist ein großartiger Unterstützer!\n" +
@@ -41,7 +42,7 @@ public class EmoteAchievementListener {
                 if (ev.getUserId().equals(author.getId()))
                     return;
                 //QueuedLog.verbose("Ehre " + author.getId());
-                AchievementCounter.increment("Ehre", author);
+                AchievementCounter.increment("Ehre", author, o.getMember(), o.getGuild());
             }, (err) -> QueuedLog.error("could not retrieve message, that was reacted to",err));
         }
     }

@@ -1,14 +1,15 @@
 package com.theFox6.kleinerNerd.achievements;
 
+import com.theFox6.kleinerNerd.ModLog;
 import com.theFox6.kleinerNerd.data.ResourceNotFoundException;
 import com.theFox6.kleinerNerd.data.SendableImage;
 import com.theFox6.kleinerNerd.storage.CounterStorage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,7 +20,7 @@ public class AchievementCounter {
         achievements.put(name, thresholds);
     }
 
-    public static void increment(String key, User user) {
+    public static void increment(String key, User user, Member member, Guild guild) {
         Map<Integer, Achievement> thresholds = achievements.get(key);
         int count = CounterStorage.getUserCounter("achievement_"+key, user.getId()).incrementAndGet();
         if (thresholds == null)
@@ -27,16 +28,26 @@ public class AchievementCounter {
         else {
             Achievement a = thresholds.get(count);
             if (a != null)
-                sendAchievement(user, a);
+                sendAchievement(user, a, member, guild);
         }
     }
 
-    public static void sendAchievement(User user, Achievement a) {
+    public static void sendAchievement(User user, Achievement a, Member member, Guild guild) {
         QueuedLog.verbose(user.getName() + " reached achievement threshold for \"" + a.title + '"');
         //can't send achievements to yourself
         if (user.getJDA().getSelfUser().equals(user))
             return;
 
+        if (member != null) {
+            List<Role> achievementRoles = guild.getRolesByName(a.roleName, true);
+            if (achievementRoles.size() > 1)
+                ModLog.sendToGuild(guild, "Mehr als eine " + a.roleName + " Rolle!");
+            if (!achievementRoles.isEmpty())
+                guild.addRoleToMember(member, achievementRoles.get(0)).reason("Achievement").queue(
+                        (s) -> QueuedLog.action(member.getEffectiveName() + " earned " + a.roleName + " role."),
+                        (e) -> QueuedLog.error("Couldn't assign achievement role " + a.roleName + " to " + user.getName(),e)
+                );
+        }
         user.openPrivateChannel().queue((pc) -> sendAchievement(pc, user, a.image, a.title, a.desc),
                 (e) -> QueuedLog.error("Couldn't open PrivateChannel to send achievement to " + user.getName(),e));
     }
