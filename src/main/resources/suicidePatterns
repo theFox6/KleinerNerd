@@ -189,6 +189,7 @@ $kms; = {kms:
 	},$od;],
 	"kann ich vom dach springen? der drang ist da.",
 	"i am hanging myself",
+	"i'm taking a bath with my toaster",
 	[$iamgoingto;, $commitsc;, ("then"), $od;],
 	[("i "), ("guess "),"i ", ("just "), {wanna: "want to ", "wanna "}, $commitsc;, $od;, ("xd")],
 	#"aliven't",
