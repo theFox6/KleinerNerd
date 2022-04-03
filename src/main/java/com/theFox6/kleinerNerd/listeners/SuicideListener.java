@@ -9,8 +9,10 @@ import com.theFox6.kleinerNerd.storage.CounterStorage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 import java.io.BufferedReader;
@@ -89,12 +91,28 @@ public class SuicideListener {
 	@SubscribeEvent
 	public void onMessage(MessageReceivedEvent event) {
 		Message msg = event.getMessage();
+		MessageChannel chan = msg.getChannel();
+		if (!ConfigFiles.getSuicideChannels().contains(chan.getId()))
+			return;
+		checkMessage(msg, chan);
+	}
+
+	@SubscribeEvent
+	public void onEdit(MessageUpdateEvent event) {
+		Message msg = event.getMessage();
 		if (!ConfigFiles.getSuicideChannels().contains(msg.getChannel().getId()))
 			return;
+		MessageChannel chan = msg.getChannel();
+		if (!msg.getId().equals(chan.getLatestMessageId()))
+			return;
+		checkMessage(msg, chan);
+	}
+
+	private void checkMessage(Message msg, MessageChannel chan) {
 		String raw = msg.getContentRaw();
 		String lowerRaw = raw.toLowerCase();
 		if (raw.equals(KleinerNerd.prefix + "totaldeaths")) {
-			msg.getChannel().sendMessage("Insgesamt wurden " + CounterStorage.getUserTotalCount("suicides") + " Selbstmorde verzeichnet.").queue();
+			chan.sendMessage("Insgesamt wurden " + CounterStorage.getUserTotalCount("suicides") + " Selbstmorde verzeichnet.").queue();
 		} else if (kms.matches(lowerRaw)) {
 			User author = msg.getAuthor();
 			String authorId = author.getId();
@@ -104,7 +122,7 @@ public class SuicideListener {
 			if (last != null) {
 				Instant revive = last.plus(penalty);
 				if (revive.isAfter(now)) {
-					msg.getChannel().sendMessage("Momentan bist du definitiv noch tot.").queue();
+					chan.sendMessage("Momentan bist du definitiv noch tot.").queue();
 					return;
 				}
 				revive = revive.plus(penalty);
@@ -116,16 +134,15 @@ public class SuicideListener {
 			int count = CounterStorage.getUserCounter("suicides",authorId).incrementAndGet();
 			Member member = msg.getMember();
 			if (member == null) {
-				//probs DM
-				//TODO:send a better message perhaps
-				msg.getChannel().sendMessage(author.getName()+" hat sich zum " + count + ". mal umgebracht.").queue(SuicideListener::reactWithF);
+				//TODO: send a better message perhaps
+				chan.sendMessage(author.getName()+" hat sich zum " + count + ". mal umgebracht.").queue(SuicideListener::reactWithF);
 				return;
 			}
-			msg.getChannel().sendMessage(member.getEffectiveName()+" hat sich zum " + count + ". mal umgebracht.").queue(SuicideListener::reactWithF);
+			chan.sendMessage(member.getEffectiveName()+" hat sich zum " + count + ". mal umgebracht.").queue(SuicideListener::reactWithF);
 		} else if (howMany.matches(lowerRaw)) {
 			String authorId = msg.getAuthor().getId();
 			int count = CounterStorage.getUserCounter("suicides",authorId).get();
-			msg.getChannel().sendMessage("Du hast dich " + count + " mal umgebracht.").queue();
+			chan.sendMessage("Du hast dich " + count + " mal umgebracht.").queue();
 		}
 	}
 	
