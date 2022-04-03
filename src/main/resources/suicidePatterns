@@ -21,6 +21,7 @@ $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
 	"die",
 	"drink some bleach",
 	"hang myself",
+	"jump of my balcony",
 	"unalive me",
 	[{end: "end ", "terminate "}, "my ", {life:
 		"alive status",
@@ -35,6 +36,7 @@ $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
 	"self destruct",
 	"suicide",
 	[("the "),"not living"],
+	"be crushed by her thighs",
 	"seppuku",
 	# this is not exactly a match but the memes
 	"sudoku"
@@ -58,6 +60,7 @@ $kms; = {kms:
 	#"kms", "kill myself",
 	[$z;,
 		{lebenbeenden:
+		    "die zementmaschine von innen putzen",
 			"mein leben beenden",
 			"meine pulsadern aufschlitzen",
 			"mir die pulsadern aufschlitzen",
@@ -123,24 +126,39 @@ $kms; = {kms:
 		[{verbindemit: "fasse in ", "uriniere in ", "stecke eine gabel in "},{einz: "eine ", "die "}, "steckdose"],
 		["ertränke mich",({ort:" in meinen Tränen", " in der toilette", " in einer toilette"})],
 		[{erschießen: "erschieße ", "erschieß ", "erschieß' ", "ersteche "}, " mich"],
-		[{springen: "hüpfe ", "springe ", "spring ", "werf mich ", "werfe mich ", "gehe ", "geh ", "lauf ", "renn ", "renne ", "schmeiß mich ", "schmeiße mich ", "mach einen backflip ", "mache einen backflip "}, ({wann: "jetzt ", "dann mal "}), {indentod:
-			[$ausm;, "fenster"],
-			"in den tod",
-			"ins Messer",
-			"in ein Messer",
-			"ins müllauto",
-			"vom dach",
-			"vom hochhaus",
-			"vom turm",
-			["von ", $ein;, {$höhe:
-				"er klippe",
-				"em turm",
-				"er brücke",
-				"em hochhaus"
-			}],
-			[$vorn;, $fahrzeug;]
-		},([" auf ", {boden: "die bundesstraße", "der bundesstraße", "den beton"}])],
-		["mache einen köpfer auf den ",{material: "asphalt","beton"}],
+		[
+		    {springen:
+		        "hüpfe ",
+		        "springe ", "spring ",
+                "werf mich ", "werfe mich ",
+                "gehe ", "geh ",
+                "lauf ", "laufe "
+                "renn ", "renne ",
+                "schmeiß mich ", "schmeiße mich ",
+                "mach einen köpfer ", "mache einen köpfer ",
+                "mach einen backflip ", "mache einen backflip "
+            }, ({wann: "jetzt ", "dann mal "}), {indentod:
+                ["auf ", {boden: "die bundesstraße", "die autobahn", "den beton", "den asphalt"}],
+                [$ausm;, "fenster"],
+                "in den tod",
+                "ins Messer",
+                "in ein Messer",
+                "in das müllauto",
+                "in ein müllauto",
+                "ins müllauto",
+                "von der freiheitsstatue",
+                "vom dach",
+                "vom hochhaus",
+                "vom turm",
+                ["von ", $ein;, {$höhe:
+                    "er klippe",
+                    "em turm",
+                    "er brücke",
+                    "em hochhaus"
+                }],
+			    [$vorn;, $fahrzeug;]
+		    }
+        ],
 		"vergifte mich",
 		["begehe ", {suizid:
 			"seppuku",
@@ -172,7 +190,7 @@ $kms; = {kms:
 	"kann ich vom dach springen? der drang ist da.",
 	"i am hanging myself",
 	[$iamgoingto;, $commitsc;, ("then"), $od;],
-	[("i "), ("guess "),"i ", ("just "), {wanna: "want to ", "wanna "}, $commitsc;, $od;],
+	[("i "), ("guess "),"i ", ("just "), {wanna: "want to ", "wanna "}, $commitsc;, $od;, ("xd")],
 	#"aliven't",
 	$muffinSong;
 }
