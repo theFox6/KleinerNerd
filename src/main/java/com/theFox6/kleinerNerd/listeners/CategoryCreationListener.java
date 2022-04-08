@@ -67,6 +67,18 @@ public class CategoryCreationListener {
                                         (s) -> cat.putPermissionOverride(g.getPublicRole()).deny(Permission.VIEW_CHANNEL)
                                                 .queue(categorySetup::success)
                                 );
+                                OptionMapping voiceName = ev.getOption("voicekanalname");
+                                if (voiceName == null || voiceName.getAsString().isEmpty())
+                                    categorySetup.success();
+                                else {
+                                    cat.createVoiceChannel(voiceName.getAsString()).queue((vc) -> {
+                                        vc.putPermissionOverride(role).grant(Permission.VIEW_CHANNEL).queue(
+                                                (s) -> vc.putPermissionOverride(g.getPublicRole()).deny(Permission.VIEW_CHANNEL)
+                                                        .queue(categorySetup::success)
+                                        );
+                                        categorySetup.success();
+                                    });
+                                }
                             });
                         }
                     }
@@ -75,12 +87,6 @@ public class CategoryCreationListener {
                         categorySetup.success();
                     else {
                         cat.createTextChannel(textName.getAsString()).queue(categorySetup::success);
-                    }
-                    OptionMapping voiceName = ev.getOption("voicekanalname");
-                    if (voiceName == null || voiceName.getAsString().isEmpty())
-                        categorySetup.success();
-                    else {
-                        cat.createTextChannel(voiceName.getAsString()).queue(categorySetup::success);
                     }
                 });
             });

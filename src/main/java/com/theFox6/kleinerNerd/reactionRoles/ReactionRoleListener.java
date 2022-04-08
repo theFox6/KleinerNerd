@@ -74,8 +74,10 @@ public class ReactionRoleListener {
 		Emoji emote = Emoji.fromMarkdown(KNHelpers.getOptionMapping(ev,"emote").getAsString());
 		if (emote.isUnicode()) {
 			String u = emote.getName();
+			/* emotes can be two code points or contain a zero width joiner, so no checking code point count
 			if (u.codePointCount(0,u.length()) > 1)
 				throw new EmojiFormatException("too many code points", emote.getAsMention());
+			 */
 		}
 		return emote;
 	}
