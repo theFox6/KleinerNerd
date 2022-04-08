@@ -1,9 +1,9 @@
 package com.theFox6.kleinerNerd;
 
+import foxLog.queued.QueuedLog;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
-import foxLog.queued.QueuedLog;
 
 /**
  * A counter that runs either a success consumer when all actions succeeded
@@ -52,7 +52,7 @@ public class MultiActionHandler<T> {
 		failure.accept(t);
 	}
 
-	public void success(Void nothing) {
+	public <I> void success(I ignored) {
 		success();
 	}
 }
