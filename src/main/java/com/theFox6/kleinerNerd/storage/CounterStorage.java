@@ -25,8 +25,8 @@ public class CounterStorage {
 	
 	/**
 	 * sums up all user counters within one category
-	 * @param category
-	 * @return
+	 * @param category the category to get the count from
+	 * @return the total summed up count
 	 */
 	public static int getUserTotalCount(String category) {
 		return userCounters.get(category).values().stream().map(AtomicInteger::get).reduce( Integer::sum).orElse(0);

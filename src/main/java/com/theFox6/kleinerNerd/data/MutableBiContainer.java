@@ -1,5 +1,6 @@
 package com.theFox6.kleinerNerd.data;
 
+//a single type pair
 public class MutableBiContainer<T> implements BiContainer<T> {
 	public T v1;
 	public T v2;

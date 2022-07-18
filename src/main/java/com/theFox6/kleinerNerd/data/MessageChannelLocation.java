@@ -45,7 +45,7 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 			if (guildId != null)
 				throw new IllegalArgumentException("Didn't expect two arguments for a private channel.");
 			this.channelId = channelId;
-			this.guildId = guildId;
+			this.guildId = null;
 		} else {
 			throw new IllegalArgumentException("Unsupported channel type: "+ channelType.name());
 		}

@@ -22,7 +22,7 @@ public class PatternJunction implements PatternPart, NestingPattern {
 	/**
 	 * creates a new PatternJunction with the given possibilities
 	 * this makes the possibility list have a fixed size
-	 * since it is using {@link java.util.Arrays.asList}
+	 * since it is using {@link java.util.Arrays#asList}
 	 * 
 	 * @param name the name of the PatternJunction (will be displayed in the stringRepresentation)
 	 * @param possibilities the PatternParts of which any has to match

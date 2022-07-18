@@ -8,14 +8,15 @@ import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageHistory;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 public class PollListener {
     public void setupCommands(CommandManager cm) {
-        cm.registerCommand(new CommandData("thumbpoll", "ertellt einfache Abstimmungen").addSubcommands(
+        cm.registerCommand(Commands.slash("thumbpoll", "ertellt einfache Abstimmungen").addSubcommands(
                 new SubcommandData("letzte", "reagiert mit Daumen hoch und runter unter der letzten Nachricht"),
                 new SubcommandData("hier", "reagiert mit Daumen hoch und runter auf die Nachricht mit der gegebenen ID in diesem Kanal")
                         .addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht", true),
@@ -26,7 +27,7 @@ public class PollListener {
         );
     }
 
-    public void onPollCommand(SlashCommandEvent ev) {
+    public void onPollCommand(SlashCommandInteractionEvent ev) {
         String subcommand = ev.getSubcommandName();
         if (subcommand == null) {
             QueuedLog.error("Thumbpoll without subcommand " + ev.getCommandPath());
@@ -57,7 +58,7 @@ public class PollListener {
         }
     }
 
-    private void addThumbpoll(SlashCommandEvent ev, MessageChannel chan, String msgId) {
+    private void addThumbpoll(SlashCommandInteractionEvent ev, MessageChannel chan, String msgId) {
         if (chan == null) {
             QueuedLog.error("got no MessageChannel for thumbpoll");
             ev.reply("konnte Kanal nicht finden").setEphemeral(true).queue();
@@ -68,15 +69,15 @@ public class PollListener {
                 (e) -> QueuedLog.error("Could not create thumb poll", e)
         );
         try {
-            chan.addReactionById(msgId, "U+1F44D").queue(poll::success, poll::failure);
-            chan.addReactionById(msgId, "U+1F44E").queue(poll::success, poll::failure);
+            chan.addReactionById(msgId, Emoji.fromUnicode("U+1F44D")).queue(poll::success, poll::failure);
+            chan.addReactionById(msgId, Emoji.fromUnicode("U+1F44E")).queue(poll::success, poll::failure);
         } catch (NumberFormatException e) {
             QueuedLog.info("bad message id for thumbpoll " + msgId);
             ev.reply("Keine valide Nachrichten ID").setEphemeral(true).queue();
         }
     }
 
-    private void addThumbpollToLast(SlashCommandEvent ev) {
+    private void addThumbpollToLast(SlashCommandInteractionEvent ev) {
         MessageChannel chan = ev.getChannel();
         MessageHistory h = chan.getHistory();
         h.retrievePast(1).queue((msgs) -> {
@@ -88,8 +89,8 @@ public class PollListener {
                     }
             );
             Message msg = msgs.get(0);
-            msg.addReaction("U+1F44D").queue(poll::success, poll::failure);
-            msg.addReaction("U+1F44E").queue(poll::success, poll::failure);
+            msg.addReaction(Emoji.fromUnicode("U+1F44D")).queue(poll::success, poll::failure);
+            msg.addReaction(Emoji.fromUnicode("U+1F44E")).queue(poll::success, poll::failure);
         }, (e) -> {
             QueuedLog.error("could not retrieve MessageHistory for thumbpoll",e);
             ev.reply("Konnte letzte Nachricht nicht ermitteln.").setEphemeral(true).queue();

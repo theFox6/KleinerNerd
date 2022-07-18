@@ -6,19 +6,22 @@ import com.theFox6.kleinerNerd.ModLog;
 import com.theFox6.kleinerNerd.commands.BadOptionTypeException;
 import com.theFox6.kleinerNerd.commands.CommandManager;
 import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
-import com.theFox6.kleinerNerd.commands.PermissionType;
 import com.theFox6.kleinerNerd.data.MessageLocation;
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
+import net.dv8tion.jda.api.entities.emoji.CustomEmoji;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 import java.time.Instant;
@@ -33,21 +36,20 @@ public class ReactionRoleListener {
 
 	public ReactionRoleListener setupCommands(CommandManager cm) {
 		cm.registerCommand(
-				new CommandData("rr", "ändert die Reaktions-Rollen Konfiguration").addSubcommands(
+				Commands.slash("rr", "ändert die Reaktions-Rollen Konfiguration").addSubcommands(
 						new SubcommandData("add", "fügt eine Reaktion hinzu, die zum verteilen einer Rolle dient")
 								.addOption(OptionType.CHANNEL, "kanal", "der Kanal in dem die Nachricht ist, unter die die Reaktion soll", true)
 								.addOption(OptionType.STRING, "nachrichtenid", "die ID der Nachricht der die Reaktion angehängt werden soll", true)
 								.addOption(OptionType.STRING, "emote", "das emote für die Rollenänderung", true)
 								.addOption(OptionType.ROLE, "rolle", "die Rolle die reagierenden Benutzern zugewiesen wird", true)
-				).setDefaultEnabled(false),
-				this::onRRCommand,
-				PermissionType.MOD_ONLY
+				).setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES)),
+				this::onRRCommand
 		);
 
 		return this;
 	}
 
-	public void onRRCommand(SlashCommandEvent ev) {
+	public void onRRCommand(SlashCommandInteractionEvent ev) {
 		if (!ev.isFromGuild()) //not supported for now
 			return; //TODO: warn
 		if ("add".equals(ev.getSubcommandName())) {
@@ -70,17 +72,17 @@ public class ReactionRoleListener {
 		}
 	}
 
-	private Emoji parseEmoteOption(SlashCommandEvent ev) throws OptionNotFoundException, EmojiFormatException {
-		Emoji emote = Emoji.fromMarkdown(KNHelpers.getOptionMapping(ev,"emote").getAsString());
-		if (emote.isUnicode()) {
+	private Emoji parseEmoteOption(SlashCommandInteractionEvent ev) throws OptionNotFoundException, EmojiFormatException {
+		Emoji emote = Emoji.fromFormatted(KNHelpers.getOptionMapping(ev,"emote").getAsString());
+		if (emote.getType() == Emoji.Type.UNICODE) {
 			String u = emote.getName();
 			if (u.codePointCount(0,u.length()) > 1)
-				throw new EmojiFormatException("too many code points", emote.getAsMention());
+				throw new EmojiFormatException("too many code points", emote.getFormatted());
 		}
 		return emote;
 	}
 
-	private void parseAndFetchMessage(SlashCommandEvent ev, Consumer<? super Message> onMessageFetched) throws OptionNotFoundException, BadOptionTypeException {
+	private void parseAndFetchMessage(SlashCommandInteractionEvent ev, Consumer<? super Message> onMessageFetched) throws OptionNotFoundException, BadOptionTypeException {
 		OptionMapping channelOption = KNHelpers.getOptionMapping(ev, "kanal");
 		MessageChannel chan = channelOption.getAsMessageChannel();
 		if (chan == null)
@@ -96,11 +98,11 @@ public class ReactionRoleListener {
 		});
 	}
 
-	private void addReactionRoleCommand(SlashCommandEvent ev, Emoji emote, Message tmsg, Role role) {
-		if (emote.isUnicode()) {
-			String emoji = emote.getAsMention();
+	private void addReactionRoleCommand(SlashCommandInteractionEvent ev, Emoji emote, Message tmsg, Role role) {
+		if (emote.getType() == Emoji.Type.UNICODE) {
+			String emoji = emote.getFormatted();
 			ReactionRoleStorage.getOrCreateConfig(new MessageLocation(tmsg)).addReactionRole(emoji, role.getId());
-			tmsg.addReaction(emoji).queue(s -> {
+			tmsg.addReaction(Emoji.fromFormatted(emoji)).queue(s -> {
 			}, (e) -> {
 				if (e.getMessage().equals("50013: Missing Permissions")) {
 					QueuedLog.debug("no permissions to react with rr emote");
@@ -110,19 +112,20 @@ public class ReactionRoleListener {
 					ev.getChannel().sendMessage("Ich konnte nicht mit dem rr emoji reagieren.").queue();
 				}
 			});
-		} else {
+		} else if (emote instanceof CustomEmoji) {
+			//TODO: cast to CustomEmoji?
 			//perhaps also fetch external emotes and cancel if check fails
 			ReactionRoleStorage.getOrCreateConfig(new MessageLocation(tmsg))
-					.addReactionRole(emote.getName() + ":" + emote.getId(), role.getId());
+					.addReactionRole(emote.getAsReactionCode(), role.getId());
 			Guild g = ev.getGuild();
 			if (g == null) {
 				QueuedLog.warning("rr add outside of a guild");
 				ev.reply("Dieser Befehl kann nur in Gilden/Servern verwendet werden.").setEphemeral(true).queue();
 				return;
 			}
-			Emote guildEmote = g.getEmoteById(emote.getId());
+			Emoji guildEmote = g.getEmojiById(((CustomEmoji) emote).getId());
 			if (guildEmote == null) {
-				QueuedLog.warning("could not find rr emote " + emote.getAsMention() + " within guild");
+				QueuedLog.warning("could not find rr emote " + emote.getAsReactionCode() + " within guild");
 				ev.getChannel().sendMessage("Ich konnte nicht mit dem rr emoji reagieren, da ich es nicht in diesem Server finden konnte.").queue();
 			} else {
 				tmsg.addReaction(guildEmote).queue((s) -> {
@@ -136,16 +139,18 @@ public class ReactionRoleListener {
 					}
 				});
 			}
+		} else {
+			QueuedLog.error("unknown emoji type " + emote);
 		}
-		ev.reply("Mit " + emote.getAsMention() + " kann man jetzt die Rolle \"" + role.getName() + "\" bekommen.").queue();
+		ev.reply("Mit " + emote.getFormatted() + " kann man jetzt die Rolle \"" + role.getName() + "\" bekommen.").queue();
 	}
 
-	private Role getReactionRoleFromEvent(GenericGuildMessageReactionEvent event) {
+	private Role getReactionRoleFromEvent(GenericMessageReactionEvent event) {
 		MessageLocation loc = new MessageLocation(event);
 		ReactionRoleMap config = ReactionRoleStorage.getConfig(loc);
 		if (config == null)
 			return null;
-		String reactionCode = event.getReactionEmote().getAsReactionCode();
+		String reactionCode = event.getReaction().getEmoji().getAsReactionCode();
 		String roleId = config.getRoleIdForReaction(reactionCode);
 		if (roleId == null) {
 			QueuedLog.debug(event.getUserId() + " reacted to a reaction role message with a different Emote " + reactionCode);
@@ -196,7 +201,7 @@ public class ReactionRoleListener {
 	}
 	
 	@SubscribeEvent
-	public void onReactionAdded(GuildMessageReactionAddEvent event) {
+	public void onReactionAdded(MessageReactionAddEvent event) {
 		Role r = getReactionRoleFromEvent(event);
 		if (r == null) {
 			return;
@@ -241,7 +246,7 @@ public class ReactionRoleListener {
 	}
 
 	@SubscribeEvent
-	public void onReactionRemoved(GuildMessageReactionRemoveEvent event) {
+	public void onReactionRemoved(MessageReactionRemoveEvent event) {
 		Role r = getReactionRoleFromEvent(event);
 		if (r == null) {
 			return;

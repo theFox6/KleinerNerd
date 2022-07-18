@@ -1,6 +1,8 @@
 package com.theFox6.kleinerNerd.listeners;
 
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.*;
@@ -11,9 +13,9 @@ import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.update.GuildUpdateOwnerEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.priv.PrivateMessageUpdateEvent;
+import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
@@ -60,60 +62,58 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	@Override
 	@SubscribeEvent
     public void onException(ExceptionEvent event) {
-    	QueuedLog.warning("exception occured", event.getCause());
-    }
-
-    /*
-	@Override
-	@SubscribeEvent
-    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-    	Message msg = event.getMessage();
-    	QueuedLog.verbose("message from guild " + msg.getGuild().getName() + "\n" +
-				msg.getContentRaw());
+    	QueuedLog.warning("exception occurred", event.getCause());
     }
     
 	@Override
 	@SubscribeEvent
-    public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
-    	Message msg = event.getMessage();
-    	QueuedLog.verbose("message edited in guild " + msg.getGuild().getName() + " in channel " + msg.getChannel().getName());
+    public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+		ChannelType ct = event.getChannelType();
+		if (ct == ChannelType.PRIVATE) {
+			Message msg = event.getMessage();
+			User author = msg.getAuthor();
+			if (event.getJDA().getSelfUser().equals(author))
+				return;
+			QueuedLog.info("private message in conversation with " + msg.getChannel().getName() + "\n"
+					+ "written by " + author.getName() + "\n"
+					+ "message contents " + msg.getContentRaw());
+		} else if (ct == ChannelType.NEWS) {
+			Message msg = event.getMessage();
+			QueuedLog.verbose("message from guild " + msg.getGuild().getName() + "\n" +
+					msg.getContentRaw());
+		}
+		//TODO: other channel types
     }
     
 	@Override
 	@SubscribeEvent
-    public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
-		QueuedLog.verbose("message deleted in channel " + event.getChannel().getName());
-    }
-     */
-    
-	@Override
-	@SubscribeEvent
-    public void onPrivateMessageReceived(@Nonnull PrivateMessageReceivedEvent event) {
-    	Message msg = event.getMessage();
-    	User author = msg.getAuthor();
-    	if (event.getJDA().getSelfUser().equals(author))
-    		return;
-    	QueuedLog.info("private message in conversation with " + msg.getChannel().getName() + "\n"
-    			+ "written by " + author.getName() + "\n"
-				+ "message contents " + msg.getContentRaw());
-    }
-    
-	@Override
-	@SubscribeEvent
-    public void onPrivateMessageUpdate(@Nonnull PrivateMessageUpdateEvent event) {
-    	Message msg = event.getMessage();
-    	User author = msg.getAuthor();
-    	if (event.getJDA().getSelfUser().equals(author))
-    		return;
-    	QueuedLog.info("private message edited in convo with " + msg.getChannel().getName() + "\n"
-    			+ "new message contents " + msg.getContentRaw());
+    public void onMessageUpdate(@Nonnull MessageUpdateEvent event) {
+		ChannelType ct = event.getChannelType();
+		if (ct == ChannelType.PRIVATE) {
+			Message msg = event.getMessage();
+			User author = msg.getAuthor();
+			if (event.getJDA().getSelfUser().equals(author))
+				return;
+			QueuedLog.info("private message edited in convo with " + msg.getChannel().getName() + "\n"
+					+ "new message contents " + msg.getContentRaw());
+		} else if (ct == ChannelType.NEWS) {
+			Message msg = event.getMessage();
+			QueuedLog.verbose("message edited in guild " + msg.getGuild().getName() + " in channel " + msg.getChannel().getName());
+		}
+		//TODO: other channel types
     }
     
 	@Override
 	@SubscribeEvent
-    public void onPrivateMessageDelete(@Nonnull PrivateMessageDeleteEvent event) {
-		QueuedLog.info("private message deleted from " + event.getChannel().getName());
-    	//later also print message ID
+    public void onMessageDelete(@Nonnull MessageDeleteEvent event) {
+		ChannelType ct = event.getChannelType();
+		if (ct == ChannelType.PRIVATE) {
+			QueuedLog.info("private message deleted from " + event.getChannel().getName());
+			//later also print message ID
+		} else if (ct == ChannelType.NEWS) {
+			QueuedLog.verbose("message deleted in channel " + event.getChannel().getName());
+		}
+		//TODO: other channel types
     }
     
 	@Override
@@ -149,7 +149,9 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	@Override
 	@SubscribeEvent
     public void onGuildUpdateOwner(@Nonnull GuildUpdateOwnerEvent event) {
-		QueuedLog.info("ownership of guild " + event.getGuild().getName() + " was transferred to " + event.getNewOwner().getUser().getName());
+		Member owner = event.getNewOwner();
+		QueuedLog.info("ownership of guild " + event.getGuild().getName() + " was transferred"
+				+ (owner == null ? "" : " to " + owner.getUser().getName()));
     }
     
 	@Override

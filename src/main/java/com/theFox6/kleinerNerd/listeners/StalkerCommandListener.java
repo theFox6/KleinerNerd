@@ -7,19 +7,20 @@ import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.Interaction;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
 import java.time.Instant;
 
 public class StalkerCommandListener {
+	//TODO: user rightclick commands
 	public void setupCommands(CommandManager cm) {
-		cm.registerCommand(new CommandData("avatar", "sendet einen Avatar")
+		cm.registerCommand(Commands.slash("avatar", "sendet einen Avatar")
 				.addSubcommandGroups(new SubcommandGroupData("von", "sendet den Avatar von jemandem oder etwas")
 						.addSubcommands(
 								new SubcommandData("benutzer", "sendet den Avatar von einem Benutzer")
@@ -29,7 +30,7 @@ public class StalkerCommandListener {
 								new SubcommandData("serverid", "sendet das icon von einer Gilde (einem Server)")
 										.addOption(OptionType.STRING,"guildid","die ID vom Server",false)
 					)
-				), (SlashCommandEvent ev) -> {
+				), (SlashCommandInteractionEvent ev) -> {
 					if (!"von".equals(ev.getSubcommandGroup())) {
 						QueuedLog.warning("unknown subcommand group: " + ev.getSubcommandGroup());
 						return;
@@ -44,7 +45,7 @@ public class StalkerCommandListener {
 		);
 	}
 
-	private void processAvatar(SlashCommandEvent ev) throws OptionNotFoundException {
+	private void processAvatar(SlashCommandInteractionEvent ev) throws OptionNotFoundException {
 		if (ev.getSubcommandName() == null) {
 			QueuedLog.error("no subcommand for avatar: " + ev.getCommandPath());
 			ev.reply("Fehler bei der Identifikation des Befehls").setEphemeral(true).queue();
@@ -97,7 +98,7 @@ public class StalkerCommandListener {
 		}
 	}
 
-	private void sendImageEmbed(Interaction i, String title, String url) {
+	private void sendImageEmbed(CommandInteraction i, String title, String url) {
 		EmbedBuilder avatarEmbed = new EmbedBuilder()
 				.setTitle(title)
 				.setTimestamp(Instant.now())

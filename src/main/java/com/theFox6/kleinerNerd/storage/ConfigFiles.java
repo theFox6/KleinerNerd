@@ -3,6 +3,7 @@ package com.theFox6.kleinerNerd.storage;
 import foxLog.queued.QueuedLog;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
@@ -18,7 +19,7 @@ public class ConfigFiles {
 	 * Read a file and return it's contents as String.
 	 * @param filename the file to be loaded
 	 * @return the contents of the file
-	 * @throws IOException
+	 * @throws IOException if anything goes wrong
 	 */
 	private static String getFileContent(String filename) throws IOException {
 		try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
@@ -52,6 +53,9 @@ public class ConfigFiles {
 		if (token == null) {
 			try {
 				token = getFileContent("secrets/token.txt");
+			} catch (FileNotFoundException e) {
+				QueuedLog.error("missing token.txt file in secrets folder");
+				return null;
 			} catch (IOException e) {
 				QueuedLog.error("error while trying to read secrets/token.txt file",e);
 				return null;

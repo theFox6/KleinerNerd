@@ -3,8 +3,8 @@ package com.theFox6.kleinerNerd.achievements;
 import com.theFox6.kleinerNerd.data.SendableImage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 import java.util.LinkedHashMap;
@@ -35,8 +35,8 @@ public class EmoteAchievementListener {
     }
 
     @SubscribeEvent
-    public void onReactionAdded(GuildMessageReactionAddEvent ev) {
-        if (ev.getReactionEmote().getName().equalsIgnoreCase("ehre")) {
+    public void onReactionAdded(MessageReactionAddEvent ev) {
+        if (ev.getEmoji().getName().equalsIgnoreCase("ehre")) {
             ev.getChannel().retrieveMessageById(ev.getMessageId()).queue((o) -> {
                 User author = o.getAuthor();
                 if (ev.getUserId().equals(author.getId()))
@@ -48,8 +48,8 @@ public class EmoteAchievementListener {
     }
 
     @SubscribeEvent
-    public void onReactionRemoved(GuildMessageReactionRemoveEvent ev) {
-        if (ev.getReactionEmote().getName().equalsIgnoreCase("ehre")) {
+    public void onReactionRemoved(MessageReactionRemoveEvent ev) {
+        if (ev.getEmoji().getName().equalsIgnoreCase("ehre")) {
             ev.getChannel().retrieveMessageById(ev.getMessageId()).queue((o) -> {
                 User author = o.getAuthor();
                 if (ev.getUserId().equals(author.getId()))

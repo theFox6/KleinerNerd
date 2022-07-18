@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
@@ -147,7 +148,7 @@ public class SuicideListener {
 	}
 	
 	public static void reactWithF(Message msg) {
-		msg.addReaction("U+1f1eb").queue();
+		msg.addReaction(Emoji.fromUnicode("U+1f1eb")).queue();
 	}
 	
 	/* coming soon

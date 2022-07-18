@@ -38,6 +38,6 @@ public class ReactionRoleConfig {
 			ConcurrentHashMap<MessageLocation, ReactionRoleMap> rrConfig) {
 		if (ser == null)
 			return;
-		ser.stream().forEach((c) -> rrConfig.put(c.loc, c.rRoles));
+		ser.forEach((c) -> rrConfig.put(c.loc, c.rRoles));
 	}
 }

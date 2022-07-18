@@ -156,7 +156,7 @@ public class KleinerNerd {
 		Path currentBackup = backupFolder.resolve(backupName);
 		if (Files.exists(currentBackup)) {
 			for (int i = 1; Files.exists(currentBackup); i++)
-			currentBackup = backupFolder.resolve(backupName + '_' + i);
+				currentBackup = backupFolder.resolve(backupName + '_' + i);
 		}
 		try {
 			KNHelpers.copyFolder(dataFolder, currentBackup);

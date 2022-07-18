@@ -62,18 +62,14 @@ public class AchievementCounter {
             //achievement.setAuthor("Errungenschaft",null, image.link());
             achievement.setThumbnail(image.link());
             if (image.needsAttach()) {
-                try {
-                    channel.sendFile(image.data(), image.name()).embed(achievement.build()).queue(
-                            (m) -> QueuedLog.debug(receiver.getName() + " received the achievement \"" + title + '"'),
-                            (e) -> QueuedLog.error("couldn't send achievement", e)
-                    );
-                    return;
-                } catch (ResourceNotFoundException e) {
-                    QueuedLog.error("achievement image not found", e);
-                }
+                channel.sendFile(image.data(), image.name()).setEmbeds(achievement.build()).queue(
+                        (m) -> QueuedLog.debug(receiver.getName() + " received the achievement \"" + title + '"'),
+                        (e) -> QueuedLog.error("couldn't send achievement", e)
+                );
+                return;
             }
         }
-        channel.sendMessage(achievement.build()).queue(
+        channel.sendMessageEmbeds(achievement.build()).queue(
                 (m) -> QueuedLog.debug(receiver.getName() + " received the achievement \"" + title + '"'),
                 (e) -> QueuedLog.error("couldn't send achievement", e)
         );

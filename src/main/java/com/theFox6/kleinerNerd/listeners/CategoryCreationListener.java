@@ -3,35 +3,42 @@ package com.theFox6.kleinerNerd.listeners;
 import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.commands.CommandManager;
 import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
-import com.theFox6.kleinerNerd.commands.PermissionType;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+
+import java.util.List;
 
 public class CategoryCreationListener {
-    public CategoryCreationListener setupCommands(CommandManager cm) {
+    public void setupCommands(CommandManager cm) {
         cm.registerCommand(
-                new CommandData("create-category", "erstellt eine neue Kategorie mit einem Text und einem Voice Kanal")
+                Commands.slash("create-category", "erstellt eine neue Kategorie mit einem Text und einem Voice Kanal")
                         .addOption(OptionType.STRING, "kategoriename", "der Name für den die Kategorie", true)
                         .addOption(OptionType.STRING, "rollenname", "der Name der Rolle, die Zugriff auf die Kategorie haben soll", false)
                         .addOption(OptionType.STRING, "textkanalname", "der Name für den Textkanal", false)
                         .addOption(OptionType.STRING, "voicekanalname", "der Name für den Sprachkanal", false)
-                        .setDefaultEnabled(false),
-                this::onCCCommand,
-                PermissionType.MOD_ONLY
+                        .setGuildOnly(true)
+                        .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)),
+                this::onCCCommand
         );
 
-        return this;
     }
 
-    public void onCCCommand(SlashCommandEvent ev) {
+    public void onCCCommand(SlashCommandInteractionEvent ev) {
         if (!ev.isFromGuild()) //not supported
             return; //TODO: warn
         Guild g = ev.getGuild();
+        if (g == null) {
+            QueuedLog.warning("Command from guild without guild.");
+            return;
+        }
         try {
             String catName = KNHelpers.getOptionMapping(ev, "kategoriename").getAsString();
             if (catName.isEmpty())
@@ -45,12 +52,14 @@ public class CategoryCreationListener {
             g.createCategory(catName).queue((cat) -> {
                 OptionMapping rolename = ev.getOption("rollenname");
                 if (rolename != null && !rolename.getAsString().isEmpty()) {
-                    //TODO: check if role exists
-                    g.createRole().setName(rolename.getAsString()).queue((role) -> {
-                        cat.putPermissionOverride(role).grant(Permission.VIEW_CHANNEL).queue(
-                                (s) -> cat.putPermissionOverride(g.getPublicRole()).deny(Permission.VIEW_CHANNEL).queue()
-                        );
-                    });
+                    List<Role> existing = g.getRolesByName(rolename.getAsString(),true);
+                    //perhaps ask whether to create one or use existing
+                    if (existing.isEmpty()) {
+                        g.createRole().setName(rolename.getAsString())
+                                .queue((role) -> CategoryCreationListener.makeRoleExclusive(g, cat, role));
+                    } else {
+                        existing.forEach((r) -> CategoryCreationListener.makeRoleExclusive(g, cat, r));
+                    }
                 }
                 OptionMapping textName = ev.getOption("textkanalname");
                 if (textName != null && !textName.getAsString().isEmpty()) {
@@ -66,5 +75,11 @@ public class CategoryCreationListener {
             ev.reply("konnte " + e.getOption() + " option nicht extrahieren").setEphemeral(true).queue();
         }
 
+    }
+
+    private static void makeRoleExclusive(Guild g, Category category, Role role) {
+        category.upsertPermissionOverride(role).grant(Permission.VIEW_CHANNEL).queue(
+                (s) -> category.upsertPermissionOverride(g.getPublicRole()).deny(Permission.VIEW_CHANNEL).queue()
+        );
     }
 }

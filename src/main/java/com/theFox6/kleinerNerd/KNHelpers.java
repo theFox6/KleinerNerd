@@ -2,7 +2,7 @@ package com.theFox6.kleinerNerd;
 
 import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
 import foxLog.queued.QueuedLog;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
 import javax.annotation.Nonnull;
@@ -79,7 +79,7 @@ public class KNHelpers {
      * @throws OptionNotFoundException if the option was null
      */
     @Nonnull
-    public static OptionMapping getOptionMapping(SlashCommandEvent ev, String optionName) throws OptionNotFoundException {
+    public static OptionMapping getOptionMapping(SlashCommandInteractionEvent ev, String optionName) throws OptionNotFoundException {
         OptionMapping om = ev.getOption(optionName);
         if (om == null)
             throw new OptionNotFoundException(ev.getCommandPath(), optionName);
