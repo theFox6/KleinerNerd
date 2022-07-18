@@ -36,7 +36,7 @@ $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:
 	"self destruct",
 	"suicide",
 	[("the "),"not living"],
-	"be crushed by her thighs",
+	[{passive: "be ", "get "}, "crushed by her thighs"],
 	"seppuku",
 	# this is not exactly a match but the memes
 	"sudoku"
