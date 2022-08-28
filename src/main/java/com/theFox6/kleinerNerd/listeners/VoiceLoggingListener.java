@@ -10,10 +10,7 @@ import com.theFox6.kleinerNerd.storage.ConfigFiles;
 
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
@@ -34,6 +31,7 @@ public class VoiceLoggingListener {
 	
 	@SubscribeEvent
 	public void onMessageReceived(MessageReceivedEvent event) {
+		//TODO: respond to the interaction
     	Message msg = event.getMessage();
     	if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId()))
     		return;
@@ -41,7 +39,7 @@ public class VoiceLoggingListener {
     	MessageChannel chan = event.getChannel();
     	if (!raw.startsWith(KleinerNerd.prefix + "logvoice"))
     		return;
-    	List<TextChannel> targets  = msg.getMentionedChannels();
+    	List<GuildChannel> targets  = msg.getMentions().getChannels();
     	if (targets.isEmpty()) {
     		switch (chan.getType()) {
 	    	case TEXT:
@@ -68,14 +66,21 @@ public class VoiceLoggingListener {
 	    		return;
 	    	default:
 	    		QueuedLog.warning("message from unknown channel type: " + chan.getType());
-	    		return;
+	    		//return;
 	    	}
     	} else {
     		targets.forEach((tc) -> {
     			guildChannels.put(tc.getGuild().getId(), tc.getId());
+				TextChannel c = tc.getGuild().getTextChannelById(tc.getId());
+				if (c == null)
+					chan.sendMessage("Couldn't identify TextChannel " + tc.getName()).queue();
+				else
+					c.sendMessage("I'll send voice channel updates here")
+						.queue((s) -> {}, (e) -> chan.sendMessage("An error occured when sending a message to " +
+								tc.getName() + ": " + e.getMessage()).queue());
     		});
-    		chan.sendMessage("done! perhaps...").queue();
-    		//TODO: feedback, deactivation
+    		chan.sendMessage("Added channels for logging").queue();
+    		//TODO: deactivation
     	}
 	}
 	

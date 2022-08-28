@@ -25,7 +25,7 @@ public class SendableImage {
         return url == null;
     }
 
-    public InputStream data() throws ResourceNotFoundException {
+    public InputStream data() {
         return KleinerNerd.class.getResourceAsStream(resourcePath);
     }
 

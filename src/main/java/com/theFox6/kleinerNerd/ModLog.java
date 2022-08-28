@@ -17,6 +17,8 @@ public class ModLog {
 	//guildid, message
 	private static Map<String, Set<String>> sentMessages = new ConcurrentHashMap<>();
 
+	//TODO: ask ownsers: send a message with buttons to the owners
+
 	public static void sendToOwners(JDA jda, String msg) {
 		ConfigFiles.getOwners().forEach((id) -> jda.retrieveUserById(id).queue(
 				(user) -> user.openPrivateChannel().queue(

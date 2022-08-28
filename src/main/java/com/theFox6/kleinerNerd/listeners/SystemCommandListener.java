@@ -11,10 +11,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,7 +30,7 @@ public class SystemCommandListener {
 	};
 
 	public SystemCommandListener setupCommands(CommandManager cm) {
-		cm.registerCommand(new CommandData("ping", "Misst und zeigt verschiedene Netzwerklatenzzeiten."),
+		cm.registerCommand(Commands.slash("ping", "Misst und zeigt verschiedene Netzwerklatenzzeiten."),
 				(event) -> {
 					long time = System.currentTimeMillis();
 					event.reply("Pong!\n(warte auf Antwort von Discord)").queue(
@@ -43,17 +43,17 @@ public class SystemCommandListener {
 					);
 				}
 		);
-		cm.registerCommand(new CommandData("pong", "Cooler als ping."),
+		cm.registerCommand(Commands.slash("pong", "Cooler als ping."),
 				(event) -> event.reply("PENG!").queue()
 		);
-		cm.registerCommand(new CommandData("logfile", "Schickt die Protokolldatei."), this::onLogfileCommand);
-		cm.registerCommand(new CommandData("shutdown", "Fährt den Bot herunter."), this::onShutdownCommand);
-		cm.registerCommand(new CommandData("update", "Aktualisiert den Bot und startet ihn neu."), this::onUpdateCommand);
+		cm.registerCommand(Commands.slash("logfile", "Schickt die Protokolldatei."), this::onLogfileCommand);
+		cm.registerCommand(Commands.slash("shutdown", "Fährt den Bot herunter."), this::onShutdownCommand);
+		cm.registerCommand(Commands.slash("update", "Aktualisiert den Bot und startet ihn neu."), this::onUpdateCommand);
 
 		return this;
 	}
 
-	public void onShutdownCommand(SlashCommandEvent event) {
+	public void onShutdownCommand(SlashCommandInteractionEvent event) {
 		User user = event.getUser();
 		if (!ConfigFiles.getOwners().contains(user.getId())) {
 			event.reply(KNHelpers.randomElement(noShutdown)).queue();
@@ -63,7 +63,7 @@ public class SystemCommandListener {
 		event.reply("fahre herunter").queue((ih) -> shutdown(ih.getJDA(), InstanceState.SHUTTING_DOWN));
 	}
 
-	private void onUpdateCommand(SlashCommandEvent event) {
+	private void onUpdateCommand(SlashCommandInteractionEvent event) {
 		User user = event.getUser();
 		if (!ConfigFiles.getOwners().contains(user.getId())) {
 			event.reply(KNHelpers.randomElement(noShutdown)).queue();
@@ -73,7 +73,7 @@ public class SystemCommandListener {
 		event.reply("aktualisiere").queue((ih) -> shutdown(ih.getJDA(), InstanceState.PREPARING_UPDATE));
 	}
 
-	public void onLogfileCommand(SlashCommandEvent event) {
+	public void onLogfileCommand(SlashCommandInteractionEvent event) {
 		User user = event.getUser();
 		if (!ConfigFiles.getOwners().contains(user.getId())) {
 			event.reply("Die Protokolldaten sind zu sensibel um sie jedem zu schicken. Tut mir leid.").setEphemeral(true).queue();
@@ -95,7 +95,7 @@ public class SystemCommandListener {
     	String raw = msg.getContentRaw();
     	MessageChannel chan = event.getChannel();
     	String ownId = event.getJDA().getSelfUser().getId();
-    	if (raw.startsWith(".shutdown") && msg.getMentionedUsers().stream().map(User::getId).anyMatch(el -> el.equals(ownId))) {
+    	if (raw.startsWith(".shutdown") && msg.getMentions().getUsers().stream().map(User::getId).anyMatch(el -> el.equals(ownId))) {
     		if (!ConfigFiles.getOwners().contains(msg.getAuthor().getId())) {
 				chan.sendMessage(KNHelpers.randomElement(noShutdown)).queue();
     			return;

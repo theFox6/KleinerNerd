@@ -7,30 +7,29 @@ import com.theFox6.kleinerNerd.storage.GuildStorage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 public class ConfigurationListener {
 	public void setupCommands(CommandManager cm) {
 		cm.registerCommand(
-				new CommandData("modrole","Stellt die Moderatorenrolle des Servers ein")
-						.setDefaultEnabled(false)
+				Commands.slash("modrole","Stellt die Moderatorenrolle des Servers ein")
+						.setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 						.addOption(OptionType.ROLE,"rolle","die Rolle, die Verwaltungs-Befehle ausführen darf",false),
-				this::onModRoleCommand,
-				PermissionType.SERVER_OWNER_ONLY
+				this::onModRoleCommand
 		);
 		cm.registerCommand(
-				new CommandData("modlog", "stellt den Moderator log Kanal de Servers ein")
-						.setDefaultEnabled(false)
+				Commands.slash("modlog", "stellt den Moderator log Kanal de Servers ein")
+						.setGuildOnly(true).setDefaultPermissions(DefaultMemberPermissions.DISABLED)
 						.addOption(OptionType.CHANNEL, "kanal", "der Kanal in den der KleineNerd Nachrichten für Moderatoren sendet", true),
-				this::onModLogCommand,
-				PermissionType.SERVER_OWNER_ONLY
+				this::onModLogCommand
 		);
 	}
 
-	public void onModRoleCommand(SlashCommandEvent ev) {
+	public void onModRoleCommand(SlashCommandInteractionEvent ev) {
 		Guild g = ev.getGuild();
 		if (g == null) {
 			QueuedLog.warning("Couldn't get guild for modrole command.");
@@ -48,7 +47,7 @@ public class ConfigurationListener {
 		}
 	}
 
-	public void onModLogCommand(SlashCommandEvent ev) {
+	public void onModLogCommand(SlashCommandInteractionEvent ev) {
 		Guild g = ev.getGuild();
 		if (g == null) {
 			QueuedLog.warning("Couldn't get guild for modlog command.");
