@@ -8,7 +8,9 @@ $vorn; = [{davor: "vor den ", "vorn ", "vor n ", "vor einen ", "vor ein ", "vors
 $fahrzeug; = {fahrzeug: "bus", "zug", "auto", "lkw", "lastwagen", "lastkraftwagen", "traktor"}
 $iamgoingto; = [{iamgoingto:
 	[{ill: "ima ",  "i want to ", "i wanna ", "i will ", "i'll "}, ("just "), ("go ")],
-	[{im: "i am ", "i'm ", "im "}, ("just "), {gonna: "gonna ", "going to "}]
+	[{im: "i am ", "i'm ", "im "}, ("just "), {gonna: "gonna ", "going to "}],
+	# seriously these lazy people...
+	"i go ", "i "
 }]
 $ausm; = {raus: "aus dem ", "ausm "}
 $commitsc; = [("fucking "), ("commit "), ("fucking "), {die:

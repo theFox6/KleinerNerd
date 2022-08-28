@@ -216,7 +216,7 @@ public class ReactionRoleListener {
 							member.getUser().openPrivateChannel().queue(
 									(pc) -> pc.sendMessage("Rolle \"" + r.getName() + "\" zugewiesen.").queue((m)->{}, (e) -> {
 										if (e.getMessage().equals("50007: Cannot send messages to this user"))
-											QueuedLog.error("cannot send confirmation messages to " + userId, e);
+											QueuedLog.debug("cannot send confirmation messages to " + userId);
 										else
 											QueuedLog.error("couldn't send rr confirmation message",e);
 									})
@@ -259,7 +259,12 @@ public class ReactionRoleListener {
 						(s) -> {
 							QueuedLog.debug("Role \"" + r.getName() + "\" was removed from " + name + ".");
 							member.getUser().openPrivateChannel().queue(
-									(pc) -> pc.sendMessage("Rolle \"" + r.getName() + "\" entfernt.").queue()
+									(pc) -> pc.sendMessage("Rolle \"" + r.getName() + "\" entfernt.").queue((m)->{}, (e) -> {
+										if (e.getMessage().equals("50007: Cannot send messages to this user"))
+											QueuedLog.debug("cannot send confirmation messages to " + userId);
+										else
+											QueuedLog.error("couldn't send rr confirmation message",e);
+									})
 							);
 						},
 						(f) -> {
