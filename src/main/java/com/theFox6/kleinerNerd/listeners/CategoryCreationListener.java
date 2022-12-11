@@ -4,6 +4,7 @@ import com.theFox6.kleinerNerd.KNHelpers;
 import com.theFox6.kleinerNerd.MultiActionHandler;
 import com.theFox6.kleinerNerd.commands.CommandManager;
 import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
+import com.theFox6.kleinerNerd.roles.GetRoleStorage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -21,6 +22,7 @@ public class CategoryCreationListener {
                         .addOption(OptionType.STRING, "rollenname", "der Name der Rolle, die Zugriff auf die Kategorie haben soll", false)
                         .addOption(OptionType.STRING, "textkanalname", "der Name für den Textkanal", false)
                         .addOption(OptionType.STRING, "voicekanalname", "der Name für den Sprachkanal", false)
+                        .addOption(OptionType.STRING, "rollenkategorie", "die Kategorie mit der man sich die Rolle holen kann", false)
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)),
                 this::onCCCommand
         );
@@ -65,6 +67,10 @@ public class CategoryCreationListener {
                                         (s) -> cat.upsertPermissionOverride(g.getPublicRole()).deny(Permission.VIEW_CHANNEL)
                                                 .queue(categorySetup::success)
                                 );
+                                OptionMapping roleCategory = ev.getOption("rollenkategorie");
+                                if (roleCategory != null)
+                                    GetRoleStorage.addRole(g.getId(), roleCategory.getAsString(), role.getId());
+
                                 OptionMapping voiceName = ev.getOption("voicekanalname");
                                 if (voiceName == null || voiceName.getAsString().isEmpty())
                                     categorySetup.success();

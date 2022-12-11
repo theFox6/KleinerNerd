@@ -7,6 +7,8 @@ import com.theFox6.kleinerNerd.commands.ModRoleChangeListener;
 import com.theFox6.kleinerNerd.listeners.*;
 import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleListener;
 import com.theFox6.kleinerNerd.reactionRoles.ReactionRoleStorage;
+import com.theFox6.kleinerNerd.roles.GetRoleStorage;
+import com.theFox6.kleinerNerd.roles.RoleCommandListener;
 import com.theFox6.kleinerNerd.storage.ConfigFiles;
 import com.theFox6.kleinerNerd.storage.CounterStorage;
 import com.theFox6.kleinerNerd.storage.GuildStorage;
@@ -101,6 +103,7 @@ public class KleinerNerd {
 			System.exit(1);
 		}
 		GuildStorage.load();
+		GetRoleStorage.load();
 		ReactionRoleStorage.load();
 		CounterStorage.loadAll();
 		Runtime.getRuntime().addShutdownHook(new Thread("KleinerNerd-shutdownHook") {
@@ -147,6 +150,7 @@ public class KleinerNerd {
 	private static void saveAll() {
 		checkDataFolder();
 		GuildStorage.save();
+		GetRoleStorage.save();
 		ReactionRoleStorage.save();
 		CounterStorage.saveAll();
 	}
@@ -189,6 +193,7 @@ public class KleinerNerd {
 		eventManager.register(new SystemCommandListener().setupCommands(commandManager));
 		new ConfigurationListener().setupCommands(commandManager);
 		new CategoryCreationListener().setupCommands(commandManager);
+		eventManager.register(new RoleCommandListener().setupCommands(commandManager));
 		eventManager.register(new ReactionRoleListener().setupCommands(commandManager));
 
 		eventManager.register(new ConvoSnippetListener());
