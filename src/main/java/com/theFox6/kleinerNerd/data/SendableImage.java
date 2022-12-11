@@ -1,6 +1,7 @@
 package com.theFox6.kleinerNerd.data;
 
 import com.theFox6.kleinerNerd.KleinerNerd;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.InputStream;
 
@@ -31,5 +32,9 @@ public class SendableImage {
 
     public String name() {
         return fileName;
+    }
+
+    public FileUpload upload() {
+        return FileUpload.fromData(data(), name());
     }
 }

@@ -47,7 +47,7 @@ public class StalkerCommandListener {
 
 	private void processAvatar(SlashCommandInteractionEvent ev) throws OptionNotFoundException {
 		if (ev.getSubcommandName() == null) {
-			QueuedLog.error("no subcommand for avatar: " + ev.getCommandPath());
+			QueuedLog.error("no subcommand for avatar: " + ev.getFullCommandName());
 			ev.reply("Fehler bei der Identifikation des Befehls").setEphemeral(true).queue();
 			return;
 		}

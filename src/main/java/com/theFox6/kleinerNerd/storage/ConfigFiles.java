@@ -16,11 +16,12 @@ public class ConfigFiles {
 	private static Collection<String> scc;
 
 	/**
-	 * Read a file and return it's contents as String.
+	 * Read a file and return its contents as String.
 	 * @param filename the file to be loaded
 	 * @return the contents of the file
 	 * @throws IOException if anything goes wrong
 	 */
+	@SuppressWarnings("SameParameterValue")
 	private static String getFileContent(String filename) throws IOException {
 		try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
 			return reader.lines().collect(Collectors.joining("\n"));
@@ -34,6 +35,7 @@ public class ConfigFiles {
 	 * @return a list containing the lines from the file
 	 * @throws IOException if something goes wrong while reading the file
 	 */
+	@SuppressWarnings("SameParameterValue")
 	private static Collection<String> getFileContents(String filename, boolean ignoreEC) throws IOException {
 		if (ignoreEC) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {

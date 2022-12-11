@@ -18,9 +18,9 @@ import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 
-import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,8 +47,8 @@ public class KleinerNerd {
             jda = JDABuilder.createDefault(ConfigFiles.getToken())
                     .setEventManager(eventManager)
                     .build();
-        } catch (LoginException e) {
-            QueuedLog.error("Login failed (probably because of a bad token)",e);
+        } catch (InvalidTokenException e) {
+            QueuedLog.error("Login failed because of a bad token",e);
             return null;
         } catch (ErrorResponseException e) {
         	QueuedLog.error("Error response while building bot");

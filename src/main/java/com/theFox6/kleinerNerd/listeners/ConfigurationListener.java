@@ -2,11 +2,11 @@ package com.theFox6.kleinerNerd.listeners;
 
 import com.theFox6.kleinerNerd.ModLog;
 import com.theFox6.kleinerNerd.commands.CommandManager;
-import com.theFox6.kleinerNerd.commands.PermissionType;
 import com.theFox6.kleinerNerd.storage.GuildStorage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -59,15 +59,16 @@ public class ConfigurationListener {
 			GuildStorage.setModLogChannel(g, null);
 			ev.reply("Es werden keine Protokoll-Nachrichten für Moderatoren mehr gesendet.").queue();
 		} else {
+			GuildChannelUnion targetChannel = channel.getAsChannel();
 			try {
-				ModLog.setModLogChannel(g, channel.getAsMessageChannel());
+				ModLog.setModLogChannel(g, targetChannel.asGuildMessageChannel());
 			} catch (IllegalArgumentException e) {
 				QueuedLog.warning("bad modlog setting", e);
 				ev.reply("konnte modlog Kanal nicht einstellen: " + e.getMessage()).setEphemeral(true).queue();
 				return;
 			}
 			ev.reply("Protokoll-Nachrichten für Moderatoren werden ab jetzt in "
-					+ channel.getAsGuildChannel().getAsMention() + " gesendet.").queue();
+					+ targetChannel.getAsMention() + " gesendet.").queue();
 		}
 	}
 }

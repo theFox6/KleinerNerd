@@ -6,8 +6,8 @@ import com.theFox6.kleinerNerd.commands.CommandManager;
 import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageHistory;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -30,7 +30,7 @@ public class PollListener {
     public void onPollCommand(SlashCommandInteractionEvent ev) {
         String subcommand = ev.getSubcommandName();
         if (subcommand == null) {
-            QueuedLog.error("Thumbpoll without subcommand " + ev.getCommandPath());
+            QueuedLog.error("Thumbpoll without subcommand " + ev.getFullCommandName());
             return;
         }
         switch (subcommand) {
@@ -46,7 +46,7 @@ public class PollListener {
                 }
             case "in-kanal":
                 try {
-                    addThumbpoll(ev, KNHelpers.getOptionMapping(ev, "kanal").getAsMessageChannel(), KNHelpers.getOptionMapping(ev, "nachrichtenid").getAsString());
+                    addThumbpoll(ev, KNHelpers.getOptionMapping(ev, "kanal").getAsChannel().asGuildMessageChannel(), KNHelpers.getOptionMapping(ev, "nachrichtenid").getAsString());
                 } catch (OptionNotFoundException e) {
                     QueuedLog.error("could not get option " + e.getOption(), e);
                     ev.reply("konnte option nicht extrahieren").setEphemeral(true).queue();

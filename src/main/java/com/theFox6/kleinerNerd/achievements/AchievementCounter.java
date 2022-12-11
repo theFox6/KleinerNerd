@@ -1,12 +1,15 @@
 package com.theFox6.kleinerNerd.achievements;
 
 import com.theFox6.kleinerNerd.ModLog;
-import com.theFox6.kleinerNerd.data.ResourceNotFoundException;
 import com.theFox6.kleinerNerd.data.SendableImage;
 import com.theFox6.kleinerNerd.storage.CounterStorage;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AchievementCounter {
-    private static Map<String, Map<Integer, Achievement>> achievements = new ConcurrentHashMap<>();
+    private static final Map<String, Map<Integer, Achievement>> achievements = new ConcurrentHashMap<>();
 
     public static void registerAchievements(String name, Map<Integer, Achievement> thresholds) {
         achievements.put(name, thresholds);
@@ -62,7 +65,7 @@ public class AchievementCounter {
             //achievement.setAuthor("Errungenschaft",null, image.link());
             achievement.setThumbnail(image.link());
             if (image.needsAttach()) {
-                channel.sendFile(image.data(), image.name()).setEmbeds(achievement.build()).queue(
+                channel.sendFiles(image.upload()).setEmbeds(achievement.build()).queue(
                         (m) -> QueuedLog.debug(receiver.getName() + " received the achievement \"" + title + '"'),
                         (e) -> QueuedLog.error("couldn't send achievement", e)
                 );

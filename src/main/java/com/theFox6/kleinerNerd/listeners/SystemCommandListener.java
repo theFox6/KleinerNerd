@@ -9,12 +9,13 @@ import com.theFox6.kleinerNerd.system.InstanceState;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,7 +39,7 @@ public class SystemCommandListener {
 											+ "Sendezeit: %d ms\n"
 											+ "letzter heartbeat: %d ms",
 									System.currentTimeMillis() - time,
-									event.getJDA().getGatewayPing()
+									h.getJDA().getGatewayPing()
 							).queue()
 					);
 				}
@@ -86,7 +87,7 @@ public class SystemCommandListener {
 			QueuedLog.warning("logfile request was interrupted", e);
 		}
 		event.reply("log vom " + OffsetDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)))
-				.queue((h) -> event.getChannel().sendFile(KleinerNerd.logFile).queue());
+				.queue((h) -> event.getChannel().sendFiles(FileUpload.fromData(KleinerNerd.logFile)).queue());
 	}
 
 	@SubscribeEvent

@@ -82,7 +82,7 @@ public class KNHelpers {
     public static OptionMapping getOptionMapping(SlashCommandInteractionEvent ev, String optionName) throws OptionNotFoundException {
         OptionMapping om = ev.getOption(optionName);
         if (om == null)
-            throw new OptionNotFoundException(ev.getCommandPath(), optionName);
+            throw new OptionNotFoundException(ev.getFullCommandName(), optionName);
         return om;
     }
 

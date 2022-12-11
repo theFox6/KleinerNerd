@@ -1,31 +1,33 @@
 package com.theFox6.kleinerNerd.listeners;
 
+import com.theFox6.kleinerNerd.KleinerNerd;
+import com.theFox6.kleinerNerd.storage.ConfigFiles;
+import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
+import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.theFox6.kleinerNerd.KleinerNerd;
-import com.theFox6.kleinerNerd.storage.ConfigFiles;
-
-import foxLog.queued.QueuedLog;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.SubscribeEvent;
-
 public class VoiceLoggingListener {
 	// TODO: serialization of subscribers
 	// TODO: localization
 	
-	private List<String> stalkers = new LinkedList<>();
+	private final List<String> stalkers = new LinkedList<>();
 	
 	//guild, channel
-	private Map<String,String> guildChannels = new LinkedHashMap<>();
+	private final Map<String,String> guildChannels = new LinkedHashMap<>();
 	
 	// TODO: edit message on extremely short visits
 	
@@ -71,6 +73,7 @@ public class VoiceLoggingListener {
     	} else {
     		targets.forEach((tc) -> {
     			guildChannels.put(tc.getGuild().getId(), tc.getId());
+				//TODO: it may not be a text channel
 				TextChannel c = tc.getGuild().getTextChannelById(tc.getId());
 				if (c == null)
 					chan.sendMessage("Couldn't identify TextChannel " + tc.getName()).queue();
@@ -83,22 +86,38 @@ public class VoiceLoggingListener {
     		//TODO: deactivation
     	}
 	}
-	
+
 	@SubscribeEvent
-	public void onVoiceJoin(GuildVoiceJoinEvent e) {
-		String msg = e.getMember().getEffectiveName() + " joined vc \"" + e.getChannelJoined().getName() + '"';
+	public void onVoiceUpdate(GuildVoiceUpdateEvent e) {
+		//TODO: edit message when things change rapidly (short disconnect, short visit)
+		AudioChannelUnion old = e.getChannelLeft();
+		AudioChannelUnion joined = e.getChannelJoined();
+		if (old == null) {
+			if (joined == null)
+				QueuedLog.warning("guild voice update without channel change");
+			else
+				onVoiceJoin(e, joined);
+
+		} else {
+			if (joined == null)
+				onVoiceLeave(e, old);
+			else
+				onVoiceMove(e, old, joined);
+		}
+	}
+	
+	public void onVoiceJoin(GuildVoiceUpdateEvent e, AudioChannelUnion joined) {
+		String msg = e.getMember().getEffectiveName() + " joined vc \"" + joined.getName() + '"';
 		sendVcUpdate(e,msg);
 	}
 	
-	@SubscribeEvent
-	public void onVoiceLeave(GuildVoiceLeaveEvent e) {
-		String msg = e.getMember().getEffectiveName() + " left vc \"" + e.getChannelLeft().getName() + '"';
+	public void onVoiceLeave(GuildVoiceUpdateEvent e, AudioChannelUnion left) {
+		String msg = e.getMember().getEffectiveName() + " left vc \"" + left.getName() + '"';
 		sendVcUpdate(e,msg);
 	}
 	
-	@SubscribeEvent
-	public void onVoiceMove(GuildVoiceMoveEvent e) {
-		String msg = e.getMember().getEffectiveName() + " moved vc from \"" + e.getChannelLeft().getName() + "\" to \"" + e.getChannelJoined().getName() + '"';
+	public void onVoiceMove(GuildVoiceUpdateEvent e, AudioChannelUnion left, AudioChannelUnion joined) {
+		String msg = e.getMember().getEffectiveName() + " moved vc from \"" + left.getName() + "\" to \"" + joined.getName() + '"';
 		sendVcUpdate(e,msg);
 	}
 

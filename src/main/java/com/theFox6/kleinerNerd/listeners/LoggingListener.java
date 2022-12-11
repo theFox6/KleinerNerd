@@ -1,11 +1,12 @@
 package com.theFox6.kleinerNerd.listeners;
 
 import foxLog.queued.QueuedLog;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.*;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.events.ExceptionEvent;
+import net.dv8tion.jda.api.events.StatusChangeEvent;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
@@ -16,6 +17,7 @@ import net.dv8tion.jda.api.events.guild.update.GuildUpdateOwnerEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
+import net.dv8tion.jda.api.events.session.*;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
@@ -23,6 +25,7 @@ import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import javax.annotation.Nonnull;
 
 public class LoggingListener extends ListenerAdapter implements EventListener {
+	//TODO: log less maybe build a new listener that tracks and logs stuff and creates statistics for debugging
 	@Override
 	@SubscribeEvent
 	public void onReady(@Nonnull ReadyEvent event) {
@@ -31,19 +34,19 @@ public class LoggingListener extends ListenerAdapter implements EventListener {
 	
 	@Override
 	@SubscribeEvent
-	public void onResumed(@Nonnull ResumedEvent event) {
+	public void onSessionResume(@Nonnull SessionResumeEvent event) {
 		QueuedLog.info("Bot resumed");
 	}
 	
 	@Override
 	@SubscribeEvent
-    public void onReconnected(@Nonnull ReconnectedEvent event) {
+    public void onSessionRecreate(@Nonnull SessionRecreateEvent event) {
 		QueuedLog.info("Bot reconnected");
 	}
 	
 	@Override
 	@SubscribeEvent
-    public void onDisconnect(@Nonnull DisconnectEvent event) {
+    public void onSessionDisconnect(@Nonnull SessionDisconnectEvent event) {
 		QueuedLog.info("Bot disconnected");
 	}
 	

@@ -12,7 +12,8 @@ import com.theFox6.kleinerNerd.data.GuildSettings;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -127,7 +128,8 @@ public class GuildStorage {
 		// 		this might not be easy when already within shutdown process
 	}
 
-	public static void setModLogChannel(Guild guild, @Nullable TextChannel chan) {
+	public static void setModLogChannel(Guild guild, @Nullable GuildMessageChannel chan) {
+		//was this an extra safety precaution? perhaps remove it
 		String gid = guild.getId();
 		if (chan == null)
 			getSettings(gid).modLogChannel = null;
@@ -142,6 +144,7 @@ public class GuildStorage {
 		String mlcid = getSettings(g.getId()).modLogChannel;
 		if (mlcid == null)
 			return null;
+		//FIXME: it might not be a text channel
 		TextChannel tc = g.getTextChannelById(mlcid);
 		if (tc == null) {
 			QueuedLog.debug("could not get modlog channel channel from guild, trying to fetch it from jda");

@@ -7,7 +7,12 @@ import com.theFox6.kleinerNerd.TextChannelIdInGuildNotFoundException;
 import com.theFox6.kleinerNerd.storage.ChannelTypeSerializer;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -38,6 +43,7 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 	
 	public MessageChannelLocation(ChannelType channelType, String channelId, String guildId) {
 		type = channelType;
+		//TODO: support for other channel types
 		if (type == ChannelType.TEXT) {
 			this.channelId = channelId;
 			this.guildId = guildId;
@@ -51,16 +57,17 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 		}
 	}
 
-	public MessageChannelLocation(MessageChannel chan) {
+	public MessageChannelLocation(MessageChannelUnion chan) {
 		this.type = chan.getType();
 		this.channelId = chan.getId();
-		if (chan instanceof TextChannel)
-			this.guildId = ((TextChannel) chan).getGuild().getId();
-		else //perhaps add support for the other guild channels too
+		if (chan.getType().isGuild())
+			this.guildId = chan.asGuildMessageChannel().getGuild().getId();
+		else
 			this.guildId = null;
+		//is this extra check still needed?
 		if (type == ChannelType.TEXT)
 			if (guildId == null)
-				throw new IllegalArgumentException("got MessageChannel of type TEXT that is not a TextChannel");
+				throw new IllegalArgumentException("got MessageChannel of type TEXT without guild id");
 	}
 
 	public boolean equals(Object o) {
@@ -81,10 +88,12 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 			return false;
 		
 		if (guildId == null) {
+			//noinspection RedundantIfStatement
 			if (l.guildId != null)
 				return false;
-		} else if (!guildId.equals(l.guildId))
-			return false;
+		} else //noinspection RedundantIfStatement
+			if (!guildId.equals(l.guildId))
+				return false;
 		
 		return true;
 	}
@@ -102,6 +111,7 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 	}
 
     public void fetchChannel(JDA jda, Consumer<? super MessageChannel> success, Consumer<? super Throwable> fail) {
+		//TODO: use type.isGuild() etc. to support more channels
 		switch (type) {
 			case TEXT:
 				Guild g = jda.getGuildById(guildId);

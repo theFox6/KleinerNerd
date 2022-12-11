@@ -9,7 +9,11 @@ import com.theFox6.kleinerNerd.commands.OptionNotFoundException;
 import com.theFox6.kleinerNerd.data.MessageLocation;
 import foxLog.queued.QueuedLog;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.CustomEmoji;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -76,17 +80,19 @@ public class ReactionRoleListener {
 		Emoji emote = Emoji.fromFormatted(KNHelpers.getOptionMapping(ev,"emote").getAsString());
 		if (emote.getType() == Emoji.Type.UNICODE) {
 			String u = emote.getName();
-			if (u.codePointCount(0,u.length()) > 1)
-				throw new EmojiFormatException("too many code points", emote.getFormatted());
+			if (KNHelpers.getOptionMapping(ev,"emote").getAsString().length() > u.length())
+				throw new EmojiFormatException("emote differs from parsed emoji", emote.getFormatted());
 		}
 		return emote;
 	}
 
 	private void parseAndFetchMessage(SlashCommandInteractionEvent ev, Consumer<? super Message> onMessageFetched) throws OptionNotFoundException, BadOptionTypeException {
 		OptionMapping channelOption = KNHelpers.getOptionMapping(ev, "kanal");
-		MessageChannel chan = channelOption.getAsMessageChannel();
+		MessageChannel chan = channelOption.getAsChannel().asGuildMessageChannel();
+		/* channels from commands used to be nullable
 		if (chan == null)
 			throw new BadOptionTypeException(ev.getCommandPath(), "kanal", channelOption.getType(), OptionType.CHANNEL, MessageChannel.class);
+		*/
 		chan.retrieveMessageById(KNHelpers.getOptionMapping(ev, "nachrichtenid").getAsString()).queue(onMessageFetched, (e) -> {
 			if ("10008: Unknown Message".equals(e.getMessage())) {
 				QueuedLog.debug("tried to fetch unknown message id");
