@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +33,7 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 		if (type == ChannelType.PRIVATE) {
 			channelId = userId;
 			guildId = null;
-		} else if (type == ChannelType.TEXT) {
+		} else if (type.isGuild()) {
 			channelId = userId;
 			throw new IllegalArgumentException("No guildId provided.");
 		} else {
@@ -43,10 +43,10 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 	
 	public MessageChannelLocation(ChannelType channelType, String channelId, String guildId) {
 		type = channelType;
-		//TODO: support for other channel types
-		if (type == ChannelType.TEXT) {
+		if (type.isGuild()) {
 			this.channelId = channelId;
 			this.guildId = guildId;
+			//perhaps check if guildId is null
 		} else if (type == ChannelType.PRIVATE) {
 			if (guildId != null)
 				throw new IllegalArgumentException("Didn't expect two arguments for a private channel.");
@@ -64,8 +64,7 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 			this.guildId = chan.asGuildMessageChannel().getGuild().getId();
 		else
 			this.guildId = null;
-		//is this extra check still needed?
-		if (type == ChannelType.TEXT)
+		if (type.isGuild())
 			if (guildId == null)
 				throw new IllegalArgumentException("got MessageChannel of type TEXT without guild id");
 	}
@@ -111,41 +110,35 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 	}
 
     public void fetchChannel(JDA jda, Consumer<? super MessageChannel> success, Consumer<? super Throwable> fail) {
-		//TODO: use type.isGuild() etc. to support more channels
-		switch (type) {
-			case TEXT:
-				Guild g = jda.getGuildById(guildId);
-				if (g == null) {
-					fail.accept(GuildNotFoundException.forGuildId(guildId));
-					return;
-				}
-				TextChannel c = g.getTextChannelById(channelId);
-				if (c == null) {
-					c = jda.getTextChannelById(channelId);
-					if (c != null) {
-						if (c.getGuild().getId().equals(guildId)) {
-							QueuedLog.info("Guild.getTextChannelById didn't find the channel");
-							success.accept(c);
-							return;
-						} else
-							QueuedLog.debug("Found a TextChannel with the right ID in the wrong guild.");
-					}
-					fail.accept(new TextChannelIdInGuildNotFoundException(channelId,guildId,g.getName()));
-					return;
-				}
-				success.accept(c);
+		if (!type.isMessage())
+			fail.accept(WrongChannelTypeException.notMessage(channelId));
+		if (type.isGuild()) {
+			Guild g = jda.getGuildById(guildId);
+			if (g == null) {
+				fail.accept(GuildNotFoundException.forGuildId(guildId));
 				return;
-			case PRIVATE:
-				PrivateChannel chan = jda.getPrivateChannelById(channelId);
-				if (chan != null) {
-					success.accept(chan);
-					return;
+			}
+			GuildMessageChannel c = g.getChannelById(GuildMessageChannel.class, channelId);
+			if (c != null) {success.accept(c);return;}
+			c = jda.getChannelById(GuildMessageChannel.class, channelId);
+			if (c != null) {
+				if (c.getGuild().getId().equals(guildId)) {
+					QueuedLog.info("Guild.getTextChannelById didn't find the channel");
+					success.accept(c);return;
+				} else {
+					QueuedLog.debug("Found a TextChannel with the right ID in the wrong guild.");
 				}
-				jda.openPrivateChannelById(channelId).queue(success,fail);
-			default:
-				fail.accept(new Exception("unimplemented channel type: " + type.name()));
+			}
+			fail.accept(new TextChannelIdInGuildNotFoundException(channelId,guildId,g.getName()));
+			return;
+		} else if (type == ChannelType.PRIVATE) {
+			PrivateChannel chan = jda.getPrivateChannelById(channelId);
+			if (chan != null) {success.accept(chan);return;}
+			jda.openPrivateChannelById(channelId).queue(success, fail);
+			return;
 		}
-    }
+		fail.accept(new Exception("unimplemented channel type: " + type.name()));
+	}
 
 	/**
 	 * Comparison method for ordering and mapping.
@@ -155,6 +148,7 @@ public class MessageChannelLocation implements Comparable<MessageChannelLocation
 	 */
 	@Override
 	public int compareTo(@NotNull MessageChannelLocation o) {
+		//idk if plain addition is the best operation here
 		if (guildId == null || o.guildId == null)
 			return type.compareTo(o.type) + channelId.compareTo(o.channelId);
 		else

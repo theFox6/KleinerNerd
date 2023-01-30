@@ -23,6 +23,7 @@ public class CategoryCreationListener {
                         .addOption(OptionType.STRING, "textkanalname", "der Name für den Textkanal", false)
                         .addOption(OptionType.STRING, "voicekanalname", "der Name für den Sprachkanal", false)
                         .addOption(OptionType.STRING, "rollenkategorie", "die Kategorie mit der man sich die Rolle holen kann", false)
+                        .setGuildOnly(true)
                         .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL)),
                 this::onCCCommand
         );
@@ -30,8 +31,12 @@ public class CategoryCreationListener {
     }
 
     public void onCCCommand(SlashCommandInteractionEvent ev) {
-        if (!ev.isFromGuild()) //not supported
-            return; //TODO: warn
+        if (!ev.isFromGuild()) {
+            ev.reply("Dieser Befehl funktioniert nur auf Servern. Scheinbar wurde er aber gerade nicht auf einem Server benutzt.")
+                    .setEphemeral(true).queue();
+            QueuedLog.warning("Create-category command used outside a guild.");
+            return;
+        }
         Guild g = ev.getGuild();
         if (g == null) {
             QueuedLog.error("Create-category command from guild without guild information.");
@@ -39,8 +44,10 @@ public class CategoryCreationListener {
         }
         try {
             String catName = KNHelpers.getOptionMapping(ev, "kategoriename").getAsString();
-            if (catName.isEmpty())
-                return; //TODO: warn
+            if (catName.isEmpty()) {
+                ev.reply("Bitte gib einen Kategorienamen an.").setEphemeral(true).queue();
+                return;
+            }
             ev.getInteraction().deferReply().queue((ih) -> {
                 if (g.getCategoriesByName(catName, true).size() > 0) {
                     QueuedLog.warning("Category already exists, aborting.");
