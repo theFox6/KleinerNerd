@@ -30,8 +30,11 @@ public class MessagePinListener {
 		return this;
 	}
 	private static void onPinCountCommand(SlashCommandInteractionEvent e) {
-		if (e.getGuild() == null)
-			return; // not supported on private channels
+		if (e.getGuild() == null) {
+			// not supported on private channels cuz pin count is a server setting
+			e.reply("Das wird leider noch nicht in DMs unterstützt. (pin doch einfach selbst)").setEphemeral(true).queue();
+			return;
+		}
 		int reactCount;
 		try {
 			reactCount = KNHelpers.getOptionMapping(e, "anzahl").getAsInt();
@@ -56,6 +59,10 @@ public class MessagePinListener {
 	}
 
 	private void doOnSufficientReactions(MessageReactionAddEvent e, Consumer<? super Message> s) {
+		if (!e.isFromGuild()) {
+			// not supported on private channels cuz pin count is a server setting
+			return;
+		}
 		int neededReactionCount = GuildStorage.getPinReactCount(e.getGuild());
 		if (neededReactionCount < 1)
 			return;
