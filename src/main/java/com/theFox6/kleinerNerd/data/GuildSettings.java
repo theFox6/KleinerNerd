@@ -17,4 +17,10 @@ public class GuildSettings {
      */
     @JsonProperty
     public String moderatorRole;
+
+    /**
+     * the number of pin reacts needed to pin a message
+     */
+    @JsonProperty
+    public int pinReactCount;
 }

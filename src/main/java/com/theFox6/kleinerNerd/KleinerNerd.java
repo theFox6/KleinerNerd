@@ -196,6 +196,7 @@ public class KleinerNerd {
 		eventManager.register(new RoleCommandListener().setupCommands(commandManager));
 		eventManager.register(new ReactionRoleListener().setupCommands(commandManager));
 
+		eventManager.register(new MessagePinListener().setupCommands(commandManager));
 		eventManager.register(new ConvoSnippetListener());
 		try {
 			eventManager.register(new SuicideListener());

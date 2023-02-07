@@ -156,4 +156,12 @@ public class GuildStorage {
 		}
 		return tc;
 	}
+
+	public static int getPinReactCount(Guild g) {
+		return getSettings(g.getId()).pinReactCount;
+	}
+
+	public static void setPinReactCount(Guild g, int reactCount) {
+		getSettings(g.getId()).pinReactCount = reactCount;
+	}
 }
