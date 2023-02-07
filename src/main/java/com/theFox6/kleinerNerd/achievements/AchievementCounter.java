@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.exceptions.HierarchyException;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,6 +27,8 @@ public class AchievementCounter {
     public static void increment(String key, User user, Member member, Guild guild) {
         Map<Integer, Achievement> thresholds = achievements.get(key);
         int count = CounterStorage.getUserCounter("achievement_"+key, user.getId()).incrementAndGet();
+        QueuedLog.verbose(thresholds.toString());
+        QueuedLog.verbose(user.getName() + " now has " + count + " " + key);
         if (thresholds == null)
             QueuedLog.warning("No achievements for " + key + " registered.");
         else {
@@ -38,18 +41,27 @@ public class AchievementCounter {
     public static void sendAchievement(User user, Achievement a, Member member, Guild guild) {
         QueuedLog.verbose(user.getName() + " reached achievement threshold for \"" + a.title + '"');
         //can't send achievements to yourself
-        if (user.getJDA().getSelfUser().equals(user))
+        if (user.getJDA().getSelfUser().equals(user)) {
+            QueuedLog.debug("Yey, I earned the " + a.title + " achievement!");
             return;
+        }
 
         if (member != null) {
+            QueuedLog.verbose("threshold reached to receive the " + a.roleName + " role");
             List<Role> achievementRoles = guild.getRolesByName(a.roleName, true);
             if (achievementRoles.size() > 1)
                 ModLog.sendToGuild(guild, "Mehr als eine " + a.roleName + " Rolle!");
             if (!achievementRoles.isEmpty())
-                guild.addRoleToMember(member, achievementRoles.get(0)).reason("Achievement").queue(
-                        (s) -> QueuedLog.action(member.getEffectiveName() + " earned " + a.roleName + " role."),
-                        (e) -> QueuedLog.error("Couldn't assign achievement role " + a.roleName + " to " + user.getName(),e)
-                );
+                try {
+                    guild.addRoleToMember(member, achievementRoles.get(0)).reason("Achievement").queue(
+                            (s) -> QueuedLog.action(member.getEffectiveName() + " earned " + a.roleName + " role."),
+                            (e) -> QueuedLog.error("Couldn't assign achievement role " + a.roleName + " to " + user.getName(), e)
+                    );
+                } catch (HierarchyException ex) {
+                    ModLog.sendToGuild(guild, "Ich kann die " + a.roleName + " Rolle nicht zuweisen, da sie über mir in der Rollenhierarchie steht.");
+                }
+            else
+                QueuedLog.debug("no " + a.roleName + " role present on " + guild.getName());
         }
         user.openPrivateChannel().queue((pc) -> sendAchievement(pc, user, a.image, a.title, a.desc),
                 (e) -> QueuedLog.error("Couldn't open PrivateChannel to send achievement to " + user.getName(),e));

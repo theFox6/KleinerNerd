@@ -2,6 +2,9 @@ package com.theFox6.kleinerNerd.achievements;
 
 import com.theFox6.kleinerNerd.data.SendableImage;
 import foxLog.queued.QueuedLog;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
@@ -9,6 +12,7 @@ import net.dv8tion.jda.api.hooks.SubscribeEvent;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class EmoteAchievementListener {
     public EmoteAchievementListener() {
@@ -42,7 +46,7 @@ public class EmoteAchievementListener {
                 if (ev.getUserId().equals(author.getId()))
                     return;
                 //QueuedLog.verbose("Ehre " + author.getId());
-                AchievementCounter.increment("Ehre", author, o.getMember(), o.getGuild());
+                getOrRetrieveMember(o, (m) -> AchievementCounter.increment("Ehre", author, m, o.getGuild()));
             }, (err) -> QueuedLog.error("could not retrieve message, that was reacted to",err));
         }
     }
@@ -58,5 +62,23 @@ public class EmoteAchievementListener {
                 AchievementCounter.decrement("Ehre",o.getAuthor());
             }, (err) -> QueuedLog.error("could not retrieve message, that was reacted to",err));
         }
+    }
+
+    public static void getOrRetrieveMember(Message msg, Consumer<? super Member> success) {
+        Member m = msg.getMember();
+        if (m != null) {
+            success.accept(m);
+            return;
+        }
+        if (!msg.isFromGuild())
+            return; //TODO: add a fail consumer, that receives an error here
+        Guild g = msg.getGuild();
+        User author = msg.getAuthor();
+        m = g.getMember(author);
+        if (m != null) {
+            success.accept(m);
+            return;
+        }
+        g.retrieveMember(author).queue(success, (e) -> QueuedLog.error("retrieving member failed", e));
     }
 }
