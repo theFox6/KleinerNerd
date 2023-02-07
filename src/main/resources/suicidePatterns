@@ -138,7 +138,7 @@ $kms; = {kms:
                 "renn ", "renne ",
                 "schmeiß mich ", "schmeiße mich ",
                 "mach einen köpfer ", "mache einen köpfer ",
-                "mach einen backflip ", "mache einen backflip "
+                "mach einen backflip ", "mache einen backflip ", "mach nen backflip "
             }, ({wann: "jetzt ", "dann mal "}), {indentod:
                 ["auf ", {boden: "die bundesstraße", "die autobahn", "den beton", "den asphalt"}],
                 [$ausm;, "fenster"],
@@ -179,14 +179,15 @@ $kms; = {kms:
 		["nehme ein bad mit ", {one: "meinem ", "einem ", "nem "}, "toaster"],
 		[{schießen: "schieße ", "schieß ", "schieß' "}, "mir in den kopf"],
 		["erhänge mich", ({mitstrick: " mit stacheldraht", "mit einer Lichterkette"})],
+		"schlitze mir die Pulsadern auf",
 		"trinke konzentrierte salzsäure",
 		#references
 		"schreibe mich ins death note ein",
 		"signiere das death note",
 		[$haben;,{lebenAbgeschlossen:
     	"mein leben abgeschlossen",
-      "mit meinem leben abgeschlossen",
-      "abgeschlossen mit meinem leben"
+        "mit meinem leben abgeschlossen",
+        "abgeschlossen mit meinem leben"
     }],
 	},$od;],
 	"kann ich vom dach springen? der drang ist da.",

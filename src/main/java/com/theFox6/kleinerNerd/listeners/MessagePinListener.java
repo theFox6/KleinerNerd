@@ -57,6 +57,8 @@ public class MessagePinListener {
 
 	private void doOnSufficientReactions(MessageReactionAddEvent e, Consumer<? super Message> s) {
 		int neededReactionCount = GuildStorage.getPinReactCount(e.getGuild());
+		if (neededReactionCount < 1)
+			return;
 		MessageReaction r = e.getReaction();
 		if (r.hasCount())
 			if (r.getCount() < neededReactionCount)
