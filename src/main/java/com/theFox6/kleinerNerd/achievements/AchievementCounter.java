@@ -46,7 +46,7 @@ public class AchievementCounter {
             return;
         }
 
-        if (member != null) {
+        if (member != null && a.roleName != null) {
             QueuedLog.verbose("threshold reached to receive the " + a.roleName + " role");
             List<Role> achievementRoles = guild.getRolesByName(a.roleName, true);
             if (achievementRoles.size() > 1)
